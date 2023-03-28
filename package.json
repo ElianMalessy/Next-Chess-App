@@ -9,14 +9,31 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@chakra-ui/next-js": "^2.1.1",
+    "@chakra-ui/react": "^2.5.3",
+    "@emotion/react": "^11.10.6",
+    "@emotion/styled": "^11.10.6",
+    "@firebase/app": "^0.9.5",
+    "@firebase/auth": "^0.21.5",
+    "@firebase/database": "^0.14.4",
+    "@firebase/storage": "^0.11.2",
     "@types/node": "18.15.10",
     "@types/react": "18.0.29",
     "@types/react-dom": "18.0.11",
     "eslint": "8.36.0",
     "eslint-config-next": "13.2.4",
+    "firebase-tools": "^11.25.1",
+    "framer-motion": "^10.9.1",
+    "global": "^4.4.0",
     "next": "13.2.4",
+    "next-firebase-auth-edge": "^0.5.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "typescript": "5.0.2"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.14",
+    "postcss": "^8.4.21",
+    "tailwindcss": "^3.2.7"
   }
 }

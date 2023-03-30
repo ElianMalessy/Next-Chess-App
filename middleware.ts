@@ -1,7 +1,7 @@
 import type {NextRequest} from 'next/server';
 import {NextResponse} from 'next/server';
 import {authentication} from 'next-firebase-auth-edge/lib/next/middleware';
-import {serverConfig} from './(config)/server_config';
+import {serverConfig} from './config/server_config';
 
 function redirectToLogin(request: NextRequest) {
   if (request.nextUrl.pathname !== '/update-profile') {

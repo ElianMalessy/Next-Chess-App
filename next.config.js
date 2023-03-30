@@ -4,7 +4,7 @@ const nextConfig = {
     appDir: true,
   },
   images: {
-    domains: ['encrypted-tbn0.gstatic.com', 'upload.wikimedia.org', 'lh3.googleusercontent.com'],
+    domains: ['encrypted-tbn0.gstatic.com', 'upload.wikimedia.org', 'lh3.googleusercontent.com', 'firebasestorage.googleapis.com'],
     formats: ['image/avif', 'image/webp'],
   },
 };

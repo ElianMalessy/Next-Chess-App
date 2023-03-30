@@ -15,7 +15,7 @@ import {
 } from '@firebase/auth';
 import type {User as FirebaseUser, IdTokenResult} from '@firebase/auth';
 
-import type {User, AuthMethods} from './types';
+import type {AuthMethods} from './types';
 import {auth} from '../firebase';
 
 const defaultValue: AuthMethods = {
@@ -35,34 +35,6 @@ const AuthContext = createContext<AuthMethods>(defaultValue);
 
 export function useAuth() {
   return useContext(AuthContext);
-}
-
-function mapFirebaseResponseToUser(result: IdTokenResult, user: FirebaseUser): User {
-  const providerData = user.providerData && user.providerData[0];
-
-  if (!user.isAnonymous && providerData) {
-    return {
-      uid: user.uid,
-      name: providerData.displayName || user.displayName || user.email || null,
-      email: providerData.email || null,
-      emailVerified: user.emailVerified || false,
-      photoURL: providerData.photoURL || null,
-      customClaims: {},
-      isAnonymous: user.isAnonymous,
-      idToken: result.token,
-    };
-  }
-
-  return {
-    uid: user.uid,
-    name: user.displayName || providerData?.displayName || user.email || null,
-    email: user.email || null,
-    emailVerified: user.emailVerified || false,
-    photoURL: user.photoURL || null,
-    customClaims: {},
-    isAnonymous: user.isAnonymous,
-    idToken: result.token,
-  };
 }
 
 export function AuthProvider({children}: any) {
@@ -130,7 +102,7 @@ export function AuthProvider({children}: any) {
       },
     });
     startTransition(() => {
-      setCurrentUser(mapFirebaseResponseToUser(tokenResult, firebaseUser));
+      setCurrentUser(firebaseUser);
     });
   }
 

@@ -1,17 +1,6 @@
-export type CustomClaims = {[key: string]: any};
-export interface User {
-  uid: string;
-  name: string | null;
-  email: string | null;
-  photoURL: string | null;
-  emailVerified: boolean;
-  isAnonymous: boolean;
-  customClaims: CustomClaims;
-  idToken: string;
-}
-
+import type {User as FirebaseUser} from '@firebase/auth';
 export interface AuthMethods {
-  currentUser: User | null;
+  currentUser: FirebaseUser | null;
   login: (email: string, password: string) => Promise<any>;
   signup: (email: string, password: string) => Promise<any>;
   logout: () => Promise<void>;

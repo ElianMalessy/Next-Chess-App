@@ -5,9 +5,9 @@ import {useRouter} from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 
-import {Button, Container} from '@chakra-ui/react';
+import {Box, Button, Container} from '@chakra-ui/react';
 
-import {useAuth} from './contexts/AuthContext';
+import {useAuth} from './(contexts)/AuthContext';
 import dataURLhrefFile, {toDataURL} from './modal/convertToFile';
 //import Modal from './Modal/Modal';
 
@@ -114,106 +114,9 @@ export default memo(function Dashboard() {
 
   return (
     <Fragment>
-      <div>
-        {/* <Modal
-          changeProfilePic={changeProfilePic}
-          sehrefpen={setInputField}
-          isOpen={inputField}
-          profilePic={profilePic}
-          setProfilePic={setProfilePic}
-        /> */}
-        <header>
-          {/* <div>
-            <div>
-              <Image
-                src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSUZZloLNz2F11mD77ey5TLZezGlFueOWuFqw&usqp=CAU'
-                alt='logo'
-                onClick={() => router.push('/development')}
-                width={5}
-                height={5}
-                //roundedCircle
-              />
-              WeChess
-            </div>
-            <ul>
-              <li>
-                <Link href='/Game/1'>Testing</Link>
-              </li>
-              <li>
-                <Link href={`/Game/${gameID.current}`}>Play</Link>
-              </li>
-            </ul>
-          </div> */}
-          <div>
-            <div
-              className='d-flex align-items-center justify-content-center'
-              style={{
-                overflow: 'hidden',
-                height: '4.5rem',
-                width: '4.5rem',
-                borderRadius: '50%',
-                transform: 'translate(-1rem, 0)',
-              }}
-            >
-              <Image
-                src={profilePic}
-                alt='profile-picture'
-                id='profile-pic'
-                onClick={() => setInputField(true)}
-                //
-                width={5}
-                height={5}
-              />
-            </div>
-            <div ref={clickRef} className='d-flex align-items-center'>
-              <Button onMouseEnter={() => setHidden(false)} onClick={() => setHidden(true)} style={{boxShadow: 'none'}}>
-                <pre>
-                  {currentUser && currentUser.name
-                    ? currentUser.name
-                    : currentUser && currentUser.email
-                    ? currentUser.email
-                    : 'anonymous'}
-                  <i className='fa fa-chevron-down' style={{marginLeft: '0.5rem'}} aria-hidden='true' />
-                </pre>
-                <div hidden={hidden}>
-                  {/* <Link href='/update-profile'>
-                    <i className='fa fa-user-circle-o' aria-hidden='true' /> Profile
-                  </Link> */}
-                  <Link href='#' onClick={handleLogout}>
-                    <i className='fa fa-sign-out' aria-hidden='true' /> Logout
-                  </Link>
-                </div>
-              </Button>
-            </div>
-          </div>
-        </header>
-        {/* <Container className={`d-flex justify-content-center h-100 w-100`} >
-           {error && <Alert variant='danger'>{error}</Alert>}
-
-          <Row
-            className={`d-flex justify-content-center align-item`}
-            style={{alignSelf: 'flex-end', zIndex: 100}}
-          >
-            <FormControl
-              value={randomURL}
-              
-              onChange={(e) => setRandomURL(e.target.value)}
-              style={{fontSize: '1.25rem'}}
-            />
-
-            <Button
-              
-              onClick={() => {
-                navigator.clipboard.writeText(randomURL);
-                alert('Copied href clipboard');
-              }}
-            >
-              <i className='fa fa-link' />
-            </Button>
-          </Row>
-        </Container> */}
-      </div>
-
+      <Box position='fixed' as='nav' w='100%' p='1rem 1rem 1rem 1rem' zIndex={1} top='0'>
+        nav
+      </Box>
       <div>
         <svg data-name='Layer 1' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'>
           <path d='M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z' />

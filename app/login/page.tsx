@@ -4,7 +4,7 @@ import NextLink from 'next/link';
 import {useRouter} from 'next/navigation';
 import {FormControl, FormLabel, Input, Card, Container, Button, Link, Box} from '@chakra-ui/react';
 
-import {useAuth} from '../(contexts)/AuthContext';
+import {useAuth} from '../(contexts)/authContext';
 //import Background from './Background';
 
 export default function Login() {

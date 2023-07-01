@@ -1,14 +1,16 @@
 'use client';
-import {useState, useRef, useEffect, Fragment, memo, useCallback} from 'react';
+import {useState, useRef, useEffect, memo, useCallback} from 'react';
 import {getStorage, ref, getDownloadURL, uploadBytesResumable} from '@firebase/storage';
 import {useRouter} from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 
-import {Box, Button, Container} from '@chakra-ui/react';
+import {Box, Button, Container, Flex, Spacer, useColorModeValue} from '@chakra-ui/react';
 
-import {useAuth} from './(contexts)/AuthContext';
+import ThemeToggleButton from './themeToggleButton';
+import {useAuth} from './(contexts)/authContext';
 import dataURLhrefFile, {toDataURL} from './modal/convertToFile';
+import Board from './game/board';
 //import Modal from './Modal/Modal';
 
 export default memo(function Dashboard() {
@@ -113,15 +115,51 @@ export default memo(function Dashboard() {
   }, [clickRef]);
 
   return (
-    <Fragment>
-      <Box position='fixed' as='nav' w='100%' p='1rem 1rem 1rem 1rem' zIndex={1} top='0'>
-        nav
+    <Flex
+      h='100vh'
+      w='100vw'
+      bg={useColorModeValue('#f4ede4', '#202023')}
+      alignItems={'center'}
+      justifyContent={'center'}
+    >
+      <Flex
+        position='fixed'
+        as='nav'
+        minWidth='100%'
+        alignItems='start'
+        gap='2'
+        p='1rem 1rem 1rem 1rem'
+        bg={useColorModeValue('#f4ede4', '#202023')}
+        zIndex={1}
+        top='0'
+        justifyContent={'space-between'}
+      >
+        <Box w={'5rem'} h={'5rem'} position={'relative'} mixBlendMode={'multiply'} mt={'-0.5rem'}>
+          <Image
+            alt='logo'
+            src={'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSUZZloLNz2F11mD77ey5TLZezGlFueOWuFqw&usqp=CAU'}
+            fill={true}
+          />
+        </Box>
+        <Spacer />
+        <Flex gap='2'>
+          <Box>
+            <Button border={'0.075rem solid #6c757d'} background={'inherit'}>
+              Profile
+            </Button>
+          </Box>
+          <ThemeToggleButton />
+        </Flex>
+      </Flex>
+
+      <Box style={{width: '500px', height: '500px'}}>
+        <Board />
       </Box>
-      <div>
+      {/* <div>
         <svg data-name='Layer 1' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'>
           <path d='M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z' />
         </svg>
-      </div>
-    </Fragment>
+      </div> */}
+    </Flex>
   );
 });

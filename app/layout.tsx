@@ -1,6 +1,7 @@
 import './globals.css';
 import type {Metadata} from 'next';
 import Providers from '../components/contexts/providers';
+import {Navbar} from '@/components/navbar/navbar';
 
 export const metadata: Metadata = {
   title: 'Create Next App',
@@ -12,7 +13,10 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
     <html lang='en' suppressHydrationWarning>
       <head />
       <body>
-        <Providers>{children}</Providers>
+        <Providers>
+          <Navbar />
+          <main className='min-h-screen min-w-full'>{children}</main>
+        </Providers>
       </body>
     </html>
   );

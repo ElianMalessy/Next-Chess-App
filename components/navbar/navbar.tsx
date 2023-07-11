@@ -7,16 +7,18 @@ import {Search} from './search';
 
 export function Navbar() {
   return (
-    <nav className={'flex min-w-full min-h-full items-center justify-between'}>
-      <Link href='/examples/dashboard' className='text-sm font-medium transition-colors hover:text-primary'>
-        WeChess
-      </Link>
-      <div className='flex space-x-2 lg:space-x-3 items-center'>
-        <Search />
-        <BellIcon className='h-[1.2rem] w-[1.2rem]' />
-        <Profile />
-        <ThemeToggle />
-      </div>
-    </nav>
+    <div className='border-b fixed'>
+      <nav className='flex h-16 items-center justify-between px-3 bg-navBackground' style={{minWidth: '100vw'}}>
+        <Link href='/examples/dashboard' className='text-sm font-medium transition-colors hover:text-primary'>
+          WeChess
+        </Link>
+        <div className='flex space-x-2 lg:space-x-3 items-center'>
+          <Search />
+          <BellIcon className='h-[1.2rem] w-[1.2rem]' />
+          <Profile />
+          <ThemeToggle />
+        </div>
+      </nav>
+    </div>
   );
 }

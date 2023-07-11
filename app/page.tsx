@@ -1,15 +1,10 @@
-import {Navbar} from '@/components/navbar/navbar';
-
+import Board from '@/components/game/board';
 export default function Home() {
   return (
-    <main>
-      <div className='hidden flex-col md:flex'>
-        <div className='border-b'>
-          <div className='flex h-16 items-center px-3 bg-navBackground'>
-            <Navbar />
-          </div>
-        </div>
+    <div className='flex h-screen w-screen flex-row items-center justify-center'>
+      <div className='flex justify-center items-center ' style={{height: '500px', width: '500px'}}>
+        <Board />
       </div>
-    </main>
+    </div>
   );
 }

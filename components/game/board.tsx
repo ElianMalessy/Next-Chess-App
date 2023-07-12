@@ -1,158 +1,75 @@
-import {useContext, useEffect, useState, useRef} from 'react';
-import {Box} from '@chakra-ui/react';
-// import classes from './Board.module.css';
-// import PieceMemo from './Piece';
-// import {PlayerContext, TurnContext, BoardContext} from './Game';
-// import findPossibleMoves from './moveFunctions';
-// import findPositionOf, {findAllPieces} from './findBoardIndex';
+'use client';
+import {useEffect, useRef, useState} from 'react';
 
-//function Board({FEN, check}: {FEN: string; check: boolean}) {
+import Piece from './pieces';
+import classes from './board.module.css';
+
 export default function Board() {
-  // const boardArray = useContext(BoardContext);
-  // const playerColor = useContext(PlayerContext);
-  // const {turn} = useContext(TurnContext);
+  const [FEN, setFEN] = useState('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -');
+  const [playerColor, setPlayerColor] = useState('black');
+  const [boardArray, setBoardArray]: [React.JSX.Element[] | undefined, any] = useState();
 
-  // const [board, setBoard] = useState<any>([]);
-  // const boardFiller = useRef<any>([]);
+  const firstRender = useRef(true);
+  useEffect(() => {
+    if (firstRender.current && FEN && playerColor) firstRender.current = false;
+    else if (!firstRender.current || !FEN || !playerColor) return;
 
-  // useEffect(
-  //   () => {
-  //     console.log('board-render');
-  //     const emptyBoard: any[] = [];
-  //     boardFiller.current = emptyBoard;
-  //     setBoard(emptyBoard);
+    console.log('board-render', FEN);
 
-  //     let index = FEN.length;
-  //     while (true) {
-  //       if (FEN[index] === 'w' || FEN[index] === 'b') {
-  //         index -= 2;
-  //         break;
-  //       }
-  //       index--;
-  //     }
+    const boardFiller: React.JSX.Element[] = [];
+    let index = FEN.length;
+    while (true) {
+      if (FEN[index] === 'w' || FEN[index] === 'b') {
+        index -= 2;
+        break;
+      }
+      index--;
+    }
 
-  //     // goes backwards in FEN.
-  //     if (playerColor === 'black') {
-  //       for (let i = index, row = 1, column = 0; i >= 0; i--, column++) {
-  //         if (FEN[i] === ' ') break;
-  //         if (FEN[i] === '/') {
-  //           row++;
-  //           column = -1;
-  //           continue;
-  //         }
+    // goes backwards in FEN.
+    if (playerColor === 'black') {
+      for (let i = index, row = 1, column = 1; i >= 0; i--, column++) {
+        if (FEN[i] === ' ') break;
+        if (FEN[i] === '/') {
+          row++;
+          column = 0;
+          continue;
+        } else if (!isNaN(parseInt(FEN[i]))) continue;
 
-  //         // board squares starting from top left to right bottom. a8, b8 to g1, h1
-  //         const num = parseInt(FEN[i]);
-  //         if (num) {
-  //           for (let j = parseInt(FEN[i]); j > 0; j--, column++) {
-  //             const key = String.fromCharCode(104 - column) + '' + row;
-  //             const tile_class = (column + row) % 2 === 1 ? 'non-colored-tile' : 'colored-tile';
-  //             boardFiller.current.push(<div key={key} className={classes[tile_class]} id={'S' + key} />);
-  //           }
-  //           if (num < 8) {
-  //             column--;
-  //           }
-  //         } else {
-  //           // add fmove from fen, also en passent square
-  //           const color = FEN[i] === FEN[i].toUpperCase() ? 'white' : 'black';
-  //           const key = String.fromCharCode(104 - column) + '' + row;
-  //           const tile_class = (column + row) % 2 === 1 ? 'non-colored-tile' : 'colored-tile';
+        const key = String.fromCharCode(104 - (column - 1)) + '' + row;
 
-  //           boardFiller.current.push(
-  //             <div key={key} className={classes[tile_class]} id={'S' + key}>
-  //               <PieceMemo color={color} position={FEN[i] + key} />
-  //             </div>
-  //           );
-  //         }
-  //       }
-  //     } else {
-  //       for (let i = 0, row = 8, column = 0; i < FEN.length; i++, column++) {
-  //         if (FEN[i] === ' ') break;
-  //         if (FEN[i] === '/') {
-  //           row--;
-  //           column = -1;
-  //           continue;
-  //         }
+        boardFiller.push(
+          <div key={key} id={key}>
+            <Piece
+              color={FEN[i] === FEN[i].toLowerCase() ? 'w' : 'b'}
+              piece={FEN[i].toLowerCase()}
+              styles={[64 * (8 - row), 64 * (column - 1)]}
+            />
+          </div>
+        );
+      }
+    } else {
+      for (let i = 0, row = 8, column = 1; i < FEN.length; i++, column++) {
+        if (FEN[i] === ' ') break;
+        if (FEN[i] === '/') {
+          row--;
+          column = 0;
+          continue;
+        } else if (!isNaN(parseInt(FEN[i]))) continue;
 
-  //         const num = parseInt(FEN[i]);
-  //         if (num) {
-  //           for (let j = num; j > 0; j--, column++) {
-  //             const key = String.fromCharCode(97 + column) + '' + row;
-  //             const tile_class = (column + row) % 2 === 0 ? 'non-colored-tile' : 'colored-tile';
-  //             boardFiller.current.push(<div key={key} className={classes[tile_class]} id={'S' + key} />);
-  //           }
-  //           if (num < 8) {
-  //             column--;
-  //           }
-  //         } else {
-  //           const color = FEN[i] === FEN[i].toUpperCase() ? 'white' : 'black';
-  //           const key = String.fromCharCode(97 + column) + '' + row;
-  //           const tile_class = (column + row) % 2 === 0 ? 'non-colored-tile' : 'colored-tile';
-  //           // use key instead of ID to move around pieces as that is immutable from the client side
-  //           boardFiller.current.push(
-  //             <div key={key} className={classes[tile_class]} id={'S' + key}>
-  //               <PieceMemo color={color} position={FEN[i] + key} />
-  //             </div>
-  //           );
-  //         }
-  //       }
-  //     }
-  //     setBoard(boardFiller.current);
-  //   },
-  //   // eslint-disable-next-line
-  //   [playerColor]
-  // );
-
-  // useEffect(
-  //   () => {
-  //     if (check) {
-  //       console.log(check);
-  //       let kingPos;
-
-  //       if (turn[0] === 'w') {
-  //         kingPos = findPositionOf(boardArray, 'K');
-  //       } else if (turn[0] === 'b') {
-  //         kingPos = findPositionOf(boardArray, 'k');
-  //       }
-  //       findPossibleMoves(check, kingPos, ...findAllPieces(boardArray, turn[0]));
-  //       // only use for determining checkmate and possible moves if there is a check
-  //     }
-  //   },
-  //   //eslint-disable-next-line
-  //   [check]
-  // );
-
-  //fetch('https://lichess1.org/assets/_tPoiFY/images/board/svg/brown.svg');
-
-  return (
-    // <Box ref={svgRef}
-    // width={svgDimensions.width}
-    // height={svgDimensions.height}
-    // h='100%' w='100%' backgroundImage={'https://lichess1.org/assets/_tPoiFY/images/board/svg/brown.svg'}></Box>
-    <svg
-      xmlns='http://www.w3.org/2000/svg'
-      xmlnsXlink='http://www.w3.org/1999/xlink'
-      style={{width: '100%', height: '100%'}}
-      viewBox='0 0 8 8'
-      preserveAspectRatio='xMidYMid meet'
-      shapeRendering='crispEdges'
-    >
-      <g id='a'>
-        <g id='b'>
-          <g id='c'>
-            <g id='d'>
-              <rect width='1' height='1' fill='#f0d9b5' id='e' />
-              <use x='1' y='1' href='#e' xlinkHref='#e' />
-              <rect y='1' width='1' height='1' fill='#b58863' id='f' />
-              <use x='1' y='-1' href='#f' xlinkHref='#f' />
-            </g>
-            <use x='2' href='#d' xlinkHref='#d' />
-          </g>
-          <use x='4' href='#c' xlinkHref='#c' />
-        </g>
-        <use y='2' href='#b' xlinkHref='#b' />
-      </g>
-      <use y='4' href='#a' xlinkHref='#a' />
-    </svg>
-  );
+        const key = String.fromCharCode(104 - (8 - column)) + '' + row;
+        boardFiller.push(
+          <div key={key} id={key}>
+            <Piece
+              color={FEN[i] === FEN[i].toLowerCase() ? 'w' : 'b'}
+              piece={FEN[i].toLowerCase()}
+              styles={[64 * (row - 1), 64 * (8 - column)]}
+            />
+          </div>
+        );
+      }
+    }
+    setBoardArray(boardFiller);
+  }, [playerColor, FEN]);
+  return <div className={classes.board}>{boardArray}</div>;
 }

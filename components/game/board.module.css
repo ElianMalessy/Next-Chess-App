@@ -1,0 +1,62 @@
+.board {
+  background-image: url('https://lichess1.org/assets/_tPoiFY/images/board/svg/brown.svg');
+  height: min(32rem, 95vw);
+  width: min(32rem, 95vw);
+  position: relative;
+}
+.k_w,
+.k_b,
+.q_w,
+.q_b,
+.r_w,
+.r_b,
+.b_w,
+.b_b,
+.n_w,
+.n_b,
+.p_w,
+.p_b {
+  position: absolute;
+  width: 12.5%;
+  height: 12.5%;
+  background-size: cover;
+  will-change: transform;
+  pointer-events: none;
+}
+.k_w {
+  background-image: url('../../public/pieces/k_w.svg');
+}
+.q_w {
+  background-image: url('../../public/pieces/q_w.svg');
+}
+.r_w {
+  background-image: url('../../public/pieces/r_w.svg');
+}
+.b_w {
+  background-image: url('../../public/pieces/b_w.svg');
+}
+.n_w {
+  background-image: url('../../public/pieces/n_w.svg');
+}
+.p_w {
+  background-image: url('../../public/pieces/p_w.svg');
+}
+
+.k_b {
+  background-image: url('../../public/pieces/k_b.svg');
+}
+.q_b {
+  background-image: url('../../public/pieces/q_b.svg');
+}
+.r_b {
+  background-image: url('../../public/pieces/r_b.svg');
+}
+.b_b {
+  background-image: url('../../public/pieces/b_b.svg');
+}
+.n_b {
+  background-image: url('../../public/pieces/n_b.svg');
+}
+.p_b {
+  background-image: url('../../public/pieces/p_b.svg');
+}

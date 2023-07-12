@@ -6,7 +6,7 @@ import classes from './board.module.css';
 
 export default function Board() {
   const [FEN, setFEN] = useState('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -');
-  const [playerColor, setPlayerColor] = useState('black');
+  const [playerColor, setPlayerColor] = useState('white');
   const [boardArray, setBoardArray]: [React.JSX.Element[] | undefined, any] = useState();
 
   const firstRender = useRef(true);
@@ -29,7 +29,6 @@ export default function Board() {
     // goes backwards in FEN.
     if (playerColor === 'black') {
       for (let i = index, row = 1, column = 1; i >= 0; i--, column++) {
-        if (FEN[i] === ' ') break;
         if (FEN[i] === '/') {
           row++;
           column = 0;
@@ -37,20 +36,19 @@ export default function Board() {
         } else if (!isNaN(parseInt(FEN[i]))) continue;
 
         const key = String.fromCharCode(104 - (column - 1)) + '' + row;
-
         boardFiller.push(
           <div key={key} id={key}>
             <Piece
-              color={FEN[i] === FEN[i].toLowerCase() ? 'w' : 'b'}
+              color={FEN[i] === FEN[i].toLowerCase() ? 'b' : 'w'}
               piece={FEN[i].toLowerCase()}
-              styles={[64 * (8 - row), 64 * (column - 1)]}
+              column={8 - column}
+              row={row - 1}
             />
           </div>
         );
       }
     } else {
-      for (let i = 0, row = 8, column = 1; i < FEN.length; i++, column++) {
-        if (FEN[i] === ' ') break;
+      for (let i = 0, row = 8, column = 1; i <= index; i++, column++) {
         if (FEN[i] === '/') {
           row--;
           column = 0;
@@ -61,9 +59,10 @@ export default function Board() {
         boardFiller.push(
           <div key={key} id={key}>
             <Piece
-              color={FEN[i] === FEN[i].toLowerCase() ? 'w' : 'b'}
+              color={FEN[i] === FEN[i].toLowerCase() ? 'b' : 'w'}
               piece={FEN[i].toLowerCase()}
-              styles={[64 * (row - 1), 64 * (8 - column)]}
+              column={column - 1}
+              row={8 - row}
             />
           </div>
         );

@@ -1,7 +1,7 @@
 .board {
   background-image: url('https://lichess1.org/assets/_tPoiFY/images/board/svg/brown.svg');
-  height: min(32rem, 95vw);
-  width: min(32rem, 95vw);
+  height: min(32rem, 100vw);
+  width: min(32rem, 100vw);
   position: relative;
 }
 .k_w,
@@ -16,6 +16,8 @@
 .n_b,
 .p_w,
 .p_b {
+  top: 0;
+  left: 0;
   position: absolute;
   width: 12.5%;
   height: 12.5%;

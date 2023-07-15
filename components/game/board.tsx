@@ -1,7 +1,7 @@
 'use client';
 import {useEffect, useRef, useState} from 'react';
 
-import Piece from './pieces';
+import Piece from './piece';
 import classes from './board.module.css';
 
 export default function Board() {
@@ -37,14 +37,13 @@ export default function Board() {
 
         const key = String.fromCharCode(104 - (column - 1)) + '' + row;
         boardFiller.push(
-          <div key={key} id={key}>
-            <Piece
-              color={FEN[i] === FEN[i].toLowerCase() ? 'b' : 'w'}
-              piece={FEN[i].toLowerCase()}
-              column={8 - column}
-              row={row - 1}
-            />
-          </div>
+          <Piece
+            key={key}
+            color={FEN[i] === FEN[i].toLowerCase() ? 'b' : 'w'}
+            piece={FEN[i].toLowerCase()}
+            column={8 - column}
+            row={row - 1}
+          />
         );
       }
     } else {
@@ -57,14 +56,13 @@ export default function Board() {
 
         const key = String.fromCharCode(104 - (8 - column)) + '' + row;
         boardFiller.push(
-          <div key={key} id={key}>
-            <Piece
-              color={FEN[i] === FEN[i].toLowerCase() ? 'b' : 'w'}
-              piece={FEN[i].toLowerCase()}
-              column={column - 1}
-              row={8 - row}
-            />
-          </div>
+          <Piece
+            key={key}
+            color={FEN[i] === FEN[i].toLowerCase() ? 'b' : 'w'}
+            piece={FEN[i].toLowerCase()}
+            column={column - 1}
+            row={8 - row}
+          />
         );
       }
     }

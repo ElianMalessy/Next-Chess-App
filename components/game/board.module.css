@@ -9,12 +9,10 @@
   position: absolute;
   height: 12.5%;
   width: 12.5%;
+  background: radial-gradient(rgba(0, 0, 0, 0.25) 19%, rgba(0, 0, 0, 0) 20%);
+  z-index: 0;
+}
 
-  background: radial-gradient(rgba(20, 85, 30, 0.5) 19%, rgba(0, 0, 0, 0) 20%);
-}
-.hint {
-  /* background-color: rgba(0, 0, 0, 0.2); */
-}
 .captureHint {
   border: 7px solid rgba(0, 0, 0, 0.2);
   height: 12.5%;
@@ -39,6 +37,7 @@
   height: 12.5%;
   background-size: cover;
   cursor: pointer;
+  z-index: 1;
 }
 .k_w {
   background-image: url('../../public/pieces/k_w.svg');

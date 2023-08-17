@@ -22,18 +22,18 @@ export default function Piece({
   const [piecePosition, setPiecePosition] = useState({x: column, y: row});
 
   const [isDragging, setIsDragging] = useState(false);
-  const [squares, setSquares] = useState<number[][]>();
+  const [squares, setSquares] = useState<number[][]>([[]]);
 
-  const initialPiecePosition = useRef({x: scale * column, y: scale * row});
+  const initialPiecePosition = useRef({x: column, y: row});
   const initialMousePosition = useRef({x: 0, y: 0});
   const initialOffsetPiecePosition = useRef({x: 0, y: 0});
 
   const board = useBoardStore((state) => state.board);
   useEffect(() => {
     function possibleMove(row: number, column: number) {
-      squares?.forEach((square) => {
-        if (row === square[0] && column === square[1]) return true;
-      });
+      for (let i = 0; i < squares?.length; i++) {
+        if (Math.abs(row - squares[i][0]) < 0.5 && Math.abs(column - squares[i][1]) < 0.5) return true;
+      }
       return false;
     }
     function handleMouseMove(e: any) {
@@ -46,11 +46,14 @@ export default function Piece({
     function handleMouseUp() {
       if (isDragging) {
         setIsDragging(false);
-        if (possibleMove(piecePosition.y / scale, piecePosition.x / scale)) {
+        if (possibleMove(piecePosition.y, piecePosition.x)) {
+          console.log('possible');
           return;
         }
-        initialMousePosition.current = initialPiecePosition.current;
-        setPiecePosition({x: initialPiecePosition.current.x / scale, y: initialPiecePosition.current.y / scale});
+        initialMousePosition.current.x = initialPiecePosition.current.x * scale;
+        initialMousePosition.current.y = initialPiecePosition.current.y * scale;
+
+        setPiecePosition({x: initialPiecePosition.current.x, y: initialPiecePosition.current.y});
       }
     }
 
@@ -65,42 +68,36 @@ export default function Piece({
     };
   }, [isDragging, piecePosition, board, scale, squares]);
 
-  const [highlightedSquares, setHighlightedSquares]: [React.JSX.Element[] | undefined, any] = useState();
+  const [highlightedSquares, setHighlightedSquares]: [React.JSX.Element[], any] = useState([]);
   function highlightSquares(row: number, column: number) {
-    // console.log(showPossibleMoves(board[row][column], row, column, board, '-'));
+    setSquares(showPossibleMoves(board[row][column], row, column, board, '-'));
+  }
+
+  useEffect(() => {
+    if (squares.length === 1) return;
     const highlightedSquaresFiller: React.JSX.Element[] = [];
-    const tempSquares: number[][] | undefined = showPossibleMoves(board[row][column], row, column, board, '-');
-    setSquares(tempSquares);
-    console.log(scale);
-    tempSquares?.forEach((square, key) => {
+    squares?.forEach((square, key) => {
       highlightedSquaresFiller.push(
         <div key={key} className={classes['hint']} style={{top: square[0] * scale, left: square[1] * scale}} />
       );
     });
     setHighlightedSquares(highlightedSquaresFiller);
-  }
-
-  const generateHighlightedSquares = () => {
-    const highlightedSquares = squares?.map((square, key) => (
-      <div key={key} className={classes['hint']} style={{top: square[0] * scale, left: square[1] * scale}} />
-    ));
-    return highlightedSquares;
-  };
+  }, [scale, squares]);
   // mousedown on a piece creates a new div on the possible move squares with the circle css class, ends on mouseup
   function handleMouseDown(e: any) {
     if (divRef.current) {
       const rect = divRef.current.getBoundingClientRect();
       if (!Number.isInteger(piecePosition.y) || !Number.isInteger(piecePosition.x)) return;
       highlightSquares(piecePosition.y, piecePosition.x);
+      setSquares(showPossibleMoves(board[piecePosition.y][piecePosition.x], row, column, board, '-'));
       initialMousePosition.current = {
         x: e.clientX,
         y: e.clientY,
       };
-
       initialOffsetPiecePosition.current.x =
-        initialPiecePosition.current.x - (rect.width / 2 - (initialMousePosition.current.x - rect.x));
+        initialPiecePosition.current.x * scale - (rect.width / 2 - (initialMousePosition.current.x - rect.x));
       initialOffsetPiecePosition.current.y =
-        initialPiecePosition.current.y - (rect.height / 2 - (initialMousePosition.current.y - rect.y));
+        initialPiecePosition.current.y * scale - (rect.height / 2 - (initialMousePosition.current.y - rect.y));
       setPiecePosition({
         x: initialOffsetPiecePosition.current.x / scale,
         y: initialOffsetPiecePosition.current.y / scale,
@@ -111,6 +108,7 @@ export default function Piece({
   useEffect(() => {
     const handleDocumentClick = (e: any) => {
       if (divRef.current && !divRef.current.contains(e.target)) {
+        setSquares([]);
         setHighlightedSquares([]);
       }
     };
@@ -130,7 +128,7 @@ export default function Piece({
         }}
         onMouseDown={(e) => handleMouseDown(e)}
       />
-      {generateHighlightedSquares()}
+      {highlightedSquares}
     </>
   );
 }

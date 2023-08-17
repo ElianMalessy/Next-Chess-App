@@ -139,7 +139,7 @@ export function showPossibleMoves(
   colIndex: number,
   board: string[][],
   enPassentSquare: string
-): number[][] | undefined {
+): number[][] {
   if (pieceType === 'p') return getBlackPawnMoves(rowIndex, colIndex, board, enPassentSquare);
   else if (pieceType === 'P') return getWhitePawnMoves(rowIndex, colIndex, board, enPassentSquare);
   else if (pieceType.toLowerCase() === 'n') return getKnightMoves(rowIndex, colIndex, board);
@@ -147,6 +147,9 @@ export function showPossibleMoves(
   else if (pieceType.toLowerCase() === 'r') return getVerticalHorizontalMoves(rowIndex, colIndex, board);
   else if (pieceType.toLowerCase() === 'b') return getDiagonalMoves(rowIndex, colIndex, board);
   else if (pieceType.toLowerCase() === 'k') return getKingMoves(rowIndex, colIndex, board);
+  else {
+    return [];
+  }
 }
 
 function removeDiscoveredChecks(possibleMoves: number[][], rowIndex: number, colIndex: number, board: string[][]) {

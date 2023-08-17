@@ -139,7 +139,7 @@ export function showPossibleMoves(
   colIndex: number,
   board: string[][],
   enPassentSquare: string
-) {
+): number[][] | undefined {
   if (pieceType === 'p') return getBlackPawnMoves(rowIndex, colIndex, board, enPassentSquare);
   else if (pieceType === 'P') return getWhitePawnMoves(rowIndex, colIndex, board, enPassentSquare);
   else if (pieceType.toLowerCase() === 'n') return getKnightMoves(rowIndex, colIndex, board);
@@ -212,26 +212,26 @@ function getBlackPawnMoves(rowIndex: number, colIndex: number, board: string[][]
 
 function getKnightMoves(rowIndex: number, colIndex: number, board: string[][]) {
   const possibleMoves: number[][] = [];
-  const color = getColor(board[colIndex][rowIndex]);
+  const color = getColor(board[rowIndex][colIndex]);
   const destinations = [
-    [-1, 2],
-    [1, 2],
-    [2, 1],
-    [2, -1],
-    [1, -2],
     [-1, -2],
     [-2, -1],
     [-2, 1],
+    [-1, 2],
+    [2, -1],
+    [1, -2],
+    [1, 2],
+    [2, 1],
   ]; // all the knight moves
 
   for (let i = 0; i < 8; i++) {
-    const newColIndex = colIndex + destinations[i][0];
-    const newRowIndex = rowIndex + destinations[i][1];
+    const newRowIndex = rowIndex + destinations[i][0];
+    const newColIndex = colIndex + destinations[i][1];
     if (newColIndex > 7 || newColIndex < 0 || newRowIndex > 7 || newRowIndex < 0) continue;
 
     const newSquare = board[newRowIndex][newColIndex];
     if (newSquare === '1' || (newSquare !== '1' && color !== getColor(newSquare))) {
-      possibleMoves.push([newColIndex, newRowIndex]);
+      possibleMoves.push([newRowIndex, newColIndex]);
     }
   }
   return removeDiscoveredChecks(possibleMoves, rowIndex, colIndex, board);
@@ -239,7 +239,7 @@ function getKnightMoves(rowIndex: number, colIndex: number, board: string[][]) {
 
 function getVerticalHorizontalMoves(rowIndex: number, colIndex: number, board: string[][]) {
   const possibleMoves: number[][] = [];
-  const color = getColor(board[colIndex][rowIndex]);
+  const color = getColor(board[rowIndex][colIndex]);
 
   // vertical
   for (let i = rowIndex; i >= 0; i--) {
@@ -280,7 +280,7 @@ function getVerticalHorizontalMoves(rowIndex: number, colIndex: number, board: s
 
 function getDiagonalMoves(rowIndex: number, colIndex: number, board: string[][]) {
   const possibleMoves: number[][] = [];
-  const color = getColor(board[colIndex][rowIndex]);
+  const color = getColor(board[rowIndex][colIndex]);
 
   let lbDiag, ltDiag, rbDiag, rtDiag;
   lbDiag = ltDiag = rbDiag = rtDiag = true;

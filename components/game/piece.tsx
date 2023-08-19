@@ -1,6 +1,6 @@
 import {useState, useRef, useEffect, useContext} from 'react';
 
-import useBoardStore from '@/hooks/useBoardStore';
+import useStore from '@/hooks/useStore';
 import {showPossibleMoves} from './moveFunctions';
 import useWindowDimensions from '@/hooks/useWindowDimensions';
 
@@ -22,6 +22,10 @@ export default function Piece({
   const scale = 64 > width / 8 ? width / 8 : 64;
   const [zIndex, setZIndex] = useState(1);
 
+  const board = useStore((state) => state.board);
+  const setBoard = useStore((state) => state.setBoard);
+  const setFEN = useStore((state) => state.setFEN);
+
   const [piecePosition, setPiecePosition] = useState({x: column, y: row});
   const [isDragging, setIsDragging] = useState(false);
   const [squares, setSquares] = useState<number[][]>([[]]);
@@ -29,9 +33,6 @@ export default function Piece({
   const initialPiecePosition = useRef({x: column, y: row});
   const initialMousePosition = useRef({x: 0, y: 0});
   const initialOffsetPiecePosition = useRef({x: 0, y: 0});
-
-  const board = useBoardStore((state) => state.board);
-  const setBoard = useBoardStore((state) => state.setBoard);
 
   // only for testing
   useEffect(() => {
@@ -68,6 +69,7 @@ export default function Piece({
             board[initialPiecePosition.current.y][initialPiecePosition.current.x];
           boardCopy[initialPiecePosition.current.y][initialPiecePosition.current.x] = '1';
           setBoard(boardCopy);
+          setFEN(boardCopy);
 
           initialPiecePosition.current = {x: newPosition[1], y: newPosition[0]};
           initialMousePosition.current = {x: 0, y: 0};
@@ -97,7 +99,7 @@ export default function Piece({
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, piecePosition, board, scale, squares, setBoard]);
+  }, [isDragging, piecePosition, board, scale, squares, setBoard, setFEN]);
 
   function handleMouseDown(e: any) {
     if (divRef.current && Number.isInteger(piecePosition.y) && Number.isInteger(piecePosition.x)) {

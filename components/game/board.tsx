@@ -3,19 +3,20 @@ import {createContext} from 'react';
 import {useEffect, useRef, useState} from 'react';
 
 import Piece from './piece';
+import useStore from '@/hooks/useStore';
 import classes from './board.module.css';
 
 export const ScaleContext = createContext(64);
 export default function Board() {
-  const [FEN, setFEN] = useState('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -');
+  const FEN = useStore((state) => state.FEN);
+
   const [playerColor, setPlayerColor] = useState('white');
   const [boardArray, setBoardArray]: [React.JSX.Element[] | undefined, any] = useState();
 
   const firstRender = useRef(true);
   useEffect(() => {
     if (firstRender.current && FEN && playerColor) firstRender.current = false;
-    else if (!firstRender.current || !FEN || !playerColor) return;
-
+    else return;
     console.log('board-render', FEN);
 
     const boardFiller: React.JSX.Element[] = [];
@@ -31,12 +32,14 @@ export default function Board() {
     // goes backwards in FEN.
     if (playerColor === 'black') {
       for (let i = index, row = 1, column = 1; i >= 0; i--, column++) {
+        const spaceNumber = parseInt(FEN[i]);
         if (FEN[i] === '/') {
           row++;
           column = 0;
           continue;
-        } else if (!isNaN(parseInt(FEN[i]))) continue;
-
+        } else if (!isNaN(spaceNumber)) {
+          column += spaceNumber - 1;
+        }
         const key = String.fromCharCode(104 - (column - 1)) + '' + row;
         boardFiller.push(
           <Piece
@@ -49,12 +52,17 @@ export default function Board() {
         );
       }
     } else {
+      console.log(FEN);
       for (let i = 0, row = 8, column = 1; i <= index; i++, column++) {
+        const spaceNumber = parseInt(FEN[i]);
         if (FEN[i] === '/') {
           row--;
           column = 0;
           continue;
-        } else if (!isNaN(parseInt(FEN[i]))) continue;
+        } else if (!isNaN(spaceNumber)) {
+          column += spaceNumber - 1;
+          continue;
+        }
 
         const key = String.fromCharCode(104 - (8 - column)) + '' + row;
         boardFiller.push(
@@ -69,8 +77,6 @@ export default function Board() {
       }
     }
     setBoardArray(boardFiller);
-  }, [playerColor, FEN]);
-  return (
-      <div className={classes.board}>{boardArray}</div>
-  );
+  }, [playerColor]);
+  return <div className={classes.board}>{boardArray}</div>;
 }

@@ -3,7 +3,7 @@ export default function Home() {
   return (
     <div className='flex h-screen w-screen flex-row items-center justify-center'>
       <div className='flex justify-center items-center'>
-        <Board />
+        <Board/>
       </div>
     </div>
   );

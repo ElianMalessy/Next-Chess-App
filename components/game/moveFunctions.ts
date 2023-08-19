@@ -147,9 +147,7 @@ export function showPossibleMoves(
   else if (pieceType.toLowerCase() === 'r') return getVerticalHorizontalMoves(rowIndex, colIndex, board);
   else if (pieceType.toLowerCase() === 'b') return getDiagonalMoves(rowIndex, colIndex, board);
   else if (pieceType.toLowerCase() === 'k') return getKingMoves(rowIndex, colIndex, board);
-  else {
-    return [];
-  }
+  return [];
 }
 
 function removeDiscoveredChecks(possibleMoves: number[][], rowIndex: number, colIndex: number, board: string[][]) {
@@ -243,9 +241,8 @@ function getKnightMoves(rowIndex: number, colIndex: number, board: string[][]) {
 function getVerticalHorizontalMoves(rowIndex: number, colIndex: number, board: string[][]) {
   const possibleMoves: number[][] = [];
   const color = getColor(board[rowIndex][colIndex]);
-
   // vertical
-  for (let i = rowIndex; i >= 0; i--) {
+  for (let i = rowIndex - 1; i >= 0; i--) {
     if (board[i][colIndex] === '1') {
       possibleMoves.push([i, colIndex]);
     } else if (board[i][colIndex] !== '1') {
@@ -253,7 +250,7 @@ function getVerticalHorizontalMoves(rowIndex: number, colIndex: number, board: s
       break;
     }
   }
-  for (let i = rowIndex; i <= 7; i++) {
+  for (let i = rowIndex + 1; i <= 7; i++) {
     if (board[i][colIndex] === '1') {
       possibleMoves.push([i, colIndex]);
     } else if (board[i][colIndex] !== '1') {
@@ -262,7 +259,7 @@ function getVerticalHorizontalMoves(rowIndex: number, colIndex: number, board: s
     }
   }
   // horizontal
-  for (let i = colIndex; i >= 0; i--) {
+  for (let i = colIndex - 1; i >= 0; i--) {
     if (board[rowIndex][i] === '1') {
       possibleMoves.push([rowIndex, i]);
     } else if (board[rowIndex][i] !== '1') {
@@ -270,7 +267,7 @@ function getVerticalHorizontalMoves(rowIndex: number, colIndex: number, board: s
       break;
     }
   }
-  for (let i = colIndex; i <= 7; i++) {
+  for (let i = colIndex + 1; i <= 7; i++) {
     if (board[rowIndex][i] === '1') {
       possibleMoves.push([rowIndex, i]);
     } else if (board[rowIndex][i] !== '1') {
@@ -287,20 +284,20 @@ function getDiagonalMoves(rowIndex: number, colIndex: number, board: string[][])
 
   let lbDiag, ltDiag, rbDiag, rtDiag;
   lbDiag = ltDiag = rbDiag = rtDiag = true;
-  for (let i = 0; i <= colIndex; i++) {
-    if (lbDiag && rowIndex + i === 7) lbDiag = false;
-    if (ltDiag && rowIndex - i === 0) ltDiag = false;
+  for (let i = 1; i <= colIndex; i++) {
+    if (lbDiag && rowIndex + i === 8) lbDiag = false;
+    if (ltDiag && rowIndex - i === -1) ltDiag = false;
     if (!lbDiag && !ltDiag) break;
 
     if (lbDiag) {
       if (board[rowIndex + i][colIndex - i] === '1') possibleMoves.push([rowIndex + i, colIndex - i]);
       else {
         if (color !== getColor(board[rowIndex + i][colIndex - i])) possibleMoves.push([rowIndex + i, colIndex - i]);
-        ltDiag = false;
+        lbDiag = false;
       }
     }
     if (ltDiag) {
-      if (board[rowIndex - i][colIndex + i] === '1') possibleMoves.push([rowIndex - i, colIndex - i]);
+      if (board[rowIndex - i][colIndex - i] === '1') possibleMoves.push([rowIndex - i, colIndex - i]);
       else {
         if (color !== getColor(board[rowIndex - i][colIndex - i])) possibleMoves.push([rowIndex - i, colIndex - i]);
         ltDiag = false;
@@ -308,16 +305,16 @@ function getDiagonalMoves(rowIndex: number, colIndex: number, board: string[][])
     }
   }
 
-  for (let i = 0; i <= 7 - colIndex; i++) {
-    if (rbDiag && rowIndex + i === 7) rbDiag = false;
-    if (rtDiag && rowIndex - i === 0) rtDiag = false;
+  for (let i = 1; i <= 7 - colIndex; i++) {
+    if (rbDiag && rowIndex + i === 8) rbDiag = false;
+    if (rtDiag && rowIndex - i === -1) rtDiag = false;
     if (!rbDiag && !rtDiag) break;
 
     if (rbDiag) {
       if (board[rowIndex + i][colIndex + i] === '1') possibleMoves.push([rowIndex + i, colIndex + i]);
       else {
         if (color !== getColor(board[rowIndex + i][colIndex + i])) possibleMoves.push([rowIndex + i, colIndex + i]);
-        rtDiag = false;
+        rbDiag = false;
       }
     }
     if (rtDiag) {

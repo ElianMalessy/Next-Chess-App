@@ -1,9 +1,11 @@
 'use client';
+import {createContext} from 'react';
 import {useEffect, useRef, useState} from 'react';
 
 import Piece from './piece';
 import classes from './board.module.css';
 
+export const ScaleContext = createContext(64);
 export default function Board() {
   const [FEN, setFEN] = useState('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -');
   const [playerColor, setPlayerColor] = useState('white');
@@ -68,5 +70,7 @@ export default function Board() {
     }
     setBoardArray(boardFiller);
   }, [playerColor, FEN]);
-  return <div className={classes.board}>{boardArray}</div>;
+  return (
+      <div className={classes.board}>{boardArray}</div>
+  );
 }

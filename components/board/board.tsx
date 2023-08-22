@@ -3,14 +3,10 @@ import {createContext} from 'react';
 import {useEffect, useRef, useState} from 'react';
 
 import Piece from './piece';
-import useStore from '@/hooks/useStore';
 import classes from './board.module.css';
 
 export const ScaleContext = createContext(64);
-export default function Board() {
-  const FEN = useStore((state) => state.FEN);
-
-  const [playerColor, setPlayerColor] = useState('white');
+export default function Board({playerColor, FEN}: {playerColor: string; FEN: string}) {
   const [boardArray, setBoardArray]: [React.JSX.Element[] | undefined, any] = useState();
 
   const firstRender = useRef(true);

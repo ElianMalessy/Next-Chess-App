@@ -4,8 +4,10 @@ import {persist, devtools} from 'zustand/middleware';
 interface State {
   board: string[][];
   FEN: string;
+  playerColor: string;
   setBoard: (board: string[][]) => void;
   setFEN: (board: string[][]) => void;
+  setPlayerColor: (playerColor: string) => void;
 }
 const store = (set: any) => ({
   board: [
@@ -19,6 +21,7 @@ const store = (set: any) => ({
     ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'],
   ],
   FEN: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -',
+  playerColor: 'white',
 
   setBoard: (board: string[][]) =>
     set((state: State) => ({
@@ -42,14 +45,16 @@ const store = (set: any) => ({
       }
       return {...state, FEN: tempFEN + ' w KQkq -'};
     }),
+  setPlayerColor: (playerColor: string) =>
+    set((state: State) => ({
+      ...state,
+      playerColor: playerColor,
+    })),
 });
+// persist(store, {
+//   name: 'storage',
+// })
 
-const useStore = create<State>()(
-  devtools(
-    persist(store, {
-      name: 'storage',
-    })
-  )
-);
+const useStore = create<State>()(devtools(store));
 
 export default useStore;

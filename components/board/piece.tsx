@@ -34,20 +34,6 @@ export default function Piece({
   const initialMousePosition = useRef({x: 0, y: 0});
   const initialOffsetPiecePosition = useRef({x: 0, y: 0});
 
-  // only for testing
-  useEffect(() => {
-    setBoard([
-      ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
-      ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
-      ['1', '1', '1', '1', '1', '1', '1', '1'],
-      ['1', '1', '1', '1', '1', '1', '1', '1'],
-      ['1', '1', '1', '1', '1', '1', '1', '1'],
-      ['1', '1', '1', '1', '1', '1', '1', '1'],
-      ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
-      ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'],
-    ]);
-  }, []);
-
   useEffect(() => {
     function possibleMove(row: number, column: number) {
       for (let i = 0; i < squares?.length; i++) {

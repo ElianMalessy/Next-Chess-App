@@ -1,5 +1,4 @@
 'use client';
-import {useRouter} from 'next/navigation';
 import {ref, get, set} from '@firebase/database';
 import {database} from '@/components/firebase';
 
@@ -13,26 +12,30 @@ export default function Game({params}: {params: {id: string}}) {
 
   const FEN = useStore((state) => state.FEN);
   const playerColor = useStore((state) => state.playerColor);
+  const setPlayerColor = useStore((state) => state.setPlayerColor);
 
   const firstRender = useRef(true);
   useEffect(() => {
-    if (!(firstRender.current === true && auth.currentUser && params.id)) return;
-    console.log(auth);
+    if (firstRender.current === false || !auth.currentUser || !params.id || playerColor !== '') return;
     firstRender.current = false;
-    get(ref(database, `game/${params.id}`)).then((snapshot) => {
+    get(ref(database, `${params.id}`)).then((snapshot) => {
       if (!snapshot.exists()) {
-        set(ref(database, `game/${params.id}`), {
+        set(ref(database, `${params.id}`), {
           checkmate: false,
           FEN: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -',
-          turn: 'white',
+          turn: 'w',
           player_1: auth.currentUser?.uid,
           player_2: auth.currentUser?.uid,
         });
-      } else {
-        console.log(snapshot.val());
+        setPlayerColor('white');
+      } else if (playerColor === '') {
+        set(ref(database, `${params.id}`), {
+          player_2: auth.currentUser?.uid,
+        });
+        setPlayerColor('b');
       }
     });
-  }, [auth, params.id]);
+  }, [auth, params.id, playerColor, setPlayerColor]);
 
   return (
     <div className='flex h-screen w-screen flex-row items-center justify-center'>

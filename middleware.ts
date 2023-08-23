@@ -43,8 +43,7 @@ export async function middleware(request: NextRequest) {
       return redirectToLogin(request);
     },
     handleValidToken: async ({token, decodedToken}: any) => {
-      if (token.email_verified) return redirectToHome(request);
-      else throw new Error('User email not verified');
+      return redirectToHome(request);
     },
     handleError: async (error: any) => {
       console.error('Unhandled authentication error', {error});

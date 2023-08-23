@@ -39,5 +39,7 @@
     "typescript": "5.1.6",
     "zustand": "^4.3.9"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "encoding": "^0.1.13"
+  }
 }

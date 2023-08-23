@@ -3,6 +3,7 @@ import {useState, useRef, useEffect, useContext} from 'react';
 import useStore from '@/hooks/useStore';
 import {showPossibleMoves} from './moveFunctions';
 import useWindowDimensions from '@/hooks/useWindowDimensions';
+import {getColor} from './utilityFunctions';
 
 import classes from './board.module.css';
 
@@ -25,6 +26,7 @@ export default function Piece({
   const board = useStore((state) => state.board);
   const setBoard = useStore((state) => state.setBoard);
   const setFEN = useStore((state) => state.setFEN);
+  const playerColor = useStore((state) => state.playerColor);
 
   const [piecePosition, setPiecePosition] = useState({x: column, y: row});
   const [isDragging, setIsDragging] = useState(false);
@@ -88,29 +90,35 @@ export default function Piece({
   }, [isDragging, piecePosition, board, scale, squares, setBoard, setFEN]);
 
   function handleMouseDown(e: any) {
-    if (divRef.current && Number.isInteger(piecePosition.y) && Number.isInteger(piecePosition.x)) {
-      const rect = divRef.current.getBoundingClientRect();
-      setSquares(
-        showPossibleMoves(board[piecePosition.y][piecePosition.x], piecePosition.y, piecePosition.x, board, '-')
-      );
-      setZIndex(2);
+    if (
+      !divRef.current ||
+      !Number.isInteger(piecePosition.y) ||
+      !Number.isInteger(piecePosition.x) ||
+      board[piecePosition.y][piecePosition.x] !== playerColor
+    )
+      return;
 
-      initialMousePosition.current = {
-        x: e.clientX,
-        y: e.clientY,
-      };
+    const rect = divRef.current.getBoundingClientRect();
+    setSquares(
+      showPossibleMoves(board[piecePosition.y][piecePosition.x], piecePosition.y, piecePosition.x, board, '-')
+    );
+    setZIndex(2);
 
-      initialOffsetPiecePosition.current.x =
-        initialPiecePosition.current.x * scale - (rect.width / 2 - (initialMousePosition.current.x - rect.x));
-      initialOffsetPiecePosition.current.y =
-        initialPiecePosition.current.y * scale - (rect.height / 2 - (initialMousePosition.current.y - rect.y));
+    initialMousePosition.current = {
+      x: e.clientX,
+      y: e.clientY,
+    };
 
-      setPiecePosition({
-        x: initialOffsetPiecePosition.current.x / scale,
-        y: initialOffsetPiecePosition.current.y / scale,
-      });
-      setIsDragging(true);
-    }
+    initialOffsetPiecePosition.current.x =
+      initialPiecePosition.current.x * scale - (rect.width / 2 - (initialMousePosition.current.x - rect.x));
+    initialOffsetPiecePosition.current.y =
+      initialPiecePosition.current.y * scale - (rect.height / 2 - (initialMousePosition.current.y - rect.y));
+
+    setPiecePosition({
+      x: initialOffsetPiecePosition.current.x / scale,
+      y: initialOffsetPiecePosition.current.y / scale,
+    });
+    setIsDragging(true);
   }
   useEffect(() => {
     const handleDocumentClick = (e: any) => {

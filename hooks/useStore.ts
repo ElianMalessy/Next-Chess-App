@@ -1,13 +1,17 @@
 import {create} from 'zustand';
 import {persist, devtools} from 'zustand/middleware';
+import {update, ref, DatabaseReference} from '@firebase/database';
 
 interface State {
   board: string[][];
   FEN: string;
   playerColor: string;
-  setBoard: (board: string[][]) => void;
-  setFEN: (board: string[][]) => void;
-  setPlayerColor: (playerColor: string) => void;
+  turn: string;
+
+  setBoard: (board: string[][], dbRef: DatabaseReference) => void;
+  setFEN: (board: string[][], dbRef: DatabaseReference) => void;
+  setPlayerColor: (playerColor: string, dbRef: DatabaseReference) => void;
+  setTurn: (turn: string, dbRef: DatabaseReference) => void;
 }
 const store = (set: any) => ({
   board: [
@@ -21,16 +25,17 @@ const store = (set: any) => ({
     ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'],
   ],
   FEN: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -',
-  playerColor: 'white',
+  playerColor: '',
+  turn: '',
 
-  setBoard: (board: string[][]) =>
+  setBoard: (board: string[][], dbRef: DatabaseReference) =>
     set((state: State) => ({
       ...state,
       board: board,
     })),
-  setFEN: (board: string[][]) =>
+  setFEN: (board: string[][], dbRef: DatabaseReference) => {
+    let tempFEN = '';
     set((state: State) => {
-      let tempFEN = '';
       for (let i = 0, spaces = 0, index = 0; i < 8; i++, index++) {
         for (let j = 0; j < 8; j++, index++) {
           if (board[i][j] === '1') spaces++;
@@ -44,12 +49,29 @@ const store = (set: any) => ({
         if (i < 7) tempFEN += '/';
       }
       return {...state, FEN: tempFEN + ' w KQkq -'};
-    }),
-  setPlayerColor: (playerColor: string) =>
+    });
+    update(dbRef, {
+      FEN: tempFEN + ' w KQkq -',
+    });
+  },
+  setPlayerColor: (playerColor: string, dbRef: DatabaseReference) => {
     set((state: State) => ({
       ...state,
       playerColor: playerColor,
-    })),
+    }));
+    update(dbRef, {
+      playerColor: playerColor,
+    });
+  },
+  setTurn: (turn: string, dbRef: DatabaseReference) => {
+    set((state: State) => ({
+      ...state,
+      turn: turn,
+    }));
+    update(dbRef, {
+      turn: turn,
+    });
+  },
 });
 // persist(store, {
 //   name: 'storage',

@@ -1,12 +1,12 @@
-import {useState, useRef, useEffect, useContext} from 'react';
+import {useState, useRef, useEffect, useContext, useCallback} from 'react';
 
-import useStore from '@/hooks/useStore';
+import useStateStore from '@/hooks/useStateStore';
 import {showPossibleMoves} from './moveFunctions';
 import useWindowDimensions from '@/hooks/useWindowDimensions';
 import {getColor} from './utilityFunctions';
+import {DbRefContext} from '@/app/game/[id]/page';
 
 import classes from './board.module.css';
-
 export default function Piece({
   piece,
   color,
@@ -22,11 +22,9 @@ export default function Piece({
   const {width} = useWindowDimensions();
   const scale = 64 > width / 8 ? width / 8 : 64;
   const [zIndex, setZIndex] = useState(1);
+  const dbRef = useContext(DbRefContext);
 
-  const board = useStore((state) => state.board);
-  const setBoard = useStore((state) => state.setBoard);
-  const setFEN = useStore((state) => state.setFEN);
-  const playerColor = useStore((state) => state.playerColor);
+  const {board, turn, playerColor, setBoard, setTurn, setFENFromBoard} = useStateStore((state) => state);
 
   const [piecePosition, setPiecePosition] = useState({x: column, y: row});
   const [isDragging, setIsDragging] = useState(false);
@@ -36,48 +34,74 @@ export default function Piece({
   const initialMousePosition = useRef({x: 0, y: 0});
   const initialOffsetPiecePosition = useRef({x: 0, y: 0});
 
-  useEffect(() => {
-    function possibleMove(row: number, column: number) {
+  const possibleMove = useCallback(
+    (row: number, column: number) => {
       for (let i = 0; i < squares?.length; i++) {
         if (Math.abs(row - squares[i][0]) < 0.5 && Math.abs(column - squares[i][1]) < 0.5) return squares[i];
       }
       return false;
-    }
-    function handleMouseUp() {
-      if (isDragging) {
-        setIsDragging(false);
-        const newPosition = possibleMove(piecePosition.y, piecePosition.x);
-        if (newPosition) {
-          setPiecePosition({x: newPosition[1], y: newPosition[0]});
-          setSquares([]);
-          setZIndex(1);
+    },
+    [squares]
+  );
+  const handleMouseUp = useCallback(() => {
+    if (isDragging) {
+      setIsDragging(false);
 
-          const boardCopy = board;
-          boardCopy[newPosition[0]][newPosition[1]] =
-            board[initialPiecePosition.current.y][initialPiecePosition.current.x];
-          boardCopy[initialPiecePosition.current.y][initialPiecePosition.current.x] = '1';
-          setBoard(boardCopy);
-          setFEN(boardCopy);
+      const newPosition = possibleMove(piecePosition.y, piecePosition.x);
+      if (newPosition && (playerColor === turn || playerColor === 'default')) {
+        setPiecePosition({x: newPosition[1], y: newPosition[0]});
+        setSquares([]);
+        setZIndex(1);
 
-          initialPiecePosition.current = {x: newPosition[1], y: newPosition[0]};
-          initialMousePosition.current = {x: 0, y: 0};
-          initialOffsetPiecePosition.current = {x: 0, y: 0};
-          return;
+        const boardCopy = board;
+        boardCopy[newPosition[0]][newPosition[1]] =
+          board[initialPiecePosition.current.y][initialPiecePosition.current.x];
+        boardCopy[initialPiecePosition.current.y][initialPiecePosition.current.x] = '1';
+        setBoard(boardCopy);
+
+        if (playerColor !== 'default') {
+          setFENFromBoard(boardCopy, dbRef);
+          setTurn(turn === 'w' ? 'b' : 'w', dbRef);
+        } else {
+          setFENFromBoard(boardCopy, null);
+          setTurn(turn === 'w' ? 'b' : 'w', null);
         }
-        initialMousePosition.current.x = initialPiecePosition.current.x * scale;
-        initialMousePosition.current.y = initialPiecePosition.current.y * scale;
 
-        setPiecePosition({x: initialPiecePosition.current.x, y: initialPiecePosition.current.y});
+        initialPiecePosition.current = {x: newPosition[1], y: newPosition[0]};
+        initialMousePosition.current = {x: 0, y: 0};
+        initialOffsetPiecePosition.current = {x: 0, y: 0};
+        return;
       }
+      initialMousePosition.current.x = initialPiecePosition.current.x * scale;
+      initialMousePosition.current.y = initialPiecePosition.current.y * scale;
+
+      setPiecePosition({x: initialPiecePosition.current.x, y: initialPiecePosition.current.y});
     }
-    function handleMouseMove(e: any) {
+  }, [
+    board,
+    dbRef,
+    isDragging,
+    scale,
+    turn,
+    setBoard,
+    setFENFromBoard,
+    playerColor,
+    setTurn,
+    possibleMove,
+    piecePosition,
+  ]);
+
+  const handleMouseMove = useCallback(
+    (e: any) => {
       if (isDragging) {
         const newX = initialOffsetPiecePosition.current.x + e.clientX - initialMousePosition.current.x;
         const newY = initialOffsetPiecePosition.current.y + e.clientY - initialMousePosition.current.y;
         setPiecePosition({x: newX / scale, y: newY / scale});
       }
-    }
-
+    },
+    [isDragging, scale]
+  );
+  useEffect(() => {
     if (isDragging) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
@@ -87,39 +111,44 @@ export default function Piece({
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, piecePosition, board, scale, squares, setBoard, setFEN]);
+  }, [isDragging, handleMouseMove, handleMouseUp]);
 
-  function handleMouseDown(e: any) {
-    if (
-      !divRef.current ||
-      !Number.isInteger(piecePosition.y) ||
-      !Number.isInteger(piecePosition.x) ||
-      board[piecePosition.y][piecePosition.x] !== playerColor
-    )
-      return;
+  const handleMouseDown = useCallback(
+    (e: any) => {
+      if (
+        !divRef.current ||
+        !Number.isInteger(piecePosition.x) ||
+        !Number.isInteger(piecePosition.y) ||
+        (getColor(board[piecePosition.y][piecePosition.x]) !== playerColor && playerColor !== 'default')
+      )
+        return;
 
-    const rect = divRef.current.getBoundingClientRect();
-    setSquares(
-      showPossibleMoves(board[piecePosition.y][piecePosition.x], piecePosition.y, piecePosition.x, board, '-')
-    );
-    setZIndex(2);
+      const rect = divRef.current.getBoundingClientRect();
+      console.log(piecePosition, board);
+      setSquares(
+        showPossibleMoves(board[piecePosition.y][piecePosition.x], piecePosition.y, piecePosition.x, board, '-')
+      );
+      setZIndex(2);
 
-    initialMousePosition.current = {
-      x: e.clientX,
-      y: e.clientY,
-    };
+      initialMousePosition.current = {
+        x: e.clientX,
+        y: e.clientY,
+      };
 
-    initialOffsetPiecePosition.current.x =
-      initialPiecePosition.current.x * scale - (rect.width / 2 - (initialMousePosition.current.x - rect.x));
-    initialOffsetPiecePosition.current.y =
-      initialPiecePosition.current.y * scale - (rect.height / 2 - (initialMousePosition.current.y - rect.y));
+      initialOffsetPiecePosition.current.x =
+        initialPiecePosition.current.x * scale - (rect.width / 2 - (initialMousePosition.current.x - rect.x));
+      initialOffsetPiecePosition.current.y =
+        initialPiecePosition.current.y * scale - (rect.height / 2 - (initialMousePosition.current.y - rect.y));
 
-    setPiecePosition({
-      x: initialOffsetPiecePosition.current.x / scale,
-      y: initialOffsetPiecePosition.current.y / scale,
-    });
-    setIsDragging(true);
-  }
+      setPiecePosition({
+        x: initialOffsetPiecePosition.current.x / scale,
+        y: initialOffsetPiecePosition.current.y / scale,
+      });
+      setIsDragging(true);
+    },
+    [board, piecePosition, scale, playerColor]
+  );
+
   useEffect(() => {
     const handleDocumentClick = (e: any) => {
       if (divRef.current && !divRef.current.contains(e.target)) {

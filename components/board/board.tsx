@@ -1,33 +1,23 @@
 'use client';
-import {createContext} from 'react';
 import {useEffect, useRef, useState} from 'react';
 
 import Piece from './piece';
 import classes from './board.module.css';
+import useStateStore from '@/hooks/useStateStore';
 
-export const ScaleContext = createContext(64);
-export default function Board({playerColor, FEN}: {playerColor: string; FEN: string}) {
+export default function Board() {
   const [boardArray, setBoardArray]: [React.JSX.Element[] | undefined, any] = useState();
+  const {playerColor, FEN} = useStateStore((state) => state);
 
   const firstRender = useRef(true);
   useEffect(() => {
     if (firstRender.current && FEN && playerColor) firstRender.current = false;
     else return;
-    console.log('board-render', FEN);
 
     const boardFiller: React.JSX.Element[] = [];
-    let index = FEN.length;
-    while (true) {
-      if (FEN[index] === 'w' || FEN[index] === 'b') {
-        index -= 2;
-        break;
-      }
-      index--;
-    }
-
-    // goes backwards in FEN.
-    if (playerColor === 'black') {
-      for (let i = index, row = 1, column = 1; i >= 0; i--, column++) {
+    // go backwards
+    if (playerColor === 'b') {
+      for (let i = FEN.length - 1, row = 1, column = 1; i >= 0; i--, column++) {
         const spaceNumber = parseInt(FEN[i]);
         if (FEN[i] === '/') {
           row++;
@@ -48,8 +38,7 @@ export default function Board({playerColor, FEN}: {playerColor: string; FEN: str
         );
       }
     } else {
-      console.log(FEN);
-      for (let i = 0, row = 8, column = 1; i <= index; i++, column++) {
+      for (let i = 0, row = 8, column = 1; i < FEN.length; i++, column++) {
         const spaceNumber = parseInt(FEN[i]);
         if (FEN[i] === '/') {
           row--;
@@ -59,7 +48,6 @@ export default function Board({playerColor, FEN}: {playerColor: string; FEN: str
           column += spaceNumber - 1;
           continue;
         }
-
         const key = String.fromCharCode(104 - (8 - column)) + '' + row;
         boardFiller.push(
           <Piece

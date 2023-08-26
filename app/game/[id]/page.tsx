@@ -1,46 +1,73 @@
 'use client';
-import {ref, get, set} from '@firebase/database';
+import {ref, get, set, DatabaseReference, update} from '@firebase/database';
 import {database} from '@/components/firebase';
 
-import useStore from '@/hooks/useStore';
+import useStateStore from '@/hooks/useStateStore';
 import Board from '@/components/board/board';
 import {useAuth} from '@/components/contexts/auth-provider';
-import {useEffect, useRef} from 'react';
+import {useEffect, useRef, createContext} from 'react';
 
+export const DbRefContext = createContext({} as DatabaseReference);
 export default function Game({params}: {params: {id: string}}) {
   const auth = useAuth();
-
-  const FEN = useStore((state) => state.FEN);
-  const playerColor = useStore((state) => state.playerColor);
-  const setPlayerColor = useStore((state) => state.setPlayerColor);
+  const dbRef = ref(database, `${params.id}`);
+  const {FEN, playerColor, setTurn, setCastling, setEnPassent, setFENFromFirebase, setPlayerColor} = useStateStore(
+    (state) => state
+  );
 
   const firstRender = useRef(true);
   useEffect(() => {
-    if (firstRender.current === false || !auth.currentUser || !params.id || playerColor !== '') return;
+    if (firstRender.current === false || !auth.currentUser || !params.id || playerColor !== 'default') return;
     firstRender.current = false;
-    get(ref(database, `${params.id}`)).then((snapshot) => {
+    get(dbRef).then((snapshot) => {
       if (!snapshot.exists()) {
-        set(ref(database, `${params.id}`), {
+        set(dbRef, {
           checkmate: false,
-          FEN: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -',
+          FEN: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR',
           turn: 'w',
+          castling: 'KQkq',
+          enPassent: '-',
           player_1: auth.currentUser?.uid,
-          player_2: auth.currentUser?.uid,
         });
-        setPlayerColor('white');
-      } else if (playerColor === '') {
-        set(ref(database, `${params.id}`), {
+        setPlayerColor('w');
+        return;
+      }
+
+      if (!snapshot.val().player_2) {
+        console.log('here');
+        update(dbRef, {
           player_2: auth.currentUser?.uid,
         });
         setPlayerColor('b');
+      } else if (auth.currentUser?.uid === snapshot.val().player_1) {
+        setPlayerColor('w');
+      } else if (auth.currentUser?.uid === snapshot.val().player_2) {
+        setPlayerColor('b');
       }
+      setFENFromFirebase(snapshot.val().FEN);
+      setTurn(snapshot.val().turn, null);
+      setCastling(snapshot.val().castling, null);
+      setEnPassent(snapshot.val().enPassent, null);
     });
-  }, [auth, params.id, playerColor, setPlayerColor]);
+  }, [
+    auth,
+    params.id,
+    playerColor,
+    setPlayerColor,
+    dbRef,
+    FEN,
+    setFENFromFirebase,
+    setCastling,
+    setTurn,
+    setEnPassent,
+  ]);
 
   return (
     <div className='flex h-screen w-screen flex-row items-center justify-center'>
       <div className='flex justify-center items-center'>
-        <Board playerColor={playerColor} FEN={FEN} />
+        <DbRefContext.Provider value={dbRef}>
+          <Board />
+        </DbRefContext.Provider>
       </div>
     </div>
   );

@@ -135,85 +135,107 @@ function movePiecesVertLat(destination: string, origin: string, board: string[][
 
 export function showPossibleMoves(
   pieceType: string,
-  rowIndex: number,
-  colIndex: number,
+  row: number,
+  col: number,
   board: string[][],
   enPassentSquare: string
 ): number[][] {
-  if (pieceType === 'p') return getBlackPawnMoves(rowIndex, colIndex, board, enPassentSquare);
-  else if (pieceType === 'P') return getWhitePawnMoves(rowIndex, colIndex, board, enPassentSquare);
-  else if (pieceType.toLowerCase() === 'n') return getKnightMoves(rowIndex, colIndex, board);
-  else if (pieceType.toLowerCase() === 'q') return getQueenMoves(rowIndex, colIndex, board);
-  else if (pieceType.toLowerCase() === 'r') return getVerticalHorizontalMoves(rowIndex, colIndex, board);
-  else if (pieceType.toLowerCase() === 'b') return getDiagonalMoves(rowIndex, colIndex, board);
-  else if (pieceType.toLowerCase() === 'k') return getKingMoves(rowIndex, colIndex, board);
+  if (pieceType === 'p') return getBlackPawnMoves(row, col, board, enPassentSquare);
+  else if (pieceType === 'P') return getWhitePawnMoves(row, col, board, enPassentSquare);
+  else if (pieceType.toLowerCase() === 'n') return getKnightMoves(row, col, board);
+  else if (pieceType.toLowerCase() === 'q') return getQueenMoves(row, col, board);
+  else if (pieceType.toLowerCase() === 'r') return getVerticalHorizontalMoves(row, col, board);
+  else if (pieceType.toLowerCase() === 'b') return getDiagonalMoves(row, col, board);
+  else if (pieceType.toLowerCase() === 'k') return getKingMoves(row, col, board);
   return [];
 }
 
-function removeDiscoveredChecks(possibleMoves: number[][], rowIndex: number, colIndex: number, board: string[][]) {
+function removeDiscoveredChecks(possibleMoves: number[][], row: number, col: number, board: string[][]) {
   // const board = [['1', '1']];
   // possibleMoves.forEach((move: number[]) => {
-  //   board[move[0]][move[1]] = 'p'; // temporary check just to see if the move will resuult in a discovered check
-  //   board[rowIndex][colIndex] = '1';
+  //   board[move[0]][move[1]] = 'p'; // temporary check just to see if the move will result in a discovered check
+  //   board[row][col] = '1';
   //   if (isCheck('abc', board)) {
   //   }
   // });
   return possibleMoves;
 }
-function getKingMoves(rowIndex: number, colIndex: number, board: string[][]) {
+function getKingMoves(row: number, col: number, board: string[][]) {
   const possibleMoves: number[][] = [];
+  const color = getColor(board[row][col]);
+  const destinations = [
+    [-1, -1],
+    [-1, 0],
+    [-1, 1],
+    [0, -1],
+    [0, 0],
+    [0, 1],
+    [1, -1],
+    [1, 0],
+    [1, 1],
+  ]; // all the king moves
 
-  return removeDiscoveredChecks(possibleMoves, rowIndex, colIndex, board);
+  for (let i = 0; i < 9; i++) {
+    const newRow = row + destinations[i][0];
+    const newCol = col + destinations[i][1];
+    if (newCol > 7 || newCol < 0 || newRow > 7 || newRow < 0) continue;
+
+    const newSquare = board[newRow][newCol];
+    if (newSquare === '1' || (newSquare !== '1' && color !== getColor(newSquare))) {
+      possibleMoves.push([newRow, newCol]);
+    }
+  }
+
+  return removeDiscoveredChecks(possibleMoves, row, col, board);
 }
-function getWhitePawnMoves(rowIndex: number, colIndex: number, board: string[][], enPassentSquare: string) {
+function getWhitePawnMoves(row: number, col: number, board: string[][], enPassentSquare: string) {
   const possibleMoves: number[][] = [];
-  // square ahead is free? then add it to the possible moves
-  if (rowIndex === 0) return possibleMoves;
+  if (row === 0) return possibleMoves;
 
-  if (board[rowIndex - 1][colIndex] === '1') possibleMoves.push([rowIndex - 1, colIndex]);
-  if (rowIndex === 6 && board[rowIndex - 2][colIndex] === '1') possibleMoves.push([rowIndex - 2, colIndex]);
+  if (board[row - 1][col] === '1') possibleMoves.push([row - 1, col]);
+  if (row === 6 && board[row - 2][col] === '1') possibleMoves.push([row - 2, col]);
 
-  if (colIndex > 0 && board[rowIndex - 1][colIndex - 1] !== '1' && getColor(board[rowIndex - 1][colIndex - 1]) === 'b')
-    possibleMoves.push([rowIndex - 1, colIndex - 1]);
-  if (colIndex < 7 && board[rowIndex - 1][colIndex + 1] !== '1' && getColor(board[rowIndex - 1][colIndex + 1]) === 'b')
-    possibleMoves.push([rowIndex - 1, colIndex + 1]);
+  if (col > 0 && board[row - 1][col - 1] !== '1' && getColor(board[row - 1][col - 1]) === 'b')
+    possibleMoves.push([row - 1, col - 1]);
+  if (col < 7 && board[row - 1][col + 1] !== '1' && getColor(board[row - 1][col + 1]) === 'b')
+    possibleMoves.push([row - 1, col + 1]);
 
   if (
     enPassentSquare[1] === '5' &&
-    rowIndex === 3 &&
-    Math.abs(enPassentSquare.charCodeAt(0) - 'a'.charCodeAt(0) - colIndex) === 1
+    row === 3 &&
+    Math.abs(enPassentSquare.charCodeAt(0) - 'a'.charCodeAt(0) - col) === 1
   ) {
-    possibleMoves.push([rowIndex + 1, enPassentSquare.charCodeAt(0) - 'a'.charCodeAt(0)]);
+    possibleMoves.push([row + 1, enPassentSquare.charCodeAt(0) - 'a'.charCodeAt(0)]);
   }
 
-  return removeDiscoveredChecks(possibleMoves, rowIndex, colIndex, board);
+  return removeDiscoveredChecks(possibleMoves, row, col, board);
 }
 
-function getBlackPawnMoves(rowIndex: number, colIndex: number, board: string[][], enPassentSquare: string) {
+function getBlackPawnMoves(row: number, col: number, board: string[][], enPassentSquare: string) {
   const possibleMoves: number[][] = [];
   // square ahead is free? then add it to the possible moves
-  if (rowIndex < 7 && board[rowIndex + 1][colIndex] === '1') possibleMoves.push([rowIndex + 1, colIndex]);
-  if (rowIndex === 1 && board[rowIndex + 2][colIndex] === '1') possibleMoves.push([rowIndex + 2, colIndex]);
+  if (row < 7 && board[row + 1][col] === '1') possibleMoves.push([row + 1, col]);
+  if (row === 1 && board[row + 2][col] === '1') possibleMoves.push([row + 2, col]);
 
-  if (colIndex < 7 && board[rowIndex + 1][colIndex + 1] !== '1' && getColor(board[rowIndex + 1][colIndex + 1]) === 'w')
-    possibleMoves.push([rowIndex + 1, colIndex + 1]);
-  if (colIndex > 0 && board[rowIndex + 1][colIndex - 1] !== '1' && getColor(board[rowIndex + 1][colIndex - 1]) === 'w')
-    possibleMoves.push([rowIndex + 1, colIndex - 1]);
+  if (col < 7 && board[row + 1][col + 1] !== '1' && getColor(board[row + 1][col + 1]) === 'w')
+    possibleMoves.push([row + 1, col + 1]);
+  if (col > 0 && board[row + 1][col - 1] !== '1' && getColor(board[row + 1][col - 1]) === 'w')
+    possibleMoves.push([row + 1, col - 1]);
 
   if (
     enPassentSquare[1] === '3' &&
-    rowIndex === 4 &&
-    Math.abs(enPassentSquare.charCodeAt(0) - 'a'.charCodeAt(0) - colIndex) === 1
+    row === 4 &&
+    Math.abs(enPassentSquare.charCodeAt(0) - 'a'.charCodeAt(0) - col) === 1
   ) {
-    possibleMoves.push([rowIndex - 1, enPassentSquare.charCodeAt(0) - 'a'.charCodeAt(0)]);
+    possibleMoves.push([row - 1, enPassentSquare.charCodeAt(0) - 'a'.charCodeAt(0)]);
   }
 
-  return removeDiscoveredChecks(possibleMoves, rowIndex, colIndex, board);
+  return removeDiscoveredChecks(possibleMoves, row, col, board);
 }
 
-function getKnightMoves(rowIndex: number, colIndex: number, board: string[][]) {
+function getKnightMoves(row: number, col: number, board: string[][]) {
   const possibleMoves: number[][] = [];
-  const color = getColor(board[rowIndex][colIndex]);
+  const color = getColor(board[row][col]);
   const destinations = [
     [-1, -2],
     [-2, -1],
@@ -226,111 +248,111 @@ function getKnightMoves(rowIndex: number, colIndex: number, board: string[][]) {
   ]; // all the knight moves
 
   for (let i = 0; i < 8; i++) {
-    const newRowIndex = rowIndex + destinations[i][0];
-    const newColIndex = colIndex + destinations[i][1];
-    if (newColIndex > 7 || newColIndex < 0 || newRowIndex > 7 || newRowIndex < 0) continue;
+    const newRow = row + destinations[i][0];
+    const newCol = col + destinations[i][1];
+    if (newCol > 7 || newCol < 0 || newRow > 7 || newRow < 0) continue;
 
-    const newSquare = board[newRowIndex][newColIndex];
+    const newSquare = board[newRow][newCol];
     if (newSquare === '1' || (newSquare !== '1' && color !== getColor(newSquare))) {
-      possibleMoves.push([newRowIndex, newColIndex]);
+      possibleMoves.push([newRow, newCol]);
     }
   }
-  return removeDiscoveredChecks(possibleMoves, rowIndex, colIndex, board);
+  return removeDiscoveredChecks(possibleMoves, row, col, board);
 }
 
-function getVerticalHorizontalMoves(rowIndex: number, colIndex: number, board: string[][]) {
+function getVerticalHorizontalMoves(row: number, col: number, board: string[][]) {
   const possibleMoves: number[][] = [];
-  const color = getColor(board[rowIndex][colIndex]);
+  const color = getColor(board[row][col]);
   // vertical
-  for (let i = rowIndex - 1; i >= 0; i--) {
-    if (board[i][colIndex] === '1') {
-      possibleMoves.push([i, colIndex]);
-    } else if (board[i][colIndex] !== '1') {
-      if (color !== getColor(board[i][colIndex])) possibleMoves.push([i, colIndex]);
+  for (let i = row - 1; i >= 0; i--) {
+    if (board[i][col] === '1') {
+      possibleMoves.push([i, col]);
+    } else if (board[i][col] !== '1') {
+      if (color !== getColor(board[i][col])) possibleMoves.push([i, col]);
       break;
     }
   }
-  for (let i = rowIndex + 1; i <= 7; i++) {
-    if (board[i][colIndex] === '1') {
-      possibleMoves.push([i, colIndex]);
-    } else if (board[i][colIndex] !== '1') {
-      if (color !== getColor(board[i][colIndex])) possibleMoves.push([i, colIndex]);
+  for (let i = row + 1; i <= 7; i++) {
+    if (board[i][col] === '1') {
+      possibleMoves.push([i, col]);
+    } else if (board[i][col] !== '1') {
+      if (color !== getColor(board[i][col])) possibleMoves.push([i, col]);
       break;
     }
   }
   // horizontal
-  for (let i = colIndex - 1; i >= 0; i--) {
-    if (board[rowIndex][i] === '1') {
-      possibleMoves.push([rowIndex, i]);
-    } else if (board[rowIndex][i] !== '1') {
-      if (color !== getColor(board[rowIndex][i])) possibleMoves.push([rowIndex, i]);
+  for (let i = col - 1; i >= 0; i--) {
+    if (board[row][i] === '1') {
+      possibleMoves.push([row, i]);
+    } else if (board[row][i] !== '1') {
+      if (color !== getColor(board[row][i])) possibleMoves.push([row, i]);
       break;
     }
   }
-  for (let i = colIndex + 1; i <= 7; i++) {
-    if (board[rowIndex][i] === '1') {
-      possibleMoves.push([rowIndex, i]);
-    } else if (board[rowIndex][i] !== '1') {
-      if (color !== getColor(board[rowIndex][i])) possibleMoves.push([rowIndex, i]);
+  for (let i = col + 1; i <= 7; i++) {
+    if (board[row][i] === '1') {
+      possibleMoves.push([row, i]);
+    } else if (board[row][i] !== '1') {
+      if (color !== getColor(board[row][i])) possibleMoves.push([row, i]);
       break;
     }
   }
-  return removeDiscoveredChecks(possibleMoves, rowIndex, colIndex, board);
+  return removeDiscoveredChecks(possibleMoves, row, col, board);
 }
 
-function getDiagonalMoves(rowIndex: number, colIndex: number, board: string[][]) {
+function getDiagonalMoves(row: number, col: number, board: string[][]) {
   const possibleMoves: number[][] = [];
-  const color = getColor(board[rowIndex][colIndex]);
+  const color = getColor(board[row][col]);
 
   let lbDiag, ltDiag, rbDiag, rtDiag;
   lbDiag = ltDiag = rbDiag = rtDiag = true;
-  for (let i = 1; i <= colIndex; i++) {
-    if (lbDiag && rowIndex + i === 8) lbDiag = false;
-    if (ltDiag && rowIndex - i === -1) ltDiag = false;
+  for (let i = 1; i <= col; i++) {
+    if (lbDiag && row + i === 8) lbDiag = false;
+    if (ltDiag && row - i === -1) ltDiag = false;
     if (!lbDiag && !ltDiag) break;
 
     if (lbDiag) {
-      if (board[rowIndex + i][colIndex - i] === '1') possibleMoves.push([rowIndex + i, colIndex - i]);
+      if (board[row + i][col - i] === '1') possibleMoves.push([row + i, col - i]);
       else {
-        if (color !== getColor(board[rowIndex + i][colIndex - i])) possibleMoves.push([rowIndex + i, colIndex - i]);
+        if (color !== getColor(board[row + i][col - i])) possibleMoves.push([row + i, col - i]);
         lbDiag = false;
       }
     }
     if (ltDiag) {
-      if (board[rowIndex - i][colIndex - i] === '1') possibleMoves.push([rowIndex - i, colIndex - i]);
+      if (board[row - i][col - i] === '1') possibleMoves.push([row - i, col - i]);
       else {
-        if (color !== getColor(board[rowIndex - i][colIndex - i])) possibleMoves.push([rowIndex - i, colIndex - i]);
+        if (color !== getColor(board[row - i][col - i])) possibleMoves.push([row - i, col - i]);
         ltDiag = false;
       }
     }
   }
 
-  for (let i = 1; i <= 7 - colIndex; i++) {
-    if (rbDiag && rowIndex + i === 8) rbDiag = false;
-    if (rtDiag && rowIndex - i === -1) rtDiag = false;
+  for (let i = 1; i <= 7 - col; i++) {
+    if (rbDiag && row + i === 8) rbDiag = false;
+    if (rtDiag && row - i === -1) rtDiag = false;
     if (!rbDiag && !rtDiag) break;
 
     if (rbDiag) {
-      if (board[rowIndex + i][colIndex + i] === '1') possibleMoves.push([rowIndex + i, colIndex + i]);
+      if (board[row + i][col + i] === '1') possibleMoves.push([row + i, col + i]);
       else {
-        if (color !== getColor(board[rowIndex + i][colIndex + i])) possibleMoves.push([rowIndex + i, colIndex + i]);
+        if (color !== getColor(board[row + i][col + i])) possibleMoves.push([row + i, col + i]);
         rbDiag = false;
       }
     }
     if (rtDiag) {
-      if (board[rowIndex - i][colIndex + i] === '1') possibleMoves.push([rowIndex - i, colIndex + i]);
+      if (board[row - i][col + i] === '1') possibleMoves.push([row - i, col + i]);
       else {
-        if (color !== getColor(board[rowIndex - i][colIndex + i])) possibleMoves.push([rowIndex - i, colIndex + i]);
+        if (color !== getColor(board[row - i][col + i])) possibleMoves.push([row - i, col + i]);
         rtDiag = false;
       }
     }
   }
-  return removeDiscoveredChecks(possibleMoves, rowIndex, colIndex, board);
+  return removeDiscoveredChecks(possibleMoves, row, col, board);
 }
 
-function getQueenMoves(rowIndex: number, colIndex: number, board: string[][]) {
-  const possibleMoves: number[][] = getVerticalHorizontalMoves(rowIndex, colIndex, board);
-  possibleMoves.push(...getDiagonalMoves(rowIndex, colIndex, board));
+function getQueenMoves(row: number, col: number, board: string[][]) {
+  const possibleMoves: number[][] = getVerticalHorizontalMoves(row, col, board);
+  possibleMoves.push(...getDiagonalMoves(row, col, board));
   return possibleMoves;
 }
 

@@ -17,7 +17,7 @@ export default function Game({params}: {params: {id: string}}) {
 
   const firstRender = useRef(true);
   useEffect(() => {
-    if (firstRender.current === false || !auth.currentUser || !params.id || playerColor !== 'default') return;
+    if (!firstRender.current || !auth.currentUser || !params.id) return;
     firstRender.current = false;
     get(dbRef).then((snapshot) => {
       if (!snapshot.exists()) {
@@ -30,6 +30,10 @@ export default function Game({params}: {params: {id: string}}) {
           player_1: auth.currentUser?.uid,
         });
         setPlayerColor('w');
+        setFENFromFirebase('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR');
+        setTurn('w', null);
+        setCastling('KQkq', null);
+        setEnPassent('-', null);
         return;
       }
 

@@ -175,6 +175,15 @@ export default memo(function Piece({
         squares[0] &&
         squares[0].length > 0 &&
         squares.map((square, key) => {
+          if (board[square[0]][square[1]] !== '1') {
+            return (
+              <div
+                key={key}
+                className={classes['capture-hint']}
+                style={{top: square[0] * scale, left: square[1] * scale}}
+              />
+            );
+          }
           return (
             <div key={key} className={classes['hint']} style={{top: square[0] * scale, left: square[1] * scale}} />
           );

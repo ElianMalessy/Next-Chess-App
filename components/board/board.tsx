@@ -1,20 +1,18 @@
 'use client';
-import {useEffect, useRef, useState} from 'react';
+import {useEffect, useMemo} from 'react';
 
 import Piece from './piece';
 import classes from './board.module.css';
 import useStateStore from '@/hooks/useStateStore';
 
 export default function Board() {
-  const [boardArray, setBoardArray]: [React.JSX.Element[] | undefined, any] = useState();
   const {playerColor, FEN} = useStateStore((state) => state);
-
-  const firstRender = useRef(true);
   useEffect(() => {
-    if (firstRender.current && FEN && playerColor) firstRender.current = false;
-    else return;
+    useStateStore.persist.rehydrate();
+  }, []);
 
-    const boardFiller: React.JSX.Element[] = [];
+  const boardFiller = useMemo(() => {
+    const tempBoardFiller: React.JSX.Element[] = [];
     // go backwards
     if (playerColor === 'b') {
       for (let i = FEN.length - 1, row = 1, column = 1; i >= 0; i--, column++) {
@@ -27,7 +25,7 @@ export default function Board() {
           column += spaceNumber - 1;
         }
         const key = String.fromCharCode(104 - (column - 1)) + '' + row;
-        boardFiller.push(
+        tempBoardFiller.push(
           <Piece
             key={key}
             color={FEN[i] === FEN[i].toLowerCase() ? 'b' : 'w'}
@@ -49,7 +47,7 @@ export default function Board() {
           continue;
         }
         const key = String.fromCharCode(104 - (8 - column)) + '' + row;
-        boardFiller.push(
+        tempBoardFiller.push(
           <Piece
             key={key}
             color={FEN[i] === FEN[i].toLowerCase() ? 'b' : 'w'}
@@ -60,7 +58,8 @@ export default function Board() {
         );
       }
     }
-    setBoardArray(boardFiller);
-  }, [playerColor]);
-  return <div className={classes.board}>{boardArray}</div>;
+    return tempBoardFiller;
+  }, [FEN, playerColor]);
+
+  return <div className={classes.board}>{boardFiller}</div>;
 }

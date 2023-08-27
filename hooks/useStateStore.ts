@@ -61,7 +61,6 @@ const store = (set: any) => ({
       }
       tempBoard[row][column] = FEN[i];
     }
-    console.log(tempBoard);
     set((state: State) => ({
       ...state,
       FEN: FEN,
@@ -145,6 +144,7 @@ const useStateStore = create<State>()(
   devtools(
     persist(store, {
       name: 'local-store',
+      skipHydration: true,
     })
   )
 );

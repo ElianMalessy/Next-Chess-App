@@ -1,4 +1,4 @@
-import {useState, useRef, useEffect, useContext, useCallback} from 'react';
+import {useState, useRef, useEffect, useContext, useCallback, memo} from 'react';
 
 import useStateStore from '@/hooks/useStateStore';
 import {showPossibleMoves} from './moveFunctions';
@@ -7,7 +7,7 @@ import {getColor} from './utilityFunctions';
 import {DbRefContext} from '@/app/game/[id]/page';
 
 import classes from './board.module.css';
-export default function Piece({
+export default memo(function Piece({
   piece,
   color,
   column,
@@ -124,7 +124,6 @@ export default function Piece({
         return;
 
       const rect = divRef.current.getBoundingClientRect();
-      console.log(piecePosition, board);
       setSquares(
         showPossibleMoves(board[piecePosition.y][piecePosition.x], piecePosition.y, piecePosition.x, board, '-')
       );
@@ -182,4 +181,4 @@ export default function Piece({
         })}
     </>
   );
-}
+});

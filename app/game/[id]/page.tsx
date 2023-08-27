@@ -33,8 +33,7 @@ export default function Game({params}: {params: {id: string}}) {
         return;
       }
 
-      if (!snapshot.val().player_2) {
-        console.log('here');
+      if (!snapshot.val().player_2 && snapshot.val().player_1 !== auth.currentUser?.uid) {
         update(dbRef, {
           player_2: auth.currentUser?.uid,
         });

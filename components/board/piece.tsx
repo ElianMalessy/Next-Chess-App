@@ -24,7 +24,8 @@ export default memo(function Piece({
   const [zIndex, setZIndex] = useState(1);
   const dbRef = useContext(DbRefContext);
 
-  const {board, turn, playerColor, setBoard, setTurn, setFENFromBoard} = useStateStore((state) => state);
+  const {board, turn, playerColor, enPassent, castling, setBoard, setTurn, setFENFromBoard, setCastling} =
+    useStateStore((state) => state);
 
   const [piecePosition, setPiecePosition] = useState({x: column, y: row});
   const [isDragging, setIsDragging] = useState(false);
@@ -57,7 +58,39 @@ export default memo(function Piece({
         boardCopy[newPosition[0]][newPosition[1]] =
           board[initialPiecePosition.current.y][initialPiecePosition.current.x];
         boardCopy[initialPiecePosition.current.y][initialPiecePosition.current.x] = '1';
+
+        if (newPosition.length === 4) {
+          boardCopy[newPosition[0]][newPosition[2]] = board[newPosition[0]][newPosition[3]];
+          boardCopy[newPosition[0]][newPosition[3]] = '1';
+        }
         setBoard(boardCopy);
+        if (boardCopy[newPosition[0]][newPosition[1]] === 'K') {
+          setCastling(castling.replace('KQ', ''), dbRef);
+        } else if (boardCopy[newPosition[0]][newPosition[1]] === 'k') {
+          setCastling(castling.replace('kq', ''), dbRef);
+        } else if (
+          boardCopy[newPosition[0]][newPosition[1]] === 'R' &&
+          initialPiecePosition.current.y === initialPiecePosition.current.x
+        ) {
+          setCastling(castling.replace('K', ''), dbRef);
+        } else if (
+          boardCopy[newPosition[0]][newPosition[1]] === 'R' &&
+          initialPiecePosition.current.y === 7 &&
+          initialPiecePosition.current.x === 0
+        ) {
+          setCastling(castling.replace('Q', ''), dbRef);
+        } else if (
+          boardCopy[newPosition[0]][newPosition[1]] === 'r' &&
+          initialPiecePosition.current.y === initialPiecePosition.current.x
+        ) {
+          setCastling(castling.replace('q', ''), dbRef);
+        } else if (
+          boardCopy[newPosition[0]][newPosition[1]] === 'R' &&
+          initialPiecePosition.current.y === 0 &&
+          initialPiecePosition.current.x === 7
+        ) {
+          setCastling(castling.replace('q', ''), dbRef);
+        }
 
         if (playerColor !== 'default') {
           setFENFromBoard(boardCopy, dbRef);
@@ -125,7 +158,14 @@ export default memo(function Piece({
 
       const rect = divRef.current.getBoundingClientRect();
       setSquares(
-        showPossibleMoves(board[piecePosition.y][piecePosition.x], piecePosition.y, piecePosition.x, board, '-')
+        showPossibleMoves(
+          board[piecePosition.y][piecePosition.x],
+          piecePosition.y,
+          piecePosition.x,
+          board,
+          enPassent,
+          castling
+        )
       );
       setZIndex(2);
 
@@ -145,7 +185,7 @@ export default memo(function Piece({
       });
       setIsDragging(true);
     },
-    [board, piecePosition, scale, playerColor]
+    [board, piecePosition, scale, playerColor, castling, enPassent]
   );
 
   useEffect(() => {

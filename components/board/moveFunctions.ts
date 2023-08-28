@@ -138,7 +138,8 @@ export function showPossibleMoves(
   row: number,
   col: number,
   board: string[][],
-  enPassentSquare: string
+  enPassentSquare: string,
+  castling: string
 ): number[][] {
   if (pieceType === 'p') return getBlackPawnMoves(row, col, board, enPassentSquare);
   else if (pieceType === 'P') return getWhitePawnMoves(row, col, board, enPassentSquare);
@@ -146,7 +147,7 @@ export function showPossibleMoves(
   else if (pieceType.toLowerCase() === 'q') return getQueenMoves(row, col, board);
   else if (pieceType.toLowerCase() === 'r') return getVerticalHorizontalMoves(row, col, board);
   else if (pieceType.toLowerCase() === 'b') return getDiagonalMoves(row, col, board);
-  else if (pieceType.toLowerCase() === 'k') return getKingMoves(row, col, board);
+  else if (pieceType.toLowerCase() === 'k') return getKingMoves(row, col, board, castling);
   return [];
 }
 
@@ -160,7 +161,7 @@ function removeDiscoveredChecks(possibleMoves: number[][], row: number, col: num
   // });
   return possibleMoves;
 }
-function getKingMoves(row: number, col: number, board: string[][]) {
+function getKingMoves(row: number, col: number, board: string[][], castling: string) {
   const possibleMoves: number[][] = [];
   const color = getColor(board[row][col]);
   const destinations = [
@@ -173,7 +174,7 @@ function getKingMoves(row: number, col: number, board: string[][]) {
     [1, -1],
     [1, 0],
     [1, 1],
-  ]; // all the king moves
+  ]; // all the king individual moves
 
   for (let i = 0; i < 9; i++) {
     const newRow = row + destinations[i][0];
@@ -185,6 +186,19 @@ function getKingMoves(row: number, col: number, board: string[][]) {
       possibleMoves.push([newRow, newCol]);
     }
   }
+  if (
+    ((color === 'w' && castling.includes('K')) || (color === 'b' && castling.includes('k'))) &&
+    board[row][col + 1] === '1' &&
+    board[row][col + 2] === '1'
+  )
+    possibleMoves.push([row, col + 2, col + 1, 7]);
+  if (
+    ((color === 'w' && castling.includes('Q')) || (color === 'b' && castling.includes('q'))) &&
+    board[row][col - 1] === '1' &&
+    board[row][col - 2] === '1' &&
+    board[row][col - 3] === '1'
+  )
+    possibleMoves.push([row, col - 2, col - 1, 0]);
 
   return removeDiscoveredChecks(possibleMoves, row, col, board);
 }

@@ -1,21 +1,23 @@
 'use client';
-import {useEffect, useMemo} from 'react';
+import {useEffect, useMemo, useRef} from 'react';
 
 import Piece from './piece';
 import classes from './board.module.css';
 import useStateStore from '@/hooks/useStateStore';
 
 export default function Board() {
-  const {playerColor, FEN} = useStateStore((state) => state);
+  const {playerColor, FEN, castling} = useStateStore((state) => state);
   useEffect(() => {
     useStateStore.persist.rehydrate();
   }, []);
-
+  useEffect(() => {
+    console.log(castling);
+  }, [castling]);
   const boardFiller = useMemo(() => {
     const tempBoardFiller: React.JSX.Element[] = [];
     // go backwards
     if (playerColor === 'b') {
-      for (let i = FEN.length - 1, row = 1, column = 1; i >= 0; i--, column++) {
+      for (let i = FEN.length - 1, row = 1, column = 1, index = 0; i >= 0; i--, column++) {
         const spaceNumber = parseInt(FEN[i]);
         if (FEN[i] === '/') {
           row++;
@@ -34,9 +36,10 @@ export default function Board() {
             row={row - 1}
           />
         );
+        index++;
       }
     } else {
-      for (let i = 0, row = 8, column = 1; i < FEN.length; i++, column++) {
+      for (let i = 0, row = 8, column = 1, index = 0; i < FEN.length; i++, column++) {
         const spaceNumber = parseInt(FEN[i]);
         if (FEN[i] === '/') {
           row--;
@@ -56,6 +59,7 @@ export default function Board() {
             row={8 - row}
           />
         );
+        index++;
       }
     }
     return tempBoardFiller;

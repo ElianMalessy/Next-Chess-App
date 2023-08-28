@@ -82,7 +82,7 @@ const store = (set: any) => ({
         }
         if (i < 7) tempFEN += '/';
       }
-      if (dbRef) {
+      if (dbRef && Object.keys(dbRef).length !== 0) {
         update(dbRef, {
           FEN: tempFEN,
         });
@@ -96,7 +96,7 @@ const store = (set: any) => ({
       ...state,
       turn: turn,
     }));
-    if (dbRef) {
+    if (dbRef && Object.keys(dbRef).length !== 0) {
       update(dbRef, {
         turn: turn,
       });
@@ -107,7 +107,7 @@ const store = (set: any) => ({
       ...state,
       castling: castling,
     }));
-    if (dbRef) {
+    if (dbRef && Object.keys(dbRef).length !== 0) {
       update(dbRef, {
         castling: castling,
       });
@@ -118,7 +118,7 @@ const store = (set: any) => ({
       ...state,
       enPassent: enPassent,
     }));
-    if (dbRef) {
+    if (dbRef && Object.keys(dbRef).length !== 0) {
       update(dbRef, {
         enPassent: enPassent,
       });
@@ -132,7 +132,6 @@ const store = (set: any) => ({
     }));
   },
   setBoard: (board: string[][]) => {
-    console.log(board);
     set((state: State) => ({
       ...state,
       board: board,

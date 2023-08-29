@@ -24,7 +24,7 @@ export default memo(function Piece({
   const [zIndex, setZIndex] = useState(1);
   const dbRef = useContext(DbRefContext);
 
-  const {board, turn, playerColor, enPassent, castling, setBoard, setTurn, setFENFromBoard, setCastling} =
+  const {board, turn, playerColor, enPassent, castling, setBoard, setTurn, setFENFromBoard, setCastling, setEnPassent} =
     useStateStore((state) => state);
 
   const [piecePosition, setPiecePosition] = useState({x: column, y: row});
@@ -59,11 +59,22 @@ export default memo(function Piece({
           board[initialPiecePosition.current.y][initialPiecePosition.current.x];
         boardCopy[initialPiecePosition.current.y][initialPiecePosition.current.x] = '1';
 
-        if (newPosition.length === 4) {
+        if (newPosition.length === 3) {
+          boardCopy[newPosition[2]][newPosition[1]] = '1';
+        }
+        if (newPosition.length === 4 && piece.toLowerCase() === 'p') {
+          setEnPassent(
+            String.fromCharCode(newPosition[3] + 'a'.charCodeAt(0)) + (8 - newPosition[2]).toString(),
+            dbRef
+          );
+        } else if (piece.toLowerCase() === 'p' && enPassent !== '-') {
+          setEnPassent('-', dbRef);
+        } else if (newPosition.length === 4) {
           boardCopy[newPosition[0]][newPosition[2]] = board[newPosition[0]][newPosition[3]];
           boardCopy[newPosition[0]][newPosition[3]] = '1';
+          // castling
         }
-        setBoard(boardCopy);
+
         if (boardCopy[newPosition[0]][newPosition[1]] === 'K') {
           setCastling(castling.replace('KQ', ''), dbRef);
         } else if (boardCopy[newPosition[0]][newPosition[1]] === 'k') {
@@ -92,6 +103,7 @@ export default memo(function Piece({
           setCastling(castling.replace('q', ''), dbRef);
         }
 
+        setBoard(boardCopy);
         if (playerColor !== 'default') {
           setFENFromBoard(boardCopy, dbRef);
           setTurn(turn === 'w' ? 'b' : 'w', dbRef);
@@ -122,6 +134,11 @@ export default memo(function Piece({
     setTurn,
     possibleMove,
     piecePosition,
+    castling,
+    setCastling,
+    enPassent,
+    setEnPassent,
+    piece,
   ]);
 
   const handleMouseMove = useCallback(

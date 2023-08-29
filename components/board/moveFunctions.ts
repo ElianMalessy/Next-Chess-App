@@ -207,7 +207,7 @@ function getWhitePawnMoves(row: number, col: number, board: string[][], enPassen
   if (row === 0) return possibleMoves;
 
   if (board[row - 1][col] === '1') possibleMoves.push([row - 1, col]);
-  if (row === 6 && board[row - 2][col] === '1') possibleMoves.push([row - 2, col]);
+  if (row === 6 && board[row - 2][col] === '1') possibleMoves.push([row - 2, col, row - 1, col]); // setEnPassent Square
 
   if (col > 0 && board[row - 1][col - 1] !== '1' && getColor(board[row - 1][col - 1]) === 'b')
     possibleMoves.push([row - 1, col - 1]);
@@ -215,11 +215,11 @@ function getWhitePawnMoves(row: number, col: number, board: string[][], enPassen
     possibleMoves.push([row - 1, col + 1]);
 
   if (
-    enPassentSquare[1] === '5' &&
     row === 3 &&
+    enPassentSquare[1] === '6' &&
     Math.abs(enPassentSquare.charCodeAt(0) - 'a'.charCodeAt(0) - col) === 1
   ) {
-    possibleMoves.push([row + 1, enPassentSquare.charCodeAt(0) - 'a'.charCodeAt(0)]);
+    possibleMoves.push([row - 1, enPassentSquare.charCodeAt(0) - 'a'.charCodeAt(0), row]);
   }
 
   return removeDiscoveredChecks(possibleMoves, row, col, board);
@@ -227,21 +227,20 @@ function getWhitePawnMoves(row: number, col: number, board: string[][], enPassen
 
 function getBlackPawnMoves(row: number, col: number, board: string[][], enPassentSquare: string) {
   const possibleMoves: number[][] = [];
-  // square ahead is free? then add it to the possible moves
   if (row < 7 && board[row + 1][col] === '1') possibleMoves.push([row + 1, col]);
-  if (row === 1 && board[row + 2][col] === '1') possibleMoves.push([row + 2, col]);
+  if (row === 1 && board[row + 2][col] === '1') possibleMoves.push([row + 2, col, row + 1, col]); // setEnPassent Square
 
   if (col < 7 && board[row + 1][col + 1] !== '1' && getColor(board[row + 1][col + 1]) === 'w')
     possibleMoves.push([row + 1, col + 1]);
   if (col > 0 && board[row + 1][col - 1] !== '1' && getColor(board[row + 1][col - 1]) === 'w')
     possibleMoves.push([row + 1, col - 1]);
-
+  console.log(row, enPassentSquare);
   if (
-    enPassentSquare[1] === '3' &&
     row === 4 &&
+    enPassentSquare[1] === '3' &&
     Math.abs(enPassentSquare.charCodeAt(0) - 'a'.charCodeAt(0) - col) === 1
   ) {
-    possibleMoves.push([row - 1, enPassentSquare.charCodeAt(0) - 'a'.charCodeAt(0)]);
+    possibleMoves.push([row + 1, enPassentSquare.charCodeAt(0) - 'a'.charCodeAt(0), row]);
   }
 
   return removeDiscoveredChecks(possibleMoves, row, col, board);

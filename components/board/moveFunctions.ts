@@ -1,135 +1,129 @@
-import {findAllEnemyPieces, getColor} from './utilityFunctions';
+import findPositionOf, {findAllEnemyPieces, getColor} from './utilityFunctions';
 
-// only used for determining possible moves if its checkmate after a check
-export default function getPossibleMoves(
-  checkingPieces: string[],
-  kingPos: string,
-  piecesArray: string[],
-  board: string[][]
-) {
+// used for determining if its checkmate after a check
+export default function isCheckmate(otherKingPosition: number[], board: string[][]): boolean {
   // if there are checking pieces, then that means that the move that this player makes has to block those checking pieces
   // use isCheck on all of the possibilities, if its a bishop for example, that means that the move either has to be the king moving out of the way
   // (that can be true for all of them, as long as that next position doesnt return a true in isCheck()), or it can be a piece moving into that diag
   // if there are no possible moves to stop isCheck() as in it always returns true, then it is checkmate and the game ends
-  const possibleMoves: string[][] = []; // e.g, [[p, e4], [p, e3], ...], possible squares to block
-  const tempPossibleSquares = new Set<string>();
+  const enemyPieces = findAllEnemyPieces(board, board[otherKingPosition[0]][otherKingPosition[1]] === 'k' ? 'w' : 'b');
+  const friendlyPieces = findAllEnemyPieces(
+    board,
+    board[otherKingPosition[0]][otherKingPosition[1]] === 'k' ? 'b' : 'w'
+  );
 
-  checkingPieces.forEach((checkingPiece) => {
-    if ((checkingPiece[0].toLowerCase() === 'q' || checkingPiece[0] === 'b') && checkingPiece[1] !== kingPos[1]) {
-      const squares = movePiecesDiag(checkingPiece, kingPos, board);
-      if (Array.isArray(squares)) squares.forEach(tempPossibleSquares.add, tempPossibleSquares);
+  const tempPossibleSquares: number[][] = [];
+  const checkingPieces: number[][] = [];
+  enemyPieces.forEach((potentialCheckingPiece) => {
+    const arrayOfAttack = arrayOfAttackOnDestination[
+      board[potentialCheckingPiece[0]][potentialCheckingPiece[1]].toLowerCase()
+    ](otherKingPosition, [potentialCheckingPiece[0], potentialCheckingPiece[1]], board);
+
+    if (arrayOfAttack) {
+      if (arrayOfAttack.length > 0) tempPossibleSquares.push(...arrayOfAttack);
+      tempPossibleSquares.push([potentialCheckingPiece[0], potentialCheckingPiece[1]]);
+      checkingPieces.push([potentialCheckingPiece[0], potentialCheckingPiece[1]]);
     }
+
+    // can capture the checking piece to stop the check
+  });
+
+  // console.log(checkingPieces);
+  if (checkingPieces.length === 0) return false;
+  for (let i = 0; i < friendlyPieces.length; i++) {
+    // with the possible squares where pieces must go to protect the king, check every friendly piece and see if they can go to said squares
+    // if a piece going to this square triggers a discovered check, its not a possible move
+    for (let j = 0; j < tempPossibleSquares.length; j++) {
+      const arrayOfAttack = arrayOfAttackOnDestination[board[friendlyPieces[i][0]][friendlyPieces[i][1]].toLowerCase()](
+        tempPossibleSquares[j],
+        [friendlyPieces[i][0], friendlyPieces[i][1]],
+        board
+      );
+      // if piece can go there AND it doesn't trigger a discovered check
+      if (arrayOfAttack && arrayOfAttack.length > 0 && !isCheck(otherKingPosition, board, checkingPieces)) return false;
+    }
+  }
+  return true;
+}
+
+function isCheck(ownKingPosition: number[], board: string[][], potentialCheckingPieces: number[][]) {
+  for (let i = 0; i < potentialCheckingPieces.length; i++) {
     if (
-      (checkingPiece[0].toLowerCase() === 'r' || checkingPiece[0].toLowerCase() === 'q') &&
-      (checkingPiece[1] === kingPos[1] || checkingPiece[2] === kingPos[2])
-    ) {
-      const squares = movePiecesVertLat(checkingPiece, kingPos, board);
-      if (Array.isArray(squares)) squares.forEach(tempPossibleSquares.add, tempPossibleSquares);
-    }
-    tempPossibleSquares.add(checkingPiece[1] + checkingPiece[2]); // can capture the checking piece to stop the check
-    // if the piece is a pawn or a knight, the only way to get unchecked is to move out of the way or to capture them
-  });
-  console.log(tempPossibleSquares);
-  piecesArray.forEach((piece: string) => {
-    // if a piece going to this square triggers a discovered check, then dont put this into possible moves
-    // since you have the possible squares in which the pieces must go into to protect the king, the next step is to check every piece and see if
-    // they can move to protect the king, (not including the king)
-    console.log(piece);
-    tempPossibleSquares.forEach((square: string) => {
-      if (isAttackingDestination[piece[0]](square, piece[1] + piece[2])) {
-        possibleMoves.push([piece, square]);
-        console.log(piece, square);
-      }
-    });
-  });
-  console.log(possibleMoves, 'possibleMoves');
+      arrayOfAttackOnDestination[board[potentialCheckingPieces[i][0]][potentialCheckingPieces[i][1]].toLowerCase()](
+        ownKingPosition,
+        potentialCheckingPieces[i],
+        board
+      )
+    )
+      return true;
+  }
+  return false;
 }
 
-function isCheck(kingPos: string, board: string[][]) {
-  const pieces = findAllEnemyPieces(board, kingPos[0].toLowerCase() === kingPos[0] ? 'b' : 'w'); //select all of the pieces except for the kings as they cant check each other
-  // checks if the move is legal by putting in the destination and looking for checks before actually appending to new square
-  const potentialCheckingPieces = [...pieces];
-  const checkingPieces: string[] = [];
-  potentialCheckingPieces.forEach((piece) => {
-    if (isAttackingDestination[piece[0].toLowerCase()]('S' + kingPos[1] + kingPos[2], piece, board))
-      checkingPieces.push(piece); // if a piece is attacking a king
-  });
-  return checkingPieces.length > 0 ? checkingPieces : false;
-}
+function movePiecesDiag(destination: number[], origin: number[], board: string[][]): number[][] | boolean {
+  const arrayOfAttack: number[][] = [];
 
-function movePiecesDiag(destination: string, origin: string, board: string[][]): string[] | boolean {
-  const arrayOfAttack: string[] = [];
+  if (
+    Math.abs(destination[0] - origin[0]) === Math.abs(destination[1] && origin[1]) &&
+    (destination[0] === origin[0] || destination[1] === origin[1])
+  )
+    return false; // has to be diagonal
+  else if (Math.abs(destination[0] - origin[0]) === 1) return true; // dist = 1
 
-  if (Math.abs(destination[1].charCodeAt(0) - origin[1].charCodeAt(0)) === 1) return true; // dist = 1
-
-  if (destination[1].charCodeAt(0) - origin[1].charCodeAt(0) > 0) {
-    for (let i = 1; i < destination[1].charCodeAt(0) - origin[1].charCodeAt(0); i++) {
+  if (destination[0] - origin[0] > 0) {
+    for (let i = 1; i < destination[0] - origin[0]; i++) {
       let num;
-      parseInt(destination[2]) - parseInt(origin[2]) > 0
-        ? (num = parseInt(origin[2]) + i)
-        : (num = parseInt(origin[2]) - i);
-      let str = String.fromCharCode(origin[1].charCodeAt(0) + i) + num;
-      arrayOfAttack.push(str);
-      if (board[origin[1].charCodeAt(0) + i - 'a'.charCodeAt(0)][8 - num] !== '1') return false;
+      destination[1] - origin[1] > 0 ? (num = origin[1] + i) : (num = origin[1] - i);
+      arrayOfAttack.push([origin[0] + i, num]);
+      if (board[origin[0] + i][num] !== '1') return false;
     }
   } else {
-    for (let i = -1; i > destination[1].charCodeAt(0) - origin[1].charCodeAt(0); i--) {
+    for (let i = -1; i > destination[0] - origin[0]; i--) {
       let num;
-      parseInt(destination[2]) - parseInt(origin[2]) > 0
-        ? (num = parseInt(origin[2]) - i)
-        : (num = parseInt(origin[2]) + i);
-      let str = String.fromCharCode(origin[1].charCodeAt(0) + i) + num;
-      arrayOfAttack.push(str);
-      if (board[origin[1].charCodeAt(0) + i - 'a'.charCodeAt(0)][8 - num] !== '1') return false;
+      destination[1] - origin[1] > 0 ? (num = origin[1] + i) : (num = origin[1] - i);
+      arrayOfAttack.push([origin[0] + i, num]);
+      if (board[origin[0] + i][num] !== '1') return false;
     }
   }
   return arrayOfAttack;
 }
 
-function movePiecesVertLat(destination: string, origin: string, board: string[][]): string[] | boolean {
-  const arrayOfAttack: string[] = [];
+function movePiecesVertLat(destination: number[], origin: number[], board: string[][]): number[][] | boolean {
+  const arrayOfAttack: number[][] = [];
 
-  // distance = 1 means nothing can be in the way of the move except the destination itself
-  if (
-    (Math.abs(destination[1].charCodeAt(0) - origin[1].charCodeAt(0)) === 1 && destination[2] === origin[2]) ||
-    (Math.abs(parseInt(destination[2]) - parseInt(origin[2])) === 1 &&
-      destination[1].charCodeAt(0) === origin[1].charCodeAt(0))
-  )
-    return true;
-  else if (destination[1].charCodeAt(0) > origin[1].charCodeAt(0)) {
-    for (let i = 1; i < destination[1].charCodeAt(0) - origin[1].charCodeAt(0); i++) {
-      let str = String.fromCharCode(origin[1].charCodeAt(0) + i) + origin[2];
-      arrayOfAttack.push(str);
-
-      if (board[origin[1].charCodeAt(0) + i - 'a'.charCodeAt(0)][8 - parseInt(origin[2])] !== '1') return false;
+  if (destination[0] !== origin[0] && destination[1] !== origin[1])
+    return false; // cant move both vert and lat at the same time
+  else if (
+    (Math.abs(destination[0] - origin[0]) === 1 && destination[1] === origin[1]) ||
+    (Math.abs(destination[1] - origin[1]) === 1 && destination[0] === origin[0])
+  ) {
+    return arrayOfAttack; // distance = 1 means nothing can be in the way of the move except the destination itself
+  }
+  // horizontal movement
+  else if (destination[1] > origin[1]) {
+    for (let i = 1; i < destination[1] - origin[1]; i++) {
+      if (board[origin[0]][origin[1] + i] !== '1') return false;
+      arrayOfAttack.push([destination[0], destination[1] + i]);
     }
-  } else if (destination[1].charCodeAt(0) < origin[1].charCodeAt(0)) {
-    for (let i = -1; i > destination[1].charCodeAt(0) - origin[1].charCodeAt(0); i--) {
-      let str = String.fromCharCode(origin[1].charCodeAt(0) + i) + origin[2];
-      arrayOfAttack.push(str);
-
-      if (board[origin[1].charCodeAt(0) + i - 'a'.charCodeAt(0)][8 - parseInt(origin[2])] !== '1') return false;
-    }
-  } else {
-    // vertical movement
-    if (destination[2] > origin[2]) {
-      for (let i = 1; i < parseInt(destination[2]) - parseInt(origin[2]); i++) {
-        let num = parseInt(origin[2]) + i;
-        let str = origin[1] + num;
-
-        arrayOfAttack.push(str);
-        if (board[origin[1].charCodeAt(0) - 'a'.charCodeAt(0)][8 - num] !== '1') return false;
-      }
-    } else if (destination[2] < origin[2]) {
-      for (let i = -1; i > parseInt(destination[2]) - parseInt(origin[2]); i--) {
-        let num = parseInt(origin[2]) + i;
-        let str = origin[1] + num;
-
-        arrayOfAttack.push(str);
-        if (board[origin[1].charCodeAt(0) - 'a'.charCodeAt(0)][8 - num] !== '1') return false;
-      }
+  } else if (destination[1] < origin[1]) {
+    for (let i = -1; i > destination[1] - origin[1]; i--) {
+      if (board[origin[0]][origin[1] + i] !== '1') return false;
+      arrayOfAttack.push([origin[0], origin[1] + i]);
     }
   }
+  // vertical movement
+  else if (destination[0] > origin[0]) {
+    for (let i = 1; i < destination[0] - origin[0]; i++) {
+      if (board[origin[0]][origin[1] + i] !== '1') return false;
+      arrayOfAttack.push([origin[0] + i, origin[1]]);
+    }
+  } else if (destination[0] < origin[0]) {
+    for (let i = -1; i < destination[0] - origin[0]; i--) {
+      if (board[origin[0] + i][origin[1]] !== '1') return false;
+      arrayOfAttack.push([origin[0] + i, origin[1]]);
+    }
+  }
+
   return arrayOfAttack;
 }
 
@@ -151,16 +145,30 @@ export function showPossibleMoves(
   return [];
 }
 
-function removeDiscoveredChecks(possibleMoves: number[][], row: number, col: number, board: string[][]) {
-  // const board = [['1', '1']];
-  // possibleMoves.forEach((move: number[]) => {
-  //   board[move[0]][move[1]] = 'p'; // temporary check just to see if the move will result in a discovered check
-  //   board[row][col] = '1';
-  //   if (isCheck('abc', board)) {
-  //   }
-  // });
+function removeDiscoveredChecks(
+  tempPossibleMoves: number[][],
+  row: number,
+  col: number,
+  board: string[][],
+  playerColor: string
+) {
+  const possibleMoves: number[][] = [];
+  const kingPosition = findPositionOf(board, playerColor === 'w' ? 'K' : 'k');
+  const enemyPieces = findAllEnemyPieces(board, playerColor === 'w' ? 'b' : 'w');
+
+  tempPossibleMoves.forEach((move: number[]) => {
+    const temp = board[move[0]][move[1]];
+    board[move[0]][move[1]] = board[row][col]; // scan just to see if the move will result in a discovered check
+    board[row][col] = '1';
+    if (!isCheck(kingPosition, board, enemyPieces)) {
+      possibleMoves.push(move);
+    }
+    board[row][col] = board[move[0]][move[1]];
+    board[move[0]][move[1]] = temp;
+  });
   return possibleMoves;
 }
+
 function getKingMoves(row: number, col: number, board: string[][], castling: string) {
   const possibleMoves: number[][] = [];
   const color = getColor(board[row][col]);
@@ -200,7 +208,7 @@ function getKingMoves(row: number, col: number, board: string[][], castling: str
   )
     possibleMoves.push([row, col - 2, col - 1, 0]);
 
-  return removeDiscoveredChecks(possibleMoves, row, col, board);
+  return removeDiscoveredChecks(possibleMoves, row, col, board, color);
 }
 function getWhitePawnMoves(row: number, col: number, board: string[][], enPassentSquare: string) {
   const possibleMoves: number[][] = [];
@@ -222,7 +230,7 @@ function getWhitePawnMoves(row: number, col: number, board: string[][], enPassen
     possibleMoves.push([row - 1, enPassentSquare.charCodeAt(0) - 'a'.charCodeAt(0), row]);
   }
 
-  return removeDiscoveredChecks(possibleMoves, row, col, board);
+  return removeDiscoveredChecks(possibleMoves, row, col, board, 'w');
 }
 
 function getBlackPawnMoves(row: number, col: number, board: string[][], enPassentSquare: string) {
@@ -234,7 +242,6 @@ function getBlackPawnMoves(row: number, col: number, board: string[][], enPassen
     possibleMoves.push([row + 1, col + 1]);
   if (col > 0 && board[row + 1][col - 1] !== '1' && getColor(board[row + 1][col - 1]) === 'w')
     possibleMoves.push([row + 1, col - 1]);
-  console.log(row, enPassentSquare);
   if (
     row === 4 &&
     enPassentSquare[1] === '3' &&
@@ -243,7 +250,7 @@ function getBlackPawnMoves(row: number, col: number, board: string[][], enPassen
     possibleMoves.push([row + 1, enPassentSquare.charCodeAt(0) - 'a'.charCodeAt(0), row]);
   }
 
-  return removeDiscoveredChecks(possibleMoves, row, col, board);
+  return removeDiscoveredChecks(possibleMoves, row, col, board, 'b');
 }
 
 function getKnightMoves(row: number, col: number, board: string[][]) {
@@ -270,7 +277,7 @@ function getKnightMoves(row: number, col: number, board: string[][]) {
       possibleMoves.push([newRow, newCol]);
     }
   }
-  return removeDiscoveredChecks(possibleMoves, row, col, board);
+  return removeDiscoveredChecks(possibleMoves, row, col, board, color);
 }
 
 function getVerticalHorizontalMoves(row: number, col: number, board: string[][]) {
@@ -310,7 +317,7 @@ function getVerticalHorizontalMoves(row: number, col: number, board: string[][])
       break;
     }
   }
-  return removeDiscoveredChecks(possibleMoves, row, col, board);
+  return removeDiscoveredChecks(possibleMoves, row, col, board, color);
 }
 
 function getDiagonalMoves(row: number, col: number, board: string[][]) {
@@ -360,7 +367,7 @@ function getDiagonalMoves(row: number, col: number, board: string[][]) {
       }
     }
   }
-  return removeDiscoveredChecks(possibleMoves, row, col, board);
+  return removeDiscoveredChecks(possibleMoves, row, col, board, color);
 }
 
 function getQueenMoves(row: number, col: number, board: string[][]) {
@@ -369,47 +376,55 @@ function getQueenMoves(row: number, col: number, board: string[][]) {
   return possibleMoves;
 }
 
-export const isAttackingDestination: any = {
-  n: function Knight(destination: string, origin: string) {
+export const arrayOfAttackOnDestination: any = {
+  n: function Knight(destination: number[], origin: number[]) {
     if (
-      (Math.abs(destination[1].charCodeAt(0) - origin[1].charCodeAt(0)) === 2 &&
-        Math.abs(parseInt(destination[2]) - parseInt(origin[2])) === 1) ||
-      (Math.abs(destination[1].charCodeAt(0) - origin[1].charCodeAt(0)) === 1 &&
-        Math.abs(parseInt(destination[2]) - parseInt(origin[2])) === 2)
+      (Math.abs(destination[0] - origin[0]) === 2 && Math.abs(destination[1] - origin[1]) === 1) ||
+      (Math.abs(destination[0] - origin[0]) === 1 && Math.abs(destination[1] - origin[1]) === 2)
     )
-      return true;
+      return [];
   },
-  b: function Bishop(destination: string, origin: string, board: string[][]) {
-    if (
-      Math.abs(destination[1].charCodeAt(0) - origin[1].charCodeAt(0)) ===
-      Math.abs(parseInt(destination[2]) - parseInt(origin[2]))
-    ) {
-      if (movePiecesDiag(destination, origin, board)) return true;
+  b: function Bishop(destination: number[], origin: number[], board: string[][]) {
+    if (Math.abs(destination[0] - origin[0]) === Math.abs(destination[1] - origin[1])) {
+      return movePiecesDiag(destination, origin, board);
     }
   },
-  r: function Rook(destination: string, origin: string, board: string[][]) {
-    if (destination[1].charCodeAt(0) === origin[1].charCodeAt(0) || destination[2] === origin[2]) {
-      if (movePiecesVertLat(destination, origin, board)) return true;
+  r: function Rook(destination: number[], origin: number[], board: string[][]) {
+    // console.log(destination, origin);
+    if (destination[0] === origin[0] || destination[1] === origin[1]) {
+      return movePiecesVertLat(destination, origin, board);
     }
   },
-  q: function Queen(destination: string, origin: string, board: string[][]) {
-    if (movePiecesVertLat(destination, origin, board)) {
-      return true;
-    } else if (
-      Math.abs(destination[1].charCodeAt(0) - origin[1].charCodeAt(0)) ===
-        Math.abs(parseInt(destination[2]) - parseInt(origin[2])) &&
-      movePiecesDiag(destination, origin, board)
-    )
-      return true;
-  },
-  k: function King(destination: string, origin: string) {
+  q: function Queen(destination: number[], origin: number[], board: string[][]) {
     if (
-      (Math.abs(destination[1].charCodeAt(0) - origin[1].charCodeAt(0)) === 1 ||
-        Math.abs(destination[1].charCodeAt(0) - origin[1].charCodeAt(0)) === 0) &&
-      (Math.abs(parseInt(destination[2]) - parseInt(origin[2])) === 1 ||
-        Math.abs(parseInt(destination[2]) - parseInt(origin[2])) === 0)
+      (Math.abs(destination[0] - origin[0]) > 0 && destination[1] === origin[1]) ||
+      (Math.abs(destination[1] - origin[1]) > 0 && destination[0] === origin[0])
     )
-      return true;
+      return movePiecesVertLat(destination, origin, board);
+    if (Math.abs(destination[0] - origin[0]) === Math.abs(destination[1] - origin[1]))
+      return movePiecesDiag(destination, origin, board);
   },
-  p: function Pawn(destination: string, origin: string, board: string[][]) {},
+  k: function King(destination: number[], origin: number[]) {
+    if (
+      (Math.abs(destination[0] - origin[0]) === 1 || Math.abs(destination[0] - origin[0]) === 0) &&
+      (Math.abs(destination[1] - origin[1]) === 1 || Math.abs(destination[1] - origin[1]) === 0)
+    )
+      return [];
+  },
+  p: function Pawn(destination: number[], origin: number[], board: string[][]) {
+    const color = getColor(board[origin[0]][origin[1]]);
+    let ret = false;
+
+    if (board[destination[0]][destination[1]] === '1' && destination[1] - origin[1] === 0) ret = true;
+    else if (
+      board[destination[0]][destination[1]] !== '1' &&
+      Math.abs(destination[1] - origin[1]) === 1 &&
+      color !== getColor(board[destination[0]][destination[1]])
+    )
+      ret = true;
+    if (ret && color === 'w' && destination[0] - origin[0] === -1) return [];
+    else if (ret && color === 'b' && destination[0] - origin[0] === 1) return [];
+
+    return false;
+  },
 };

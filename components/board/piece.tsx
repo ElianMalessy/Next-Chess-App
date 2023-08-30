@@ -1,10 +1,12 @@
 import {useState, useRef, useEffect, useContext, useCallback, memo} from 'react';
+import {update} from '@firebase/database';
 
 import useStateStore from '@/hooks/useStateStore';
-import {showPossibleMoves} from './moveFunctions';
 import useWindowDimensions from '@/hooks/useWindowDimensions';
-import {getColor} from './utilityFunctions';
 import {DbRefContext} from '@/app/game/[id]/page';
+
+import isCheckmate, {showPossibleMoves} from './moveFunctions';
+import findPositionOf, {getColor} from './utilityFunctions';
 
 import classes from './board.module.css';
 export default memo(function Piece({
@@ -22,14 +24,26 @@ export default memo(function Piece({
   const {width} = useWindowDimensions();
   const scale = 64 > width / 8 ? width / 8 : 64;
   const [zIndex, setZIndex] = useState(1);
+  const [pieceState, setPieceState] = useState(piece);
   const dbRef = useContext(DbRefContext);
 
-  const {board, turn, playerColor, enPassent, castling, setBoard, setTurn, setFENFromBoard, setCastling, setEnPassent} =
-    useStateStore((state) => state);
+  const {
+    board,
+    turn,
+    playerColor,
+    enPassent,
+    castling,
+    setBoard,
+    setTurn,
+    setFENFromBoard,
+    setCastling,
+    setEnPassent,
+    setPlayerColor,
+  } = useStateStore((state) => state);
 
   const [piecePosition, setPiecePosition] = useState({x: column, y: row});
   const [isDragging, setIsDragging] = useState(false);
-  const [squares, setSquares] = useState<number[][]>([[]]);
+  const [squares, setSquares] = useState<number[][]>([]);
 
   const initialPiecePosition = useRef({x: column, y: row});
   const initialMousePosition = useRef({x: 0, y: 0});
@@ -44,6 +58,7 @@ export default memo(function Piece({
     },
     [squares]
   );
+
   const handleMouseUp = useCallback(() => {
     if (isDragging) {
       setIsDragging(false);
@@ -59,8 +74,12 @@ export default memo(function Piece({
           board[initialPiecePosition.current.y][initialPiecePosition.current.x];
         boardCopy[initialPiecePosition.current.y][initialPiecePosition.current.x] = '1';
 
+        // promotion
+        if (piece === 'p' && color === 'b' && newPosition[0] === 7) board[newPosition[0]][newPosition[1]] = 'q';
+        else if (piece === 'p' && color === 'w' && newPosition[0] === 0) board[newPosition[0]][newPosition[1]] = 'Q';
+
         if (newPosition.length === 3) {
-          boardCopy[newPosition[2]][newPosition[1]] = '1';
+          boardCopy[newPosition[2]][newPosition[1]] = '1'; // enPassent
         }
         if (newPosition.length === 4 && piece.toLowerCase() === 'p') {
           setEnPassent(
@@ -72,9 +91,22 @@ export default memo(function Piece({
         } else if (newPosition.length === 4) {
           boardCopy[newPosition[0]][newPosition[2]] = board[newPosition[0]][newPosition[3]];
           boardCopy[newPosition[0]][newPosition[3]] = '1';
-          // castling
+          // castling move
         }
 
+        if (
+          isCheckmate(
+            findPositionOf(board, getColor(boardCopy[newPosition[0]][newPosition[1]]) === 'w' ? 'k' : 'K'),
+            board
+          )
+        ) {
+          setPlayerColor('');
+          // update(dbRef, {
+          //   checkmate: true,
+          // });
+        }
+
+        // setCastling
         if (boardCopy[newPosition[0]][newPosition[1]] === 'K') {
           setCastling(castling.replace('KQ', ''), dbRef);
         } else if (boardCopy[newPosition[0]][newPosition[1]] === 'k') {
@@ -139,6 +171,8 @@ export default memo(function Piece({
     enPassent,
     setEnPassent,
     piece,
+    color,
+    setPlayerColor,
   ]);
 
   const handleMouseMove = useCallback(
@@ -229,8 +263,7 @@ export default memo(function Piece({
         onMouseDown={(e) => handleMouseDown(e)}
       />
       {scale &&
-        squares[0] &&
-        squares[0].length > 0 &&
+        squares.length > 0 &&
         squares.map((square, key) => {
           if (board[square[0]][square[1]] !== '1') {
             return (

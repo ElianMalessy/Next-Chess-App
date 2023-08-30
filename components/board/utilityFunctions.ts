@@ -1,25 +1,23 @@
-export default function findPositionOf(arrayofArray: string[][], target: string) {
+export default function findPositionOf(board: string[][], target: string): number[] {
   for (let i = 0; i < 8; i++) {
     for (let j = 0; j < 8; j++) {
-      if (arrayofArray[i][j] === target) {
-        return target + String.fromCharCode('a'.charCodeAt(0) + j) + (8 - i);
-        // e.g, i = 0 and j = 0 means a8 i = 3 and j = 2 means c5
+      if (board[i][j] === target) {
+        return [i, j];
       }
     }
   }
-  return false;
+  return [];
 }
 
-export function findAllEnemyPieces(arrayofArray: string[][], color: string) {
-  const allPieces: string[] = [];
+export function findAllEnemyPieces(board: string[][], color: string): any[][] {
+  const allPieces: any[][] = [];
   for (let i = 0; i < 8; i++) {
     for (let j = 0; j < 8; j++) {
-      let piece = arrayofArray[i][j];
-      if (piece.toLowerCase() === 'k' || piece === '1') continue;
-      if (getColor(piece) === color) allPieces.push(piece + String.fromCharCode('a'.charCodeAt(0) + j) + (8 - i));
+      let piece = board[i][j];
+      if (piece.toLowerCase() === 'k' || piece === '1') continue; // kings cant give a check
+      if (getColor(piece) === color) allPieces.push([i, j]);
     }
   }
-  //console.log(allPieces);
   return allPieces;
 }
 

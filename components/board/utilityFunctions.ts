@@ -9,13 +9,13 @@ export default function findPositionOf(board: string[][], target: string): numbe
   return [];
 }
 
-export function findAllEnemyPieces(board: string[][], color: string): any[][] {
+export function findAllEnemyPieces(board: string[][], enemyColor: string): any[][] {
   const allPieces: any[][] = [];
   for (let i = 0; i < 8; i++) {
     for (let j = 0; j < 8; j++) {
-      let piece = board[i][j];
-      if (piece.toLowerCase() === 'k' || piece === '1') continue; // kings cant give a check
-      if (getColor(piece) === color) allPieces.push([i, j]);
+      const piece = board[i][j];
+      if (piece === '1') continue;
+      if (getColor(piece) === enemyColor) allPieces.push([i, j]);
     }
   }
   return allPieces;

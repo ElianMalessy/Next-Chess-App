@@ -5,8 +5,8 @@ import useStateStore from '@/hooks/useStateStore';
 import useWindowDimensions from '@/hooks/useWindowDimensions';
 import {DbRefContext} from '@/app/game/[id]/page';
 
-import isCheckmate, {showPossibleMoves} from './moveFunctions';
-import findPositionOf, {getColor} from './utilityFunctions';
+import isCheckmate, {isStalemate, showPossibleMoves} from './moveFunctions';
+import {getColor} from './utilityFunctions';
 
 import classes from './board.module.css';
 export default memo(function Piece({
@@ -24,7 +24,6 @@ export default memo(function Piece({
   const {width} = useWindowDimensions();
   const scale = 64 > width / 8 ? width / 8 : 64;
   const [zIndex, setZIndex] = useState(1);
-  const [pieceState, setPieceState] = useState(piece);
   const dbRef = useContext(DbRefContext);
 
   const {
@@ -94,16 +93,20 @@ export default memo(function Piece({
           // castling move
         }
 
-        if (
-          isCheckmate(
-            findPositionOf(board, getColor(boardCopy[newPosition[0]][newPosition[1]]) === 'w' ? 'k' : 'K'),
-            board
-          )
-        ) {
+        // check stalemate now
+        if (isStalemate(board, getColor(boardCopy[newPosition[0]][newPosition[1]]), enPassent)) {
           setPlayerColor('');
-          // update(dbRef, {
-          //   checkmate: true,
-          // });
+          if (dbRef)
+            update(dbRef, {
+              stalemate: true,
+            });
+        }
+        if (isCheckmate(board, getColor(boardCopy[newPosition[0]][newPosition[1]]))) {
+          setPlayerColor('');
+          if (dbRef)
+            update(dbRef, {
+              checkmate: true,
+            });
         }
 
         // setCastling

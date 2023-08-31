@@ -1,16 +1,13 @@
 import findPositionOf, {findAllEnemyPieces, getColor} from './utilityFunctions';
 
-// used for determining if its checkmate after a check
-export default function isCheckmate(otherKingPosition: number[], board: string[][]): boolean {
+export default function isCheckmate(board: string[][], playerColor: string): boolean {
   // if there are checking pieces, then that means that the move that this player makes has to block those checking pieces
   // use isCheck on all of the possibilities, if its a bishop for example, that means that the move either has to be the king moving out of the way
   // (that can be true for all of them, as long as that next position doesnt return a true in isCheck()), or it can be a piece moving into that diag
   // if there are no possible moves to stop isCheck() as in it always returns true, then it is checkmate and the game ends
-  const enemyPieces = findAllEnemyPieces(board, board[otherKingPosition[0]][otherKingPosition[1]] === 'k' ? 'w' : 'b');
-  const friendlyPieces = findAllEnemyPieces(
-    board,
-    board[otherKingPosition[0]][otherKingPosition[1]] === 'k' ? 'b' : 'w'
-  );
+  const otherKingPosition = findPositionOf(board, playerColor === 'w' ? 'k' : 'K');
+  const enemyPieces = findAllEnemyPieces(board, playerColor);
+  const friendlyPieces = findAllEnemyPieces(board, playerColor === 'w' ? 'b' : 'w');
 
   const tempPossibleSquares: number[][] = [];
   const checkingPieces: number[][] = [];
@@ -40,17 +37,17 @@ export default function isCheckmate(otherKingPosition: number[], board: string[]
         board
       );
       // if piece can go there AND it doesn't trigger a discovered check
-      if (arrayOfAttack && arrayOfAttack.length > 0 && !isCheck(otherKingPosition, board, checkingPieces)) return false;
+      if (arrayOfAttack && arrayOfAttack.length > 0 && !isCheck(board, otherKingPosition, checkingPieces)) return false;
     }
   }
   return true;
 }
 
-function isCheck(ownKingPosition: number[], board: string[][], potentialCheckingPieces: number[][]) {
+function isCheck(board: string[][], kingPosition: number[], potentialCheckingPieces: number[][]) {
   for (let i = 0; i < potentialCheckingPieces.length; i++) {
     if (
       arrayOfAttackOnDestination[board[potentialCheckingPieces[i][0]][potentialCheckingPieces[i][1]].toLowerCase()](
-        ownKingPosition,
+        kingPosition,
         potentialCheckingPieces[i],
         board
       )
@@ -58,6 +55,24 @@ function isCheck(ownKingPosition: number[], board: string[][], potentialChecking
       return true;
   }
   return false;
+}
+
+export function isStalemate(board: string[][], playerColor: string, enPassentSquare: string) {
+  const friendlyPieces = findAllEnemyPieces(board, playerColor === 'w' ? 'b' : 'w');
+  for (let i = 0; i < friendlyPieces.length; i++) {
+    if (
+      showPossibleMoves(
+        board[friendlyPieces[i][0]][friendlyPieces[i][1]].toLowerCase(),
+        friendlyPieces[i][0],
+        friendlyPieces[i][1],
+        board,
+        enPassentSquare,
+        ''
+      ).length > 0
+    )
+      return false;
+  }
+  return true;
 }
 
 function movePiecesDiag(destination: number[], origin: number[], board: string[][]): number[][] | boolean {
@@ -160,7 +175,7 @@ function removeDiscoveredChecks(
     const temp = board[move[0]][move[1]];
     board[move[0]][move[1]] = board[row][col]; // scan just to see if the move will result in a discovered check
     board[row][col] = '1';
-    if (!isCheck(kingPosition, board, enemyPieces)) {
+    if (!isCheck(board, kingPosition, enemyPieces)) {
       possibleMoves.push(move);
     }
     board[row][col] = board[move[0]][move[1]];
@@ -194,19 +209,39 @@ function getKingMoves(row: number, col: number, board: string[][], castling: str
       possibleMoves.push([newRow, newCol]);
     }
   }
+
+  if (isCheck(board, findPositionOf(board, color === 'w' ? 'K' : 'k'), findAllEnemyPieces(board, color)))
+    return removeDiscoveredChecks(possibleMoves, row, col, board, color); // can't castle if in check
+
   if (
     ((color === 'w' && castling.includes('K')) || (color === 'b' && castling.includes('k'))) &&
     board[row][col + 1] === '1' &&
     board[row][col + 2] === '1'
-  )
-    possibleMoves.push([row, col + 2, col + 1, 7]);
+  ) {
+    board[row][col + 1] = color === 'w' ? 'K' : 'k'; // can't castle into a check / go through a check when castling
+    board[row][col + 2] = color === 'w' ? 'K' : 'k';
+    if (isCheck(board, findPositionOf(board, color === 'w' ? 'K' : 'k'), findAllEnemyPieces(board, color))) {
+      possibleMoves.push([row, col + 2, col + 1, 7]);
+      board[row][col + 1] = '1';
+      board[row][col + 2] = '1';
+    }
+  }
   if (
     ((color === 'w' && castling.includes('Q')) || (color === 'b' && castling.includes('q'))) &&
     board[row][col - 1] === '1' &&
     board[row][col - 2] === '1' &&
     board[row][col - 3] === '1'
-  )
-    possibleMoves.push([row, col - 2, col - 1, 0]);
+  ) {
+    board[row][col - 1] = color === 'w' ? 'K' : 'k';
+    board[row][col - 2] = color === 'w' ? 'K' : 'k';
+    board[row][col - 3] = color === 'w' ? 'K' : 'k';
+    if (isCheck(board, findPositionOf(board, color === 'w' ? 'K' : 'k'), findAllEnemyPieces(board, color))) {
+      possibleMoves.push([row, col - 2, col - 1, 0]);
+      board[row][col - 1] = '1';
+      board[row][col - 2] = '1';
+      board[row][col - 3] = '1';
+    }
+  }
 
   return removeDiscoveredChecks(possibleMoves, row, col, board, color);
 }

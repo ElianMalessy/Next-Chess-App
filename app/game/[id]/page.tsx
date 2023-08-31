@@ -23,6 +23,7 @@ export default function Game({params}: {params: {id: string}}) {
       if (!snapshot.exists()) {
         set(dbRef, {
           checkmate: false,
+          stalemate: false,
           FEN: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR',
           turn: 'w',
           castling: 'KQkq',

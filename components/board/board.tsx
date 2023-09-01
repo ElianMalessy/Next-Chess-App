@@ -3,16 +3,14 @@ import {useEffect, useMemo, useRef} from 'react';
 
 import Piece from './piece';
 import classes from './board.module.css';
-import useStateStore from '@/hooks/useStateStore';
+import useGameStore from '@/hooks/useStateStore';
 
 export default function Board() {
-  const {playerColor, FEN, castling} = useStateStore((state) => state);
+  const {playerColor, FEN} = useGameStore((state) => state);
   useEffect(() => {
-    useStateStore.persist.rehydrate();
+    useGameStore.persist.rehydrate();
   }, []);
-  useEffect(() => {
-    console.log(castling);
-  }, [castling]);
+
   const boardFiller = useMemo(() => {
     const tempBoardFiller: React.JSX.Element[] = [];
     // go backwards

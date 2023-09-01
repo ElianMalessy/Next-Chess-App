@@ -1,6 +1,6 @@
 import findPositionOf, {findAllEnemyPieces, getColor} from './utilityFunctions';
 
-export default function isCheckmate(board: string[][], playerColor: string): boolean {
+export default function isCheckmate(board: string[][], playerColor: string): boolean | string {
   // if there are checking pieces, then that means that the move that this player makes has to block those checking pieces
   // use isCheck on all of the possibilities, if its a bishop for example, that means that the move either has to be the king moving out of the way
   // (that can be true for all of them, as long as that next position doesnt return a true in isCheck()), or it can be a piece moving into that diag
@@ -21,12 +21,9 @@ export default function isCheckmate(board: string[][], playerColor: string): boo
       tempPossibleSquares.push([potentialCheckingPiece[0], potentialCheckingPiece[1]]);
       checkingPieces.push([potentialCheckingPiece[0], potentialCheckingPiece[1]]);
     }
-
-    // can capture the checking piece to stop the check
   });
+  if (checkingPieces.length === 0) return false; // no checks found
 
-  // console.log(checkingPieces);
-  if (checkingPieces.length === 0) return false;
   for (let i = 0; i < friendlyPieces.length; i++) {
     // with the possible squares where pieces must go to protect the king, check every friendly piece and see if they can go to said squares
     // if a piece going to this square triggers a discovered check, its not a possible move
@@ -37,13 +34,46 @@ export default function isCheckmate(board: string[][], playerColor: string): boo
         board
       );
       // if piece can go there AND it doesn't trigger a discovered check
-      if (arrayOfAttack && arrayOfAttack.length > 0 && !isCheck(board, otherKingPosition, checkingPieces)) return false;
+      if (arrayOfAttack && arrayOfAttack.length > 0) {
+        const piece = board[friendlyPieces[i][0]][friendlyPieces[i][1]];
+        const square = board[tempPossibleSquares[j][0]][tempPossibleSquares[j][1]];
+        board[friendlyPieces[i][0]][friendlyPieces[i][1]] = '1';
+        board[tempPossibleSquares[j][0]][tempPossibleSquares[j][1]] = piece;
+
+        for (let k = 0; k < checkingPieces.length; k++) {
+          if (
+            checkingPieces[k][0] === tempPossibleSquares[j][0] &&
+            checkingPieces[k][1] === tempPossibleSquares[j][1]
+          ) {
+            checkingPieces.splice(k);
+            break;
+          }
+        }
+
+        // console.log(JSON.parse(JSON.stringify(board)), otherKingPosition, checkingPiecesCopy);
+        if (
+          !isCheck(
+            JSON.parse(JSON.stringify(board)),
+            findPositionOf(board, playerColor === 'w' ? 'k' : 'K'),
+            checkingPieces
+          )
+        ) {
+          board[tempPossibleSquares[j][0]][tempPossibleSquares[j][1]] = square;
+          board[friendlyPieces[i][0]][friendlyPieces[i][1]] = piece;
+          return 'check';
+        }
+
+        board[tempPossibleSquares[j][0]][tempPossibleSquares[j][1]] = square;
+        board[friendlyPieces[i][0]][friendlyPieces[i][1]] = piece;
+      }
     }
   }
   return true;
 }
 
 function isCheck(board: string[][], kingPosition: number[], potentialCheckingPieces: number[][]) {
+  // if (board[kingPosition[0]][kingPosition[1]] === 'k') console.log(board);
+
   for (let i = 0; i < potentialCheckingPieces.length; i++) {
     if (
       arrayOfAttackOnDestination[board[potentialCheckingPieces[i][0]][potentialCheckingPieces[i][1]].toLowerCase()](
@@ -51,8 +81,10 @@ function isCheck(board: string[][], kingPosition: number[], potentialCheckingPie
         potentialCheckingPieces[i],
         board
       )
-    )
+    ) {
+      // if (board[kingPosition[0]][kingPosition[1]] === 'k') console.log(board);
       return true;
+    }
   }
   return false;
 }
@@ -76,7 +108,7 @@ export function isStalemate(board: string[][], playerColor: string, enPassentSqu
 }
 
 function movePiecesDiag(destination: number[], origin: number[], board: string[][]): number[][] | boolean {
-  const arrayOfAttack: number[][] = [];
+  const arrayOfAttack: number[][] = [destination];
 
   if (
     Math.abs(destination[0] - origin[0]) === Math.abs(destination[1] && origin[1]) &&
@@ -104,7 +136,7 @@ function movePiecesDiag(destination: number[], origin: number[], board: string[]
 }
 
 function movePiecesVertLat(destination: number[], origin: number[], board: string[][]): number[][] | boolean {
-  const arrayOfAttack: number[][] = [];
+  const arrayOfAttack: number[][] = [destination];
 
   if (destination[0] !== origin[0] && destination[1] !== origin[1])
     return false; // cant move both vert and lat at the same time
@@ -168,19 +200,26 @@ function removeDiscoveredChecks(
   playerColor: string
 ) {
   const possibleMoves: number[][] = [];
-  const kingPosition = findPositionOf(board, playerColor === 'w' ? 'K' : 'k');
-  const enemyPieces = findAllEnemyPieces(board, playerColor === 'w' ? 'b' : 'w');
 
-  tempPossibleMoves.forEach((move: number[]) => {
+  const piece = board[row][col];
+  for (let i = 0; i < tempPossibleMoves.length; i++) {
+    const move = tempPossibleMoves[i];
     const temp = board[move[0]][move[1]];
-    board[move[0]][move[1]] = board[row][col]; // scan just to see if the move will result in a discovered check
+    board[move[0]][move[1]] = piece;
     board[row][col] = '1';
-    if (!isCheck(board, kingPosition, enemyPieces)) {
+
+    if (
+      !isCheck(
+        JSON.parse(JSON.stringify(board)),
+        findPositionOf(JSON.parse(JSON.stringify(board)), playerColor === 'w' ? 'K' : 'k'),
+        findAllEnemyPieces(JSON.parse(JSON.stringify(board)), playerColor === 'w' ? 'b' : 'w')
+      )
+    ) {
       possibleMoves.push(move);
     }
-    board[row][col] = board[move[0]][move[1]];
+    board[row][col] = piece;
     board[move[0]][move[1]] = temp;
-  });
+  }
   return possibleMoves;
 }
 
@@ -209,7 +248,6 @@ function getKingMoves(row: number, col: number, board: string[][], castling: str
       possibleMoves.push([newRow, newCol]);
     }
   }
-
   if (isCheck(board, findPositionOf(board, color === 'w' ? 'K' : 'k'), findAllEnemyPieces(board, color)))
     return removeDiscoveredChecks(possibleMoves, row, col, board, color); // can't castle if in check
 
@@ -417,7 +455,7 @@ export const arrayOfAttackOnDestination: any = {
       (Math.abs(destination[0] - origin[0]) === 2 && Math.abs(destination[1] - origin[1]) === 1) ||
       (Math.abs(destination[0] - origin[0]) === 1 && Math.abs(destination[1] - origin[1]) === 2)
     )
-      return [];
+      return [destination];
   },
   b: function Bishop(destination: number[], origin: number[], board: string[][]) {
     if (Math.abs(destination[0] - origin[0]) === Math.abs(destination[1] - origin[1])) {
@@ -425,7 +463,6 @@ export const arrayOfAttackOnDestination: any = {
     }
   },
   r: function Rook(destination: number[], origin: number[], board: string[][]) {
-    // console.log(destination, origin);
     if (destination[0] === origin[0] || destination[1] === origin[1]) {
       return movePiecesVertLat(destination, origin, board);
     }
@@ -439,12 +476,12 @@ export const arrayOfAttackOnDestination: any = {
     if (Math.abs(destination[0] - origin[0]) === Math.abs(destination[1] - origin[1]))
       return movePiecesDiag(destination, origin, board);
   },
-  k: function King(destination: number[], origin: number[]) {
+  k: function King(destination: number[], origin: number[], board: string[][]) {
     if (
       (Math.abs(destination[0] - origin[0]) === 1 || Math.abs(destination[0] - origin[0]) === 0) &&
       (Math.abs(destination[1] - origin[1]) === 1 || Math.abs(destination[1] - origin[1]) === 0)
     )
-      return [];
+      return [destination];
   },
   p: function Pawn(destination: number[], origin: number[], board: string[][]) {
     const color = getColor(board[origin[0]][origin[1]]);

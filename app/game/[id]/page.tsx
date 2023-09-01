@@ -2,7 +2,7 @@
 import {ref, get, set, DatabaseReference, update} from '@firebase/database';
 import {database} from '@/components/firebase';
 
-import useStateStore from '@/hooks/useStateStore';
+import useGameStore from '@/hooks/useStateStore';
 import Board from '@/components/board/board';
 import {useAuth} from '@/components/contexts/auth-provider';
 import {useEffect, useRef, createContext} from 'react';
@@ -11,7 +11,7 @@ export const DbRefContext = createContext({} as DatabaseReference);
 export default function Game({params}: {params: {id: string}}) {
   const auth = useAuth();
   const dbRef = ref(database, `${params.id}`);
-  const {FEN, playerColor, setTurn, setCastling, setEnPassent, setFENFromFirebase, setPlayerColor} = useStateStore(
+  const {FEN, playerColor, setTurn, setCastling, setEnPassent, setFENFromFirebase, setPlayerColor} = useGameStore(
     (state) => state
   );
 

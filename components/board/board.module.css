@@ -14,9 +14,22 @@
 .hint {
   background: radial-gradient(rgba(0, 0, 0, 0.25) 19%, rgba(0, 0, 0, 0) 20%);
 }
-
 .capture-hint {
   background: radial-gradient(transparent 0%, transparent 79%, rgba(0, 0, 0, 0.3) 80%);
+}
+
+.check {
+  background: radial-gradient(
+    ellipse at center,
+    rgb(255, 0, 0) 0%,
+    rgb(231, 0, 0) 25%,
+    rgba(169, 0, 0, 0) 89%,
+    rgba(158, 0, 0, 0) 100%
+  );
+  position: absolute;
+  height: 12.5%;
+  width: 12.5%;
+  z-index: 0;
 }
 
 .k_w,

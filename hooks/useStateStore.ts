@@ -2,13 +2,51 @@ import {create} from 'zustand';
 import {persist, devtools} from 'zustand/middleware';
 import {update, DatabaseReference} from '@firebase/database';
 
+interface EndState {
+  checkmate: boolean;
+  stalemate: boolean;
+
+  setCheckmate: (checkmate: boolean, dbRef: DatabaseReference | null) => void;
+  setStalemate: (stalemate: boolean, dbRef: DatabaseReference | null) => void;
+}
+const endStore = (set: any) => ({
+  checkmate: false,
+  stalemate: false,
+
+  setCheckmate: (checkmate: boolean, dbRef: DatabaseReference | null) => {
+    set((state: State) => ({
+      ...state,
+      checkmate: checkmate,
+    }));
+    if (dbRef && Object.keys(dbRef).length !== 0) {
+      update(dbRef, {
+        checkmate: checkmate,
+      });
+    }
+  },
+  setStalemate: (stalemate: boolean, dbRef: DatabaseReference | null) => {
+    set((state: State) => ({
+      ...state,
+      stalemate: stalemate,
+    }));
+    if (dbRef && Object.keys(dbRef).length !== 0) {
+      update(dbRef, {
+        stalemate: stalemate,
+      });
+    }
+  },
+});
+
+export const useEndStateStore = create<EndState>()(devtools(endStore));
+
 interface State {
   FEN: string;
-  playerColor: string;
   turn: string;
+  playerColor: string;
+  board: string[][];
   castling: string;
   enPassent: string;
-  board: string[][];
+  check: any;
 
   setFENFromFirebase: (FEN: string) => void;
   setFENFromBoard: (board: string[][], dbRef: DatabaseReference | null) => void;
@@ -17,13 +55,12 @@ interface State {
   setBoard: (board: string[][]) => void;
   setCastling: (castling: string, dbRef: DatabaseReference | null) => void;
   setEnPassent: (enPassent: string, dbRef: DatabaseReference | null) => void;
+  setCheck: (check: any, dbRef: DatabaseReference | null) => void;
 }
 const store = (set: any) => ({
   FEN: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR',
-  playerColor: 'default',
   turn: 'w',
-  castling: 'KQkq',
-  enPassent: '-',
+  playerColor: 'default',
   board: [
     ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
     ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'], // black
@@ -34,6 +71,9 @@ const store = (set: any) => ({
     ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'], // white
     ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'],
   ],
+  castling: 'KQkq',
+  enPassent: '-',
+  check: false,
 
   setFENFromFirebase: (FEN: string) => {
     const tempBoard: string[][] = [
@@ -137,15 +177,26 @@ const store = (set: any) => ({
       board: board,
     }));
   },
+  setCheck: (check: any, dbRef: DatabaseReference | null) => {
+    set((state: State) => ({
+      ...state,
+      check: check,
+    }));
+    if (dbRef && Object.keys(dbRef).length !== 0) {
+      update(dbRef, {
+        check: check,
+      });
+    }
+  },
 });
 
-const useStateStore = create<State>()(
+const useGameStore = create<State>()(
   devtools(
     persist(store, {
-      name: 'local-store',
+      name: 'game-store',
       skipHydration: true,
     })
   )
 );
 
-export default useStateStore;
+export default useGameStore;

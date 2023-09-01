@@ -1,17 +1,20 @@
 'use client';
 import Board from '@/components/board/board';
-import useStateStore from '@/hooks/useStateStore';
+import useGameStore from '@/hooks/useStateStore';
 import {useEffect} from 'react';
 
 export default function Home() {
-  const {setPlayerColor, setFENFromFirebase, setCastling, setEnPassent, setTurn} = useStateStore((state) => state);
+  const {setPlayerColor, setFENFromFirebase, setCastling, setEnPassent, setTurn, setCheck} = useGameStore(
+    (state) => state
+  );
   useEffect(() => {
     setPlayerColor('default');
     setFENFromFirebase('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR');
     setCastling('KQkq', null);
     setEnPassent('-', null);
     setTurn('w', null);
-  }, [setPlayerColor, setFENFromFirebase, setCastling, setEnPassent, setTurn]);
+    setCheck(false, null);
+  }, [setPlayerColor, setFENFromFirebase, setCastling, setEnPassent, setTurn, setCheck]);
   useEffect(() => {
     localStorage.removeItem('local-store');
   });

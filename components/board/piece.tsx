@@ -84,6 +84,7 @@ export default memo(function Piece({
           boardCopy[newPosition[2]][newPosition[1]] = '1'; // enPassent
         }
         if (newPosition.length === 4 && piece.toLowerCase() === 'p') {
+          console.log(newPosition);
           setEnPassent(
             String.fromCharCode(newPosition[3] + 'a'.charCodeAt(0)) + (8 - newPosition[2]).toString(),
             dbRef
@@ -107,6 +108,7 @@ export default memo(function Piece({
         } else if (checkStatus) {
           setPlayerColor('');
           setCheckmate(true, dbRef);
+          console.log('checkmate');
         } else {
           setCheck(false, dbRef);
         }

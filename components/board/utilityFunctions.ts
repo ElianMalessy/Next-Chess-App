@@ -9,7 +9,7 @@ export default function findPositionOf(board: string[][], target: string): numbe
   return [];
 }
 
-export function findAllEnemyPieces(board: string[][], enemyColor: string): any[][] {
+export function findAllPieces(board: string[][], enemyColor: string): any[][] {
   const allPieces: any[][] = [];
   for (let i = 0; i < 8; i++) {
     for (let j = 0; j < 8; j++) {

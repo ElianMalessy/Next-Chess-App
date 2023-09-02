@@ -80,11 +80,11 @@ export default memo(function Piece({
         if (piece === 'p' && color === 'b' && newPosition[0] === 7) board[newPosition[0]][newPosition[1]] = 'q';
         else if (piece === 'p' && color === 'w' && newPosition[0] === 0) board[newPosition[0]][newPosition[1]] = 'Q';
 
+        let tempEnPassent = '-';
         if (newPosition.length === 3) {
           boardCopy[newPosition[2]][newPosition[1]] = '1'; // enPassent
-        }
-        if (newPosition.length === 4 && piece.toLowerCase() === 'p') {
-          console.log(newPosition);
+        } else if (newPosition.length === 4 && piece.toLowerCase() === 'p') {
+          tempEnPassent = String.fromCharCode(newPosition[3] + 'a'.charCodeAt(0)) + (8 - newPosition[2]).toString();
           setEnPassent(
             String.fromCharCode(newPosition[3] + 'a'.charCodeAt(0)) + (8 - newPosition[2]).toString(),
             dbRef
@@ -97,16 +97,17 @@ export default memo(function Piece({
           boardCopy[newPosition[0]][newPosition[3]] = '1';
         }
 
-        if (isStalemate(board, getColor(boardCopy[newPosition[0]][newPosition[1]]), enPassent)) {
+        if (isStalemate(board, getColor(boardCopy[newPosition[0]][newPosition[1]]), tempEnPassent)) {
           setPlayerColor('');
           setStalemate(true, dbRef);
         }
-
-        const checkStatus = isCheckmate(board, getColor(boardCopy[newPosition[0]][newPosition[1]]));
-        if (checkStatus && checkStatus === 'check') {
-          setCheck(findPositionOf(board, playerColor === 'w' ? 'K' : 'k'), dbRef);
-        } else if (checkStatus) {
-          setPlayerColor('');
+        const checkStatus = isCheckmate(board, getColor(boardCopy[newPosition[0]][newPosition[1]]), tempEnPassent);
+        if (checkStatus) {
+          setCheck(
+            findPositionOf(board, getColor(boardCopy[newPosition[0]][newPosition[1]]) === 'w' ? 'k' : 'K'),
+            dbRef
+          );
+          if (checkStatus !== 'check') setPlayerColor('');
           setCheckmate(true, dbRef);
           console.log('checkmate');
         } else {

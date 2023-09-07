@@ -107,9 +107,11 @@ export default memo(function Piece({
             findPositionOf(board, getColor(boardCopy[newPosition[0]][newPosition[1]]) === 'w' ? 'k' : 'K'),
             dbRef
           );
-          if (checkStatus !== 'check') setPlayerColor('');
-          setCheckmate(true, dbRef);
-          console.log('checkmate');
+          if (checkStatus !== 'check') {
+            setPlayerColor('');
+            setCheckmate(true, dbRef);
+            console.log('checkmate');
+          }
         } else {
           setCheck(false, dbRef);
         }

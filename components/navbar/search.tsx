@@ -16,7 +16,7 @@ export function Search() {
   return (
     <div className='flex items-center'>
       <motion.div initial={{x: 0}} animate={clicked ? 'animate' : ''} exit={{x: 0}} variants={glassVariants}>
-        <MagnifyingGlassIcon onClick={() => setClicked((c) => !c)} className='h-[1.2rem] w-[1.2rem]' />
+        <MagnifyingGlassIcon onClick={() => setClicked((c) => !c)} className='h-[1.7rem] w-[1.7rem]' />
       </motion.div>
       <AnimatePresence>
         {clicked && (

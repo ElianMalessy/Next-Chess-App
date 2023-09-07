@@ -114,26 +114,19 @@ export function isStalemate(board: string[][], playerColor: string, enPassent: s
 function movePiecesDiag(destination: number[], origin: number[], board: string[][]): number[][] | boolean {
   const arrayOfAttack: number[][] = [];
 
-  if (
-    Math.abs(destination[0] - origin[0]) === Math.abs(destination[1] && origin[1]) &&
-    (destination[0] === origin[0] || destination[1] === origin[1])
-  )
-    return false; // has to be diagonal
-  else if (Math.abs(destination[0] - origin[0]) === 1) {
+  if (Math.abs(destination[0] - origin[0]) === 1) {
     return arrayOfAttack;
   } // dist = 1
 
   if (destination[0] - origin[0] > 0) {
     for (let i = 1; i < destination[0] - origin[0]; i++) {
-      let num;
-      destination[1] - origin[1] > 0 ? (num = origin[1] + i) : (num = origin[1] - i);
+      const num = destination[1] - origin[1] > 0 ? origin[1] + i : origin[1] - i;
       arrayOfAttack.push([origin[0] + i, num]);
       if (board[origin[0] + i][num] !== '1') return false;
     }
   } else {
     for (let i = -1; i > destination[0] - origin[0]; i--) {
-      let num;
-      destination[1] - origin[1] > 0 ? (num = origin[1] + i) : (num = origin[1] - i);
+      const num = destination[1] - origin[1] > 0 ? origin[1] - i : origin[1] + i;
       arrayOfAttack.push([origin[0] + i, num]);
       if (board[origin[0] + i][num] !== '1') return false;
     }
@@ -143,7 +136,6 @@ function movePiecesDiag(destination: number[], origin: number[], board: string[]
 
 function movePiecesVertLat(destination: number[], origin: number[], board: string[][]): number[][] | boolean {
   const arrayOfAttack: number[][] = [];
-
   if (destination[0] !== origin[0] && destination[1] !== origin[1])
     return false; // cant move both vert and lat at the same time
   else if (
@@ -152,28 +144,20 @@ function movePiecesVertLat(destination: number[], origin: number[], board: strin
   ) {
     return arrayOfAttack; // distance = 1 means nothing can be in the way of the move except the destination itself
   }
-  // horizontal movement
-  else if (destination[1] > origin[1]) {
-    for (let i = 1; i < destination[1] - origin[1]; i++) {
-      if (board[origin[0]][origin[1] + i] !== '1') return false;
-      arrayOfAttack.push([destination[0], destination[1] + i]);
-    }
-  } else if (destination[1] < origin[1]) {
-    for (let i = -1; i > destination[1] - origin[1]; i--) {
-      if (board[origin[0]][origin[1] + i] !== '1') return false;
-      arrayOfAttack.push([origin[0], origin[1] + i]);
+  // vertical movement
+  if (Math.abs(destination[0] - origin[0]) > 0) {
+    for (let i = 1, j = -1; i < Math.abs(destination[0] - origin[0]); i++, j--) {
+      const index = destination[0] > origin[0] ? i : j;
+      if (board[origin[0] + index][origin[1]] !== '1') return false;
+      arrayOfAttack.push([origin[0] + index, origin[1]]);
     }
   }
-  // vertical movement
-  else if (destination[0] > origin[0]) {
-    for (let i = 1; i < destination[0] - origin[0]; i++) {
-      if (board[origin[0] + i][origin[1]] !== '1') return false;
-      arrayOfAttack.push([origin[0] + i, origin[1]]);
-    }
-  } else if (destination[0] < origin[0]) {
-    for (let i = -1; i > destination[0] - origin[0]; i--) {
-      if (board[origin[0] + i][origin[1]] !== '1') return false;
-      arrayOfAttack.push([origin[0] + i, origin[1]]);
+  // horizontal movement
+  else if (Math.abs(destination[1] - origin[1]) > 0) {
+    for (let i = 1, j = -1; i < Math.abs(destination[1] - origin[1]); i++, j--) {
+      const index = destination[1] > origin[1] ? i : j;
+      if (board[origin[0]][origin[1] + index] !== '1') return false;
+      arrayOfAttack.push([origin[0], origin[1] + index]);
     }
   }
   return arrayOfAttack;
@@ -211,8 +195,6 @@ function removeDiscoveredChecks(
   let kingPosition = findPositionOf(JSON.parse(JSON.stringify(board)), playerColor === 'w' ? 'K' : 'k');
 
   for (let i = 0; i < tempPossibleMoves.length; i++) {
-    // ADD ENPASSENT SHIT LIKE I DID IN CHECKMATE
-
     const move = tempPossibleMoves[i];
     const temp = board[move[0]][move[1]];
     board[move[0]][move[1]] = piece;
@@ -305,8 +287,10 @@ function getWhitePawnMoves(row: number, col: number, board: string[][], enPassen
   const possibleMoves: number[][] = [];
   if (row === 0) return possibleMoves;
 
-  if (board[row - 1][col] === '1') possibleMoves.push([row - 1, col]);
-  if (row === 6 && board[row - 2][col] === '1') possibleMoves.push([row - 2, col, row - 1, col]); // setEnPassent Square
+  if (row > 0 && board[row - 1][col] === '1') {
+    possibleMoves.push([row - 1, col]);
+    if (row === 6 && board[row - 2][col] === '1') possibleMoves.push([row - 2, col, row - 1, col]); // setEnPassent Square
+  }
 
   if (col > 0 && board[row - 1][col - 1] !== '1' && getColor(board[row - 1][col - 1]) === 'b')
     possibleMoves.push([row - 1, col - 1]);
@@ -322,8 +306,10 @@ function getWhitePawnMoves(row: number, col: number, board: string[][], enPassen
 
 function getBlackPawnMoves(row: number, col: number, board: string[][], enPassent: string) {
   const possibleMoves: number[][] = [];
-  if (row < 7 && board[row + 1][col] === '1') possibleMoves.push([row + 1, col]);
-  if (row === 1 && board[row + 2][col] === '1') possibleMoves.push([row + 2, col, row + 1, col]); // setEnPassent Square
+  if (row < 7 && board[row + 1][col] === '1') {
+    possibleMoves.push([row + 1, col]);
+    if (row === 1 && board[row + 2][col] === '1') possibleMoves.push([row + 2, col, row + 1, col]); // setEnPassent Square
+  }
 
   if (col < 7 && board[row + 1][col + 1] !== '1' && getColor(board[row + 1][col + 1]) === 'w')
     possibleMoves.push([row + 1, col + 1]);

@@ -22,7 +22,8 @@ export default memo(function Piece({
 }) {
   const divRef: any = useRef();
   const {width} = useWindowDimensions();
-  const scale = 64 > width / 8 ? width / 8 : 64;
+  const scale = 70 > (0.95 * width) / 8 ? (0.95 * width) / 8 : 70;
+  // console.log(scale, width);
   const [zIndex, setZIndex] = useState(1);
   const dbRef = useContext(DbRefContext);
 
@@ -40,8 +41,8 @@ export default memo(function Piece({
     setEnPassent,
     setPlayerColor,
     setCheck,
-  } = useGameStore((state) => state);
-  const {setCheckmate, setStalemate} = useEndStateStore((state) => state);
+  } = useGameStore((state: any) => state);
+  const {setCheckmate, setStalemate, capturedPieces, setCapturedPieces} = useEndStateStore((state: any) => state);
 
   const [piecePosition, setPiecePosition] = useState({x: column, y: row});
   const [isDragging, setIsDragging] = useState(false);
@@ -70,6 +71,13 @@ export default memo(function Piece({
         setPiecePosition({x: newPosition[1], y: newPosition[0]});
         setSquares([]);
         setZIndex(1);
+        if (
+          board[newPosition[0]][newPosition[1]] !== '1' &&
+          color !== getColor(board[newPosition[0]][newPosition[1]])
+        ) {
+          capturedPieces.push(board[newPosition[0]][newPosition[1]]);
+          setCapturedPieces(capturedPieces, dbRef);
+        }
 
         const boardCopy = board;
         boardCopy[newPosition[0]][newPosition[1]] =
@@ -82,6 +90,8 @@ export default memo(function Piece({
 
         let tempEnPassent = '-';
         if (newPosition.length === 3) {
+          capturedPieces.push(board[newPosition[2]][newPosition[1]]);
+          setCapturedPieces(capturedPieces, dbRef);
           boardCopy[newPosition[2]][newPosition[1]] = '1'; // enPassent
         } else if (newPosition.length === 4 && piece.toLowerCase() === 'p') {
           tempEnPassent = String.fromCharCode(newPosition[3] + 'a'.charCodeAt(0)) + (8 - newPosition[2]).toString();
@@ -186,6 +196,8 @@ export default memo(function Piece({
     setCheck,
     setCheckmate,
     setStalemate,
+    setCapturedPieces,
+    capturedPieces,
   ]);
 
   const handleMouseMove = useCallback(

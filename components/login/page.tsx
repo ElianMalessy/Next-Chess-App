@@ -2,7 +2,6 @@
 import {useState} from 'react';
 import NextLink from 'next/link';
 import {useRouter} from 'next/navigation';
-import {FormControl, FormLabel, Input, Card, Container, Button, Link, Box} from '@chakra-ui/react';
 
 import {useAuth} from '../contexts/auth-provider';
 //import Background from './Background';
@@ -25,11 +24,11 @@ export default function Login() {
           >
             <FormControl>
               <FormLabel>Email address</FormLabel>
-              <Input paddingLeft={2} type='email' onChange={(e) => setEmail(e.target.value)} autoComplete='off' />
+              <Input paddingLeft={2} type='email' onChange={(e: any) => setEmail(e.target.value)} autoComplete='off' />
             </FormControl>
             <FormControl mt={3}>
               <FormLabel>Password</FormLabel>
-              <Input type='password' size='lg' onChange={(e) => setPassword(e.target.value)} autoComplete='off' />
+              <Input type='password' size='lg' onChange={(e: any) => setPassword(e.target.value)} autoComplete='off' />
             </FormControl>
             <Box>
               <Link as={NextLink} href='/' color={'blue.400'} fontSize='xs'>

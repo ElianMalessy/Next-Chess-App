@@ -8,15 +8,15 @@ import {Search} from './search';
 export function Navbar() {
   return (
     <div className='border-b fixed'>
-      <nav className='flex h-16 items-center justify-between px-3 bg-navBackground' style={{minWidth: '100vw'}}>
+      <nav className='flex h-16 w-screen items-center justify-between px-3 bg-navBackground'>
         <Link href='/examples/dashboard' className='font-medium transition-colors hover:text-primary text-lg'>
           WeChess
         </Link>
         <div className='flex space-x-2 lg:space-x-3 items-center'>
           <Search />
-          <BellIcon className='h-[1.5rem] w-[1.5rem]' />
-          <Profile />
+          {/* <BellIcon className='h-[1.5rem] w-[1.5rem]' /> */}
           <ThemeToggle />
+          <Profile />
         </div>
       </nav>
     </div>

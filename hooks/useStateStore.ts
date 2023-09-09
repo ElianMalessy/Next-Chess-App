@@ -5,16 +5,19 @@ import {update, DatabaseReference} from '@firebase/database';
 interface EndState {
   checkmate: boolean;
   stalemate: boolean;
+  capturedPieces: string[];
 
   setCheckmate: (checkmate: boolean, dbRef: DatabaseReference | null) => void;
   setStalemate: (stalemate: boolean, dbRef: DatabaseReference | null) => void;
+  setCapturedPieces: (capturedPieces: string[], dbRef: DatabaseReference | null) => void;
 }
 const endStore = (set: any) => ({
   checkmate: false,
   stalemate: false,
+  capturedPieces: ['P', 'p'],
 
   setCheckmate: (checkmate: boolean, dbRef: DatabaseReference | null) => {
-    set((state: State) => ({
+    set((state: GameState) => ({
       ...state,
       checkmate: checkmate,
     }));
@@ -25,7 +28,7 @@ const endStore = (set: any) => ({
     }
   },
   setStalemate: (stalemate: boolean, dbRef: DatabaseReference | null) => {
-    set((state: State) => ({
+    set((state: GameState) => ({
       ...state,
       stalemate: stalemate,
     }));
@@ -35,11 +38,22 @@ const endStore = (set: any) => ({
       });
     }
   },
+  setCapturedPieces: (capturedPiece: string[], dbRef: DatabaseReference | null) => {
+    set((state: GameState) => ({
+      ...state,
+      capturedPieces: capturedPiece,
+    }));
+    if (dbRef && Object.keys(dbRef).length !== 0) {
+      update(dbRef, {
+        capturedPieces: capturedPiece,
+      });
+    }
+  },
 });
 
 export const useEndStateStore = create<EndState>()(devtools(endStore));
 
-interface State {
+interface GameState {
   FEN: string;
   turn: string;
   playerColor: string;
@@ -57,6 +71,7 @@ interface State {
   setEnPassent: (enPassent: string, dbRef: DatabaseReference | null) => void;
   setCheck: (check: any, dbRef: DatabaseReference | null) => void;
 }
+
 const store = (set: any) => ({
   FEN: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR',
   turn: 'w',
@@ -101,7 +116,7 @@ const store = (set: any) => ({
       }
       tempBoard[row][column] = FEN[i];
     }
-    set((state: State) => ({
+    set((state: GameState) => ({
       ...state,
       FEN: FEN,
       board: tempBoard,
@@ -109,7 +124,7 @@ const store = (set: any) => ({
   },
   setFENFromBoard: (board: string[][], dbRef: DatabaseReference | null) => {
     let tempFEN = '';
-    set((state: State) => {
+    set((state: GameState) => {
       for (let i = 0, spaces = 0, index = 0; i < 8; i++, index++) {
         for (let j = 0; j < 8; j++, index++) {
           if (board[i][j] === '1') spaces++;
@@ -132,7 +147,7 @@ const store = (set: any) => ({
   },
 
   setTurn: (turn: string, dbRef: DatabaseReference | null) => {
-    set((state: State) => ({
+    set((state: GameState) => ({
       ...state,
       turn: turn,
     }));
@@ -143,7 +158,7 @@ const store = (set: any) => ({
     }
   },
   setCastling: (castling: string, dbRef: DatabaseReference | null) => {
-    set((state: State) => ({
+    set((state: GameState) => ({
       ...state,
       castling: castling,
     }));
@@ -154,7 +169,7 @@ const store = (set: any) => ({
     }
   },
   setEnPassent: (enPassent: string, dbRef: DatabaseReference | null) => {
-    set((state: State) => ({
+    set((state: GameState) => ({
       ...state,
       enPassent: enPassent,
     }));
@@ -166,19 +181,19 @@ const store = (set: any) => ({
   },
 
   setPlayerColor: (playerColor: string) => {
-    set((state: State) => ({
+    set((state: GameState) => ({
       ...state,
       playerColor: playerColor,
     }));
   },
   setBoard: (board: string[][]) => {
-    set((state: State) => ({
+    set((state: GameState) => ({
       ...state,
       board: board,
     }));
   },
   setCheck: (check: any, dbRef: DatabaseReference | null) => {
-    set((state: State) => ({
+    set((state: GameState) => ({
       ...state,
       check: check,
     }));
@@ -190,7 +205,7 @@ const store = (set: any) => ({
   },
 });
 
-const useGameStore = create<State>()(
+const useGameStore = create<GameState>()(
   devtools(
     persist(store, {
       name: 'game-store',

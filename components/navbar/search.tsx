@@ -14,7 +14,7 @@ export function Search() {
     animate: {width: 200, scale: 1},
   };
   return (
-    <div className='flex items-center'>
+    <div className='flex items-center cursor-pointer'>
       <motion.div initial={{x: 0}} animate={clicked ? 'animate' : ''} exit={{x: 0}} variants={glassVariants}>
         <MagnifyingGlassIcon onClick={() => setClicked((c) => !c)} className='h-[1.7rem] w-[1.7rem]' />
       </motion.div>

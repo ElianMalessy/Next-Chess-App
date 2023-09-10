@@ -1,3 +1,6 @@
+'use client';
+import {useRouter} from 'next/navigation';
+
 import {AvatarIcon, GearIcon, FaceIcon, EnvelopeClosedIcon, ExitIcon} from '@radix-ui/react-icons';
 import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar';
 import {
@@ -11,8 +14,12 @@ import {
   DropdownMenuShortcut,
 } from '@/components/ui/dropdown-menu';
 import {Button} from '@/components/ui/button';
+import {useAuth} from '@/components/contexts/auth-provider';
 
 export default function Profile() {
+  const {logout} = useAuth();
+  const router = useRouter();
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -61,7 +68,15 @@ export default function Profile() {
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={async () => {
+            await logout();
+            await fetch('/api/logout', {
+              method: 'GET',
+            });
+            router.push('/login');
+          }}
+        >
           Log out
           <DropdownMenuShortcut>
             <ExitIcon />

@@ -3,7 +3,7 @@ import {Form, Button, Card, Alert} from 'react-bootstrap';
 import {useAuth} from '../contexts/auth-provider';
 import {Link} from 'react-router-dom';
 
-export default function ForgotPassword() {
+export default function ChangePassword() {
   const emailRef = useRef();
   const {resetPassword} = useAuth();
   const [error, setError] = useState('');

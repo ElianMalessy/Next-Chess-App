@@ -1,6 +1,6 @@
 'use client';
 import {ref, get, set, DatabaseReference, update} from '@firebase/database';
-import {database} from '@/components/firebase';
+import {realtimeDB} from '@/components/firebase';
 
 import useGameStore from '@/hooks/useStateStore';
 import Board from '@/components/board/board';
@@ -10,7 +10,7 @@ import {useEffect, useRef, createContext} from 'react';
 export const DbRefContext = createContext({} as DatabaseReference);
 export default function Game({params}: {params: {id: string}}) {
   const auth = useAuth();
-  const dbRef = ref(database, `${params.id}`);
+  const dbRef = ref(realtimeDB, `${params.id}`);
   const {FEN, playerColor, setTurn, setCastling, setEnPassent, setFENFromFirebase, setPlayerColor} = useGameStore(
     (state) => state
   );

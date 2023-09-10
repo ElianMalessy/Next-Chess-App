@@ -1,26 +1,29 @@
-import type {NextRequest} from 'next/server';
+import {NextRequest} from 'next/server';
 import {NextResponse} from 'next/server';
 import {authentication} from 'next-firebase-auth-edge/lib/next/middleware';
-import {serverConfig} from './config/firebase-config';
+import {serverConfig} from './firebase-config';
 
+const PUBLIC_PATHS = ['/register', '/login', '/reset-password'];
 function redirectToLogin(request: NextRequest) {
-  if (request.nextUrl.pathname !== '/update-profile') {
+  if (PUBLIC_PATHS.includes(request.nextUrl.pathname)) {
     return NextResponse.next();
   }
 
   const url = request.nextUrl.clone();
   url.pathname = '/login';
   url.search = `redirect=${request.nextUrl.pathname}`;
+
   return NextResponse.redirect(url);
 }
 function redirectToHome(request: NextRequest) {
-  if (!request.nextUrl.pathname.startsWith('/login')) {
+  if (!PUBLIC_PATHS.includes(request.nextUrl.pathname)) {
     return NextResponse.next();
   }
 
   const url = request.nextUrl.clone();
   url.pathname = '/';
   url.search = `redirect=${request.nextUrl.pathname}`;
+
   return NextResponse.redirect(url);
 }
 

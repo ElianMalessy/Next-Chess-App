@@ -1,6 +1,7 @@
 import {initializeApp, getApp, getApps} from '@firebase/app';
 import {getAuth} from '@firebase/auth';
 import {getDatabase} from '@firebase/database';
+import {getFirestore} from '@firebase/firestore';
 
 const app = !getApps().length
   ? initializeApp({
@@ -14,6 +15,9 @@ const app = !getApps().length
     })
   : getApp();
 
-export const database = getDatabase(app, process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL);
+export const realtimeDB = getDatabase(app, process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL);
+export const firestore = getFirestore(app);
 export const auth = getAuth(app);
+auth.useDeviceLanguage();
+
 export default app;

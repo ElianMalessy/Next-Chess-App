@@ -1,5 +1,5 @@
 'use client';
-import {useEffect, useState, useContext, createContext, startTransition, useRef} from 'react';
+import {useEffect, useState, useContext, createContext} from 'react';
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -12,6 +12,7 @@ import {
   updateProfile,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
 } from '@firebase/auth';
 import type {User as FirebaseUser} from '@firebase/auth';
 
@@ -42,14 +43,15 @@ export function AuthProvider({children}: any) {
 
   function googleSignIn() {
     const provider = new GoogleAuthProvider();
-    return signInWithPopup(auth, provider);
+    // return signInWithPopup(auth, provider);
+    return signInWithRedirect(auth, provider);
   }
 
   function signup(email: string, password: string) {
     return createUserWithEmailAndPassword(auth, email, password);
   }
 
-  function login(email: string, password: string) {
+  async function login(email: string, password: string) {
     return signInWithEmailAndPassword(auth, email, password);
   }
 
@@ -88,12 +90,9 @@ export function AuthProvider({children}: any) {
       }
 
       if (!firebaseUser) {
-        startTransition(() => {
-          setCurrentUser(null);
-        });
+        setCurrentUser(null);
         return;
       }
-
       const tokenResult = await firebaseUser.getIdTokenResult();
       // Sets authentication cookies
       await fetch('/api/login', {
@@ -102,9 +101,7 @@ export function AuthProvider({children}: any) {
           Authorization: `Bearer ${tokenResult.token}`,
         },
       });
-      startTransition(() => {
-        setCurrentUser(firebaseUser);
-      });
+      setCurrentUser(firebaseUser);
     }
     async function registerChangeListener() {
       return onIdTokenChanged(auth, handleIdTokenChanged);

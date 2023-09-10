@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 import ThemeToggle from './theme-toggle';
-import Profile from './profile/profile-image';
+import Profile from './profile/profile';
 import {BellIcon} from '@radix-ui/react-icons';
 import {Search} from './search';
 

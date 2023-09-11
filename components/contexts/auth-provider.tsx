@@ -12,12 +12,13 @@ import {
   updateProfile,
   GoogleAuthProvider,
   signInWithPopup,
-  signInWithRedirect,
+  getAdditionalUserInfo,
 } from '@firebase/auth';
-import type {User as FirebaseUser} from '@firebase/auth';
+import type {User as FirebaseUser, UserCredential} from '@firebase/auth';
+import {collection, doc, setDoc} from '@firebase/firestore';
 
 import type {AuthMethods} from './types';
-import {auth} from '../firebase';
+import {auth, firestore} from '@/components/firebase';
 
 const defaultValue: AuthMethods = {
   currentUser: null,
@@ -40,23 +41,59 @@ export function useAuth() {
 
 export function AuthProvider({children}: any) {
   const [currentUser, setCurrentUser] = useState<any>();
-
-  function googleSignIn() {
+  async function setTokens(credential: UserCredential) {
+    const tokenResult = await credential?.user.getIdTokenResult();
+    // Sets authentication cookies
+    await fetch('/api/login', {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${tokenResult.token}`,
+      },
+    });
+    setCurrentUser(credential.user);
+  }
+  async function googleSignIn() {
     const provider = new GoogleAuthProvider();
     // return signInWithPopup(auth, provider);
-    return signInWithRedirect(auth, provider);
+    provider.addScope('profile');
+    provider.addScope('email');
+    const credential = await signInWithPopup(auth, provider);
+    await setTokens(credential);
+
+    if (getAdditionalUserInfo(credential)?.isNewUser) {
+      const usersRef = collection(firestore, 'users');
+      await setDoc(doc(usersRef, credential.user.email || undefined), {
+        name: credential.user.displayName,
+        profilePic: credential.user.photoURL,
+      });
+    }
+    return createContext;
   }
 
-  function signup(email: string, password: string) {
-    return createUserWithEmailAndPassword(auth, email, password);
+  async function signup(email: string, password: string) {
+    const credential = await createUserWithEmailAndPassword(auth, email, password);
+    await setTokens(credential);
+
+    const usersRef = collection(firestore, 'users');
+    await setDoc(doc(usersRef, credential.user.email || undefined), {
+      name: credential.user.displayName,
+      profilePic: credential.user.photoURL,
+    });
+
+    return credential;
   }
 
   async function login(email: string, password: string) {
-    return signInWithEmailAndPassword(auth, email, password);
+    const credential = await signInWithEmailAndPassword(auth, email, password);
+    await setTokens(credential);
+    return credential;
   }
 
-  function logout() {
-    return signOut(auth);
+  async function logout() {
+    await signOut(auth);
+    await fetch('/api/logout', {
+      method: 'GET',
+    });
   }
 
   function resetPassword(email: string) {
@@ -64,7 +101,9 @@ export function AuthProvider({children}: any) {
   }
 
   async function anonSignup() {
-    await signInAnonymously(auth);
+    const credential = await signInAnonymously(auth);
+    await setTokens(credential);
+    return credential;
   }
 
   function updateUserPassword(password: string) {

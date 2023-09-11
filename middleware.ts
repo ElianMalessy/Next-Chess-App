@@ -2,6 +2,8 @@ import {NextRequest} from 'next/server';
 import {NextResponse} from 'next/server';
 import {authentication} from 'next-firebase-auth-edge/lib/next/middleware';
 import {serverConfig} from './firebase-config';
+import {getFirebaseAuth} from 'next-firebase-auth-edge/lib/auth';
+const {verifyIdToken} = getFirebaseAuth(serverConfig.serviceAccount, serverConfig.firebaseApiKey);
 
 const PUBLIC_PATHS = ['/register', '/login', '/reset-password'];
 function redirectToLogin(request: NextRequest) {
@@ -10,7 +12,6 @@ function redirectToLogin(request: NextRequest) {
   }
 
   const url = request.nextUrl.clone();
-  url.pathname = '/login';
   url.search = `redirect=${request.nextUrl.pathname}`;
 
   return NextResponse.redirect(url);

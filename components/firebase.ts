@@ -16,8 +16,8 @@ const app = !getApps().length
   : getApp();
 
 export const realtimeDB = getDatabase(app, process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL);
-export const firestore = getFirestore(app);
 export const auth = getAuth(app);
 auth.useDeviceLanguage();
+export const firestore = getFirestore(app);
 
 export default app;

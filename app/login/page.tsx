@@ -13,6 +13,7 @@ import {Button} from '@/components/ui/button';
 import {Separator} from '@/components/ui/separator';
 
 import {useAuth} from '@/components/contexts/auth-provider';
+// import {useAuthStore} from '@/hooks/useAuthStore';
 //import Background from './Background';
 
 const formSchema = z.object({
@@ -33,7 +34,7 @@ export default function Login() {
     },
   });
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    await login(values.email, values.password).catch((error) => {
+    await login(values.email, values.password).catch((error: any) => {
       console.log(Object.keys(error), error.name, error.code);
       setError(error.code);
       return;
@@ -41,7 +42,7 @@ export default function Login() {
     router.push('/');
   }
   return (
-    <div className='h-full w-full flex items-center justify-center'>
+    <main className='h-full w-full flex items-center justify-center p-2'>
       <Card className='p-5'>
         <CardHeader className='w-full'>
           <div className='w-full'>
@@ -124,6 +125,6 @@ export default function Login() {
           </div>
         </CardContent>
       </Card>
-    </div>
+    </main>
   );
 }

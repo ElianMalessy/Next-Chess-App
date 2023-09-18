@@ -5,14 +5,14 @@ export default function useWindowDimensions() {
 
   useEffect(() => {
     function handleResize(width: number, height: number) {
-      setWindowDimensions({width: width, height: height});
+      setWindowDimensions({width: width, height: width});
     }
-    handleResize(document.body.clientWidth, document.body.clientHeight);
+    handleResize(window.innerWidth, window.innerWidth);
 
     window.addEventListener('resize', () => {
-      handleResize(window.innerWidth, window.innerHeight);
+      handleResize(window.innerWidth, window.innerWidth);
     });
-    return () => window.removeEventListener('resize', () => handleResize(window.innerWidth, window.innerHeight));
+    return () => window.removeEventListener('resize', () => handleResize(window.innerWidth, window.innerWidth));
   }, []);
 
   return windowDimensions;

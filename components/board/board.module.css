@@ -1,8 +1,8 @@
 .board {
   background-image: url('https://lichess1.org/assets/_tPoiFY/images/board/svg/brown.svg');
-  height: min(560px, 95vw);
-  width: min(560px, 95vw);
-  position: relative;
+  height: 100%;
+  width: 100%;
+  /* position: absolu; */
 }
 .hint,
 .capture-hint {

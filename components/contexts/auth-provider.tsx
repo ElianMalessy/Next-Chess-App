@@ -39,8 +39,8 @@ export function useAuth() {
   return useContext(AuthContext);
 }
 
-export function AuthProvider({children}: any) {
-  const [currentUser, setCurrentUser] = useState<any>();
+export function AuthProvider({defaultUser, children}: {defaultUser: FirebaseUser | null; children: React.ReactNode}) {
+  const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(defaultUser);
   async function setTokens(credential: UserCredential) {
     const tokenResult = await credential?.user.getIdTokenResult();
     // Sets authentication cookies
@@ -54,20 +54,20 @@ export function AuthProvider({children}: any) {
   }
   async function googleSignIn() {
     const provider = new GoogleAuthProvider();
-    // return signInWithPopup(auth, provider);
     provider.addScope('profile');
     provider.addScope('email');
+
     const credential = await signInWithPopup(auth, provider);
     await setTokens(credential);
 
-    if (getAdditionalUserInfo(credential)?.isNewUser) {
+    if (getAdditionalUserInfo(credential)?.isNewUser && credential.user.email) {
       const usersRef = collection(firestore, 'users');
-      await setDoc(doc(usersRef, credential.user.email || undefined), {
+      await setDoc(doc(usersRef, credential.user.email), {
         name: credential.user.displayName,
         profilePic: credential.user.photoURL,
       });
     }
-    return createContext;
+    return credential;
   }
 
   async function signup(email: string, password: string) {
@@ -75,10 +75,12 @@ export function AuthProvider({children}: any) {
     await setTokens(credential);
 
     const usersRef = collection(firestore, 'users');
-    await setDoc(doc(usersRef, credential.user.email || undefined), {
-      name: credential.user.displayName,
-      profilePic: credential.user.photoURL,
-    });
+    if (credential.user.email) {
+      await setDoc(doc(usersRef, credential.user.email), {
+        name: credential.user.displayName,
+        profilePic: credential.user.photoURL,
+      });
+    }
 
     return credential;
   }
@@ -107,18 +109,25 @@ export function AuthProvider({children}: any) {
   }
 
   function updateUserPassword(password: string) {
+    if (!currentUser) return Promise.resolve();
     return updatePassword(currentUser, password);
   }
 
   function updateUsername(username: string) {
+    if (!currentUser) return Promise.resolve();
+
     return updateProfile(currentUser, {displayName: username});
   }
 
   function updateProfilePic(profilePic: string) {
+    if (!currentUser) return Promise.resolve();
+
     return updateProfile(currentUser, {photoURL: profilePic});
   }
 
   function deleteCurrentUser() {
+    if (!currentUser) return Promise.resolve();
+
     return deleteUser(currentUser);
   }
 
@@ -128,19 +137,7 @@ export function AuthProvider({children}: any) {
         return;
       }
 
-      if (!firebaseUser) {
-        setCurrentUser(null);
-        return;
-      }
-      const tokenResult = await firebaseUser.getIdTokenResult();
-      // Sets authentication cookies
-      await fetch('/api/login', {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${tokenResult.token}`,
-        },
-      });
-      setCurrentUser(firebaseUser);
+      firebaseUser ? setCurrentUser(firebaseUser) : setCurrentUser(null);
     }
     async function registerChangeListener() {
       return onIdTokenChanged(auth, handleIdTokenChanged);

@@ -1,4 +1,5 @@
 'use client';
+import Image from 'next/image';
 import {useRouter} from 'next/navigation';
 
 import {AvatarIcon, GearIcon, FaceIcon, EnvelopeClosedIcon, ExitIcon} from '@radix-ui/react-icons';
@@ -20,16 +21,20 @@ export default function Profile() {
   const {currentUser, logout} = useAuth();
   const router = useRouter();
 
+  const defaultImg =
+    'https://firebasestorage.googleapis.com/v0/b/wechess-2ecf9.appspot.com/o/default-profile-pic.svg?alt=media&token=cbd585f6-a638-4e25-a502-436d2109ed7a';
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant='ghost' className='relative h-11 w-11 rounded-full'>
           <Avatar className='h-11 w-11'>
-            <AvatarImage
-              src='https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Font_Awesome_5_solid_user-circle.svg/991px-Font_Awesome_5_solid_user-circle.svg.png'
-              alt='profile-picture'
+            <Image
+              src={currentUser?.photoURL || defaultImg}
+              alt='currentUser-profile-picture'
+              width={44}
+              height={44}
+              loading='lazy'
             />
-            <AvatarFallback>{currentUser?.displayName || 'WE'}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>

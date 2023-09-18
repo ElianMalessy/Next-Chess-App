@@ -2,8 +2,7 @@ import {NextRequest} from 'next/server';
 import {NextResponse} from 'next/server';
 import {authentication} from 'next-firebase-auth-edge/lib/next/middleware';
 import {serverConfig} from './firebase-config';
-import {getFirebaseAuth} from 'next-firebase-auth-edge/lib/auth';
-const {verifyIdToken} = getFirebaseAuth(serverConfig.serviceAccount, serverConfig.firebaseApiKey);
+import {cookies} from 'next/headers';
 
 const PUBLIC_PATHS = ['/register', '/login', '/reset-password'];
 function redirectToLogin(request: NextRequest) {
@@ -12,19 +11,20 @@ function redirectToLogin(request: NextRequest) {
   }
 
   const url = request.nextUrl.clone();
+  url.pathname = '/';
   url.search = `redirect=${request.nextUrl.pathname}`;
-
   return NextResponse.redirect(url);
 }
-function redirectToHome(request: NextRequest) {
+function redirectToHome(request: NextRequest, friends: any) {
   if (!PUBLIC_PATHS.includes(request.nextUrl.pathname)) {
-    return NextResponse.next();
+    const res = NextResponse.next();
+    if (friends) res.cookies.set('friends', JSON.stringify(friends));
+    return res;
   }
 
   const url = request.nextUrl.clone();
   url.pathname = '/';
   url.search = `redirect=${request.nextUrl.pathname}`;
-
   return NextResponse.redirect(url);
 }
 
@@ -32,7 +32,7 @@ export async function middleware(request: NextRequest) {
   return authentication(request, {
     loginPath: '/api/login',
     logoutPath: '/api/logout',
-    apiKey: serverConfig.firebaseApiKey,
+    apiKey: serverConfig.apiKey,
     cookieName: 'AuthToken',
     cookieSignatureKeys: ['secret1', 'secret2'],
     cookieSerializeOptions: {
@@ -46,8 +46,9 @@ export async function middleware(request: NextRequest) {
     handleInvalidToken: async () => {
       return redirectToLogin(request);
     },
-    handleValidToken: async ({token, decodedToken}: any) => {
-      return redirectToHome(request);
+    handleValidToken: async ({decodedToken}) => {
+      const friends = await fetch(`http://localhost:3000/api/friends/${decodedToken.email}`);
+      return redirectToHome(request, await friends.json());
     },
     handleError: async (error: any) => {
       console.error('Unhandled authentication error', {error});

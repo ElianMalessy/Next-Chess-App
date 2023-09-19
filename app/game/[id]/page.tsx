@@ -4,10 +4,10 @@ import {ref, get, set, DatabaseReference, update} from '@firebase/database';
 import {realtimeDB} from '@/components/firebase';
 
 import {useAuth} from '@/components/contexts/auth-provider';
-// import {useAuthStore} from '@/hooks/useAuthStore';
 import useGameStore from '@/hooks/useStateStore';
+
 import Board from '@/components/board/board';
-import {Navbar} from '@/components/navbar/navbar';
+import Navbar from '@/components/navbar/navbar';
 
 export const DbRefContext = createContext({} as DatabaseReference);
 export default function Game({params}: {params: {id: string}}) {

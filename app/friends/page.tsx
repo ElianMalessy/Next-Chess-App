@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import {Input} from '@/components/ui/input';
 
-import {Navbar} from '@/components/navbar/navbar';
+import Navbar from '@/components/navbar/navbar';
 import FriendsCard from './friends-card';
 import FriendLink from './friend-link';
 

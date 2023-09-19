@@ -1,9 +1,11 @@
 'use client';
 import {useEffect, useMemo, useRef} from 'react';
-import {twMerge} from 'tailwind-merge';
+import {cn} from '@/lib/utils';
+import {onValue, ref, push, set, child} from '@firebase/database';
 
 import Piece from './piece';
 import useGameStore from '@/hooks/useStateStore';
+
 import classes from './board.module.css';
 
 export default function Board() {
@@ -64,5 +66,5 @@ export default function Board() {
     return tempBoardFiller;
   }, [FEN, playerColor]);
 
-  return <div className={twMerge(classes.board, 'rounded-md')}>{boardFiller}</div>;
+  return <div className={cn(classes.board, 'rounded-md')}>{boardFiller}</div>;
 }

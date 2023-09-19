@@ -39,7 +39,13 @@ export function useAuth() {
   return useContext(AuthContext);
 }
 
-export function AuthProvider({defaultUser, children}: {defaultUser: FirebaseUser | null; children: React.ReactNode}) {
+export default function AuthProvider({
+  defaultUser,
+  children,
+}: {
+  defaultUser: FirebaseUser | null;
+  children: React.ReactNode;
+}) {
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(defaultUser);
   async function setTokens(credential: UserCredential) {
     const tokenResult = await credential?.user.getIdTokenResult();

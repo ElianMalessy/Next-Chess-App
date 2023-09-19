@@ -1,42 +1,43 @@
+'use client';
 import {collection, addDoc, where, serverTimestamp, onSnapshot, query, orderBy} from '@firebase/firestore';
 import {useState, useEffect} from 'react';
 import {firestore} from '@/components/firebase';
 import {useAuth} from '@/components/contexts/auth-provider';
 import {Card, CardHeader, CardContent, CardTitle, CardDescription} from '@/components/ui/card';
 
-export const Chat = ({friendEmail}: {friendEmail: string}) => {
+export default function FriendChat({friendEmail}: {friendEmail: string}) {
   const {currentUser} = useAuth();
   const [messages, setMessages] = useState<any>([]);
   const [newMessage, setNewMessage] = useState('');
   const messagesRef = collection(firestore, 'users', currentUser?.email || '', 'friends');
 
   const room = `${currentUser?.email}_${friendEmail}`;
-  useEffect(() => {
-    const queryMessages = query(messagesRef, where('room', '==', room), orderBy('createdAt'));
-    const unSubscribe = onSnapshot(queryMessages, (snapshot) => {
-      const messages: any = [];
-      snapshot.forEach((doc) => {
-        messages.push({...doc.data(), id: doc.id});
-      });
-      setMessages(messages);
-    });
+  // useEffect(() => {
+  //   const queryMessages = query(messagesRef, where('room', '==', room), orderBy('createdAt'));
+  //   const unSubscribe = onSnapshot(queryMessages, (snapshot) => {
+  //     const messages: any = [];
+  //     snapshot.forEach((doc) => {
+  //       messages.push({...doc.data(), id: doc.id});
+  //     });
+  //     setMessages(messages);
+  //   });
 
-    return () => unSubscribe();
-  }, [messagesRef, room]);
+  //   return () => unSubscribe();
+  // }, [messagesRef, room]);
 
-  const handleSubmit = async (event: any) => {
-    event.preventDefault();
+  // const handleSubmit = async (event: any) => {
+  //   event.preventDefault();
 
-    if (newMessage === '') return;
-    await addDoc(messagesRef, {
-      text: newMessage,
-      createdAt: serverTimestamp(),
-      user: currentUser?.displayName,
-      room,
-    });
+  //   if (newMessage === '') return;
+  //   await addDoc(messagesRef, {
+  //     text: newMessage,
+  //     createdAt: serverTimestamp(),
+  //     user: currentUser?.displayName,
+  //     room,
+  //   });
 
-    setNewMessage('');
-  };
+  //   setNewMessage('');
+  // };
 
   return (
     <Card>
@@ -51,7 +52,7 @@ export const Chat = ({friendEmail}: {friendEmail: string}) => {
           </div>
         ))}
       </div>
-      <form onSubmit={handleSubmit} className='new-message-form'>
+      {/* <form onSubmit={handleSubmit} className='new-message-form'>
         <input
           type='text'
           value={newMessage}
@@ -62,7 +63,7 @@ export const Chat = ({friendEmail}: {friendEmail: string}) => {
         <button type='submit' className='send-button'>
           Send
         </button>
-      </form>
+      </form> */}
     </Card>
   );
-};
+}

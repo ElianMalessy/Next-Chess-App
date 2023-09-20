@@ -1,6 +1,7 @@
 import {Link, ChevronRight, Mail, MessagesSquare, UserPlus} from 'lucide-react';
 
 import {Card, CardHeader, CardTitle, CardContent, CardDescription} from '@/components/ui/card';
+import {Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList} from '@/components/ui/command';
 import {Button} from '@/components/ui/button';
 import {
   Dialog,
@@ -74,7 +75,16 @@ export default function Friends() {
               </DialogContent>
             </Dialog>
           </div>
-          <FriendsCard />
+          <Card className='w-[50%] p-2'>
+            <CardContent className='flex justify-center'>
+              <Command className='rounded-lg border shadow-md w-[20vw]'>
+                <CommandInput placeholder='Search for friends...' />
+              </Command>
+            </CardContent>
+            <CardContent>
+              <FriendsCard />
+            </CardContent>
+          </Card>
         </div>
       </main>
     </>

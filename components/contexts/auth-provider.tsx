@@ -14,7 +14,7 @@ import {
   signInWithPopup,
   getAdditionalUserInfo,
 } from '@firebase/auth';
-import type {User as FirebaseUser, UserCredential} from '@firebase/auth';
+import type {User, UserCredential} from '@firebase/auth';
 import {collection, doc, setDoc} from '@firebase/firestore';
 
 import type {AuthMethods} from './types';
@@ -39,14 +39,9 @@ export function useAuth() {
   return useContext(AuthContext);
 }
 
-export default function AuthProvider({
-  defaultUser,
-  children,
-}: {
-  defaultUser: FirebaseUser | null;
-  children: React.ReactNode;
-}) {
-  const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(defaultUser);
+export default function AuthProvider({defaultUser, children}: {defaultUser: User | null; children: React.ReactNode}) {
+  const [currentUser, setCurrentUser] = useState<User | null>(defaultUser);
+
   async function setTokens(credential: UserCredential) {
     const tokenResult = await credential?.user.getIdTokenResult();
     // Sets authentication cookies
@@ -58,6 +53,7 @@ export default function AuthProvider({
     });
     setCurrentUser(credential.user);
   }
+
   async function googleSignIn() {
     const provider = new GoogleAuthProvider();
     provider.addScope('profile');
@@ -121,29 +117,22 @@ export default function AuthProvider({
 
   function updateUsername(username: string) {
     if (!currentUser) return Promise.resolve();
-
     return updateProfile(currentUser, {displayName: username});
   }
 
   function updateProfilePic(profilePic: string) {
     if (!currentUser) return Promise.resolve();
-
     return updateProfile(currentUser, {photoURL: profilePic});
   }
 
   function deleteCurrentUser() {
     if (!currentUser) return Promise.resolve();
-
     return deleteUser(currentUser);
   }
 
   useEffect(() => {
-    async function handleIdTokenChanged(firebaseUser: FirebaseUser | null) {
-      if (firebaseUser && currentUser && firebaseUser.uid === currentUser.uid) {
-        return;
-      }
-
-      firebaseUser ? setCurrentUser(firebaseUser) : setCurrentUser(null);
+    async function handleIdTokenChanged(user: User | null) {
+      user ? setCurrentUser(user) : setCurrentUser(null);
     }
     async function registerChangeListener() {
       return onIdTokenChanged(auth, handleIdTokenChanged);

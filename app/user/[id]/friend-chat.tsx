@@ -1,43 +1,57 @@
 'use client';
-import {collection, addDoc, where, serverTimestamp, onSnapshot, query, orderBy} from '@firebase/firestore';
-import {useState, useEffect} from 'react';
+import {
+  where,
+  serverTimestamp,
+  onSnapshot,
+  query,
+  orderBy,
+  limit,
+  updateDoc,
+  addDoc,
+  collection,
+} from '@firebase/firestore';
+import {useState, useEffect, useRef} from 'react';
 import {firestore} from '@/components/firebase';
 import {useAuth} from '@/components/contexts/auth-provider';
-import {Card, CardHeader, CardContent, CardTitle, CardDescription} from '@/components/ui/card';
+import {Card, CardHeader, CardContent, CardTitle, CardDescription, CardFooter} from '@/components/ui/card';
 
 export default function FriendChat({friendEmail}: {friendEmail: string}) {
   const {currentUser} = useAuth();
   const [messages, setMessages] = useState<any>([]);
   const [newMessage, setNewMessage] = useState('');
-  const messagesRef = collection(firestore, 'users', currentUser?.email || '', 'friends');
+  let room = '';
+  if (currentUser?.email) {
+    const compare = currentUser?.email.localeCompare(friendEmail, 'en', {sensitivity: 'base'});
+    room = compare > 0 ? `${friendEmail}_${currentUser.email}` : `${currentUser.email}_${friendEmail}`;
+  }
+  const roomRef = collection(firestore, room);
+  const firstRender = useRef(true);
+  useEffect(() => {
+    if (!room || !roomRef || !firstRender.current) return;
+    firstRender.current = false;
+    const queryMessages = query(roomRef, where('room', '==', room), orderBy('createdAt'));
+    const unSubscribe = onSnapshot(queryMessages, (snapshot) => {
+      const messages: any = [];
+      snapshot.forEach((message: any) => {
+        console.log(message.data());
+        messages.push({...message.data()});
+      });
+      setMessages(messages);
+    });
 
-  const room = `${currentUser?.email}_${friendEmail}`;
-  // useEffect(() => {
-  //   const queryMessages = query(messagesRef, where('room', '==', room), orderBy('createdAt'));
-  //   const unSubscribe = onSnapshot(queryMessages, (snapshot) => {
-  //     const messages: any = [];
-  //     snapshot.forEach((doc) => {
-  //       messages.push({...doc.data(), id: doc.id});
-  //     });
-  //     setMessages(messages);
-  //   });
+    return () => unSubscribe();
+  }, [roomRef, room]);
 
-  //   return () => unSubscribe();
-  // }, [messagesRef, room]);
-
-  // const handleSubmit = async (event: any) => {
-  //   event.preventDefault();
-
-  //   if (newMessage === '') return;
-  //   await addDoc(messagesRef, {
-  //     text: newMessage,
-  //     createdAt: serverTimestamp(),
-  //     user: currentUser?.displayName,
-  //     room,
-  //   });
-
-  //   setNewMessage('');
-  // };
+  const handleSubmit = async (event: any) => {
+    event.preventDefault();
+    await addDoc(roomRef, {
+      text: newMessage,
+      createdAt: serverTimestamp(),
+      user: currentUser?.displayName,
+      room,
+    });
+    setNewMessage('');
+  };
 
   return (
     <Card>
@@ -45,25 +59,27 @@ export default function FriendChat({friendEmail}: {friendEmail: string}) {
         <CardTitle>Chat</CardTitle>
         <CardDescription>{`${currentUser?.displayName} - `}</CardDescription>
       </CardHeader>
-      <div className='messages'>
-        {messages.map((message: any) => (
-          <div key={message.id} className='message'>
+      <CardContent>
+        {messages.map((message: any, index: number) => (
+          <div key={index} className='message'>
             <span className='user'>{message.user}:</span> {message.text}
           </div>
         ))}
-      </div>
-      {/* <form onSubmit={handleSubmit} className='new-message-form'>
-        <input
-          type='text'
-          value={newMessage}
-          onChange={(event) => setNewMessage(event.target.value)}
-          className='new-message-input'
-          placeholder='Type your message here...'
-        />
-        <button type='submit' className='send-button'>
-          Send
-        </button>
-      </form> */}
+      </CardContent>
+      <CardFooter>
+        <form onSubmit={handleSubmit} className='new-message-form'>
+          <input
+            type='text'
+            value={newMessage}
+            onChange={(event) => setNewMessage(event.target.value)}
+            className='new-message-input'
+            placeholder='Type your message here...'
+          />
+          <button type='submit' className='send-button'>
+            Send
+          </button>
+        </form>
+      </CardFooter>
     </Card>
   );
 }

@@ -2,7 +2,6 @@ import {NextRequest} from 'next/server';
 import {NextResponse} from 'next/server';
 import {authentication} from 'next-firebase-auth-edge/lib/next/middleware';
 import {serverConfig} from './firebase-config';
-import {cookies} from 'next/headers';
 
 const PUBLIC_PATHS = ['/register', '/login', '/reset-password'];
 function redirectToLogin(request: NextRequest) {
@@ -11,15 +10,13 @@ function redirectToLogin(request: NextRequest) {
   }
 
   const url = request.nextUrl.clone();
-  url.pathname = '/';
+  url.pathname = '/login';
   url.search = `redirect=${request.nextUrl.pathname}`;
   return NextResponse.redirect(url);
 }
-function redirectToHome(request: NextRequest, friends: any) {
+function redirectToHome(request: NextRequest) {
   if (!PUBLIC_PATHS.includes(request.nextUrl.pathname)) {
-    const res = NextResponse.next();
-    if (friends) res.cookies.set('friends', JSON.stringify(friends));
-    return res;
+    return NextResponse.next();
   }
 
   const url = request.nextUrl.clone();
@@ -46,9 +43,8 @@ export async function middleware(request: NextRequest) {
     handleInvalidToken: async () => {
       return redirectToLogin(request);
     },
-    handleValidToken: async ({decodedToken}) => {
-      const friends = await fetch(`http://localhost:3000/api/friends/${decodedToken.email}`);
-      return redirectToHome(request, await friends.json());
+    handleValidToken: async () => {
+      return redirectToHome(request);
     },
     handleError: async (error: any) => {
       console.error('Unhandled authentication error', {error});

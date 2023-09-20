@@ -1,20 +1,24 @@
 import {create} from 'zustand';
 import {persist, devtools} from 'zustand/middleware';
-import {update, DatabaseReference} from '@firebase/database';
+import {update, ref} from '@firebase/database';
+import type {DatabaseReference} from '@firebase/database';
 
 interface EndState {
   checkmate: boolean;
   stalemate: boolean;
   capturedPieces: string[];
+  dbRef: any;
 
   setCheckmate: (checkmate: boolean, dbRef: DatabaseReference | null) => void;
   setStalemate: (stalemate: boolean, dbRef: DatabaseReference | null) => void;
   setCapturedPieces: (capturedPieces: string[], dbRef: DatabaseReference | null) => void;
+  setDbRef: (dbRef: DatabaseReference | null) => void;
 }
 const endStore = (set: any) => ({
   checkmate: false,
   stalemate: false,
   capturedPieces: ['P', 'p'],
+  dbRef: null,
 
   setCheckmate: (checkmate: boolean, dbRef: DatabaseReference | null) => {
     set((state: GameState) => ({
@@ -48,6 +52,12 @@ const endStore = (set: any) => ({
         capturedPieces: capturedPiece,
       });
     }
+  },
+  setDbRef: (dbRef: DatabaseReference | null) => {
+    set((state: GameState) => ({
+      ...state,
+      dbRef: dbRef,
+    }));
   },
 });
 

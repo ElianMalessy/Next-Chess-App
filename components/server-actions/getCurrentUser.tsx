@@ -1,11 +1,10 @@
 'use server';
-
 import {cookies} from 'next/headers';
 import {getTokens} from 'next-firebase-auth-edge/lib/next/tokens';
 import {User} from '@firebase/auth';
-import type {Tokens} from 'next-firebase-auth-edge/lib/auth';
+import {DecodedIdToken} from 'next-firebase-auth-edge/lib/auth/token-verifier';
 
-const mapTokensToUser = ({decodedToken}: Tokens): User => {
+export const mapTokensToUser = (decodedToken: DecodedIdToken): User => {
   const {
     uid,
     email,
@@ -14,6 +13,7 @@ const mapTokensToUser = ({decodedToken}: Tokens): User => {
     phone_number: phoneNumber,
     name: displayName,
   } = decodedToken;
+
   return {
     uid,
     email: email ?? null,
@@ -35,6 +35,6 @@ export default async function getCurrentUser() {
     cookieName: 'AuthToken',
     cookieSignatureKeys: ['secret1', 'secret2'],
   });
-  if (!tokens) return null;
-  return mapTokensToUser(tokens);
+    
+  return tokens?.decodedToken;
 }

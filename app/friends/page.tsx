@@ -1,4 +1,4 @@
-import {Link, ChevronRight, Mail, MessagesSquare, UserPlus} from 'lucide-react';
+import {Link, ChevronRight, Mail, MessagesSquare, Loader2} from 'lucide-react';
 
 import {Card, CardHeader, CardTitle, CardContent, CardDescription} from '@/components/ui/card';
 import {Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList} from '@/components/ui/command';
@@ -16,6 +16,8 @@ import {Input} from '@/components/ui/input';
 import Navbar from '@/components/navbar/navbar';
 import FriendsCard from './friends-card';
 import FriendLink from './friend-link';
+import {Skeleton} from '@/components/ui/skeleton';
+import {Suspense} from 'react';
 
 export default function Friends() {
   return (
@@ -82,7 +84,9 @@ export default function Friends() {
               </Command>
             </CardContent>
             <CardContent>
+              {/* <Suspense fallback={<Loader2 className='h-4 w-4 animate-spin' />}> */}
               <FriendsCard />
+              {/* </Suspense> */}
             </CardContent>
           </Card>
         </div>

@@ -6,7 +6,7 @@ import {useForm} from 'react-hook-form';
 import * as z from 'zod';
 
 import {zodResolver} from '@hookform/resolvers/zod';
-import {Form, FormControl, FormField, FormItem, FormMessage} from '@/components/ui/form';
+import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from '@/components/ui/form';
 import {Input} from '@/components/ui/input';
 import {Card, CardHeader, CardContent} from '@/components/ui/card';
 import {Button} from '@/components/ui/button';
@@ -60,7 +60,7 @@ export default function Login() {
         <Separator className='my-2' />
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
+            <form onSubmit={form.handleSubmit(onSubmit)} action='/auth/login' method='post'>
               <div className='grid gap-6'>
                 <div className='grid gap-4'>
                   <FormField
@@ -68,6 +68,7 @@ export default function Login() {
                     name='email'
                     render={({field}) => (
                       <FormItem>
+                        {/* <FormLabel /> */}
                         <FormControl>
                           <Input type='text' {...field} autoComplete='off' id='email' placeholder='Email' />
                         </FormControl>
@@ -81,6 +82,7 @@ export default function Login() {
                       name='password'
                       render={({field}) => (
                         <FormItem>
+                          {/* <FormLabel /> */}
                           <FormControl>
                             <Input type='password' {...field} autoComplete='off' id='password' placeholder='Password' />
                           </FormControl>

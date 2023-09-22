@@ -1,26 +1,26 @@
 'use server';
 
 import Image from 'next/image';
-import {cookies} from 'next/headers';
 import {UserX, MessageSquarePlus, Swords} from 'lucide-react';
-import {collection, getDocs, query, where, documentId, limit, doc, getDoc} from '@firebase/firestore';
-import {getFirebaseAuth} from 'next-firebase-auth-edge/lib/auth';
 
+import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from '@/components/ui/dialog';
 import {Card, CardContent, CardHeader, CardTitle, CardDescription} from '@/components/ui/card';
 import {Avatar} from '@/components/ui/avatar';
-import {firestore} from '@/components/firebase';
 
 import NonGameBoard from '@/components/board/non-game-board';
-import Client from './client';
 import getCurrentUser from '@/components/server-actions/getCurrentUser';
-import FriendChat from './friend-chat';
-import {serverConfig} from '@/firebase-config';
 import {kv} from '@vercel/kv';
+import AddFriend from './add-friend';
+import Client from './client';
+import AvatarEdit from './avatar-editor';
 
-export default async function Server({username}: {username: string}) {
+export default async function Server({username, friend}: {username: string; friend: boolean}) {
   const currentUserToken = await getCurrentUser();
-  const currentUser = await kv.hgetall(currentUserToken?.displayName || '');
+  const currentUser: any = await kv.hgetall(currentUserToken?.displayName || '');
   const pageUser = await kv.hgetall(username);
+
+  let isNewFriend: boolean = false;
+  if (friend) isNewFriend = await AddFriend(currentUserToken?.displayName, username);
 
   let userImg = pageUser?.photoURL;
   let userEmail: any = pageUser?.email;
@@ -54,25 +54,25 @@ export default async function Server({username}: {username: string}) {
         </div>
       ) : (
         <div className='w-full flex items-center flex-col'>
-            <Client
-              username={username}
-              alert={alert}
-              currentUser={currentUserToken}
-            />
+          {friend && <Client isOpen={!isNewFriend} alert={alert} />}
           <Card className='flex flex-row items-center w-[50%]'>
             <div className='ml-8'>
-              <Avatar className='w-24 h-24'>
-                <Image src={img || defaultImg} alt='user-profile-picture' width={96} height={96} priority />
-              </Avatar>
+              {username === currentUserToken?.displayName ? (
+                <Avatar className='w-24 h-24'>
+                  <Image src={img || defaultImg} alt='user-profile-picture' width={96} height={96} priority />
+                </Avatar>
+              ) : (
+                <AvatarEdit img={img || defaultImg} />
+              )}
             </div>
             <div>
               <CardHeader>
                 <CardTitle>{username.replaceAll('_', ' ') || 'user'}</CardTitle>
                 <CardDescription>{since !== '' && `Friends since: ${since}`}</CardDescription>
-                {/* <CardDescription>
-                  {firebaseUser?.metadata.creationTime &&
-                    `Joined: ${new Date(firebaseUser?.metadata.creationTime).toString()}`}
-                </CardDescription> */}
+                <CardDescription>
+                  {currentUser?.metadata.creationTime &&
+                    `Joined: ${new Date(currentUser?.metadata.creationTime).toString()}`}
+                </CardDescription>
               </CardHeader>
               <CardContent className='w-full flex gap-2'>
                 <Swords strokeWidth={1} />
@@ -81,7 +81,6 @@ export default async function Server({username}: {username: string}) {
               </CardContent>
             </div>
           </Card>
-          {/* {isFriend && <FriendChat friendEmail={userEmail} />} */}
         </div>
       )}
     </>

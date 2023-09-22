@@ -11,9 +11,10 @@ const {getUser} = getFirebaseAuth(serverConfig.serviceAccount, serverConfig.apiK
 export default async function Providers({children}: {children: React.ReactNode}) {
   const currentUser = await getCurrentUser();
   if (currentUser?.uid) {
-    const userExists = await kv.exists(currentUser?.name ?? '');
+    const userExists = await kv.exists(currentUser?.name.replaceAll(' ', '_') ?? '');
+    // console.log(userExists, await kv.exists(currentUser?.name ?? ''))
     if (userExists === 0) {
-      console.log('new user', currentUser.name);
+      console.log('new user', currentUser.name, userExists);
       const firebaseUser = await getUser(currentUser?.uid ?? '');
       kv.hset(firebaseUser.displayName?.replaceAll(' ', '_') ?? '', {
         email: firebaseUser.email,

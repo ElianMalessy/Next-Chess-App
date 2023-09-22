@@ -15,7 +15,7 @@ import {firestore} from '@/components/firebase';
 import {useAuth} from '@/components/contexts/auth-provider';
 import {Card, CardHeader, CardContent, CardTitle, CardDescription, CardFooter} from '@/components/ui/card';
 
-export default function FriendChat({friendEmail}: {friendEmail: string}) {
+export default function FriendChat({friendEmail, friendUsername}: {friendEmail: string; friendUsername: string}) {
   const {currentUser} = useAuth();
   const [messages, setMessages] = useState<any>([]);
   const [newMessage, setNewMessage] = useState('');
@@ -57,12 +57,12 @@ export default function FriendChat({friendEmail}: {friendEmail: string}) {
     <Card>
       <CardHeader>
         <CardTitle>Chat</CardTitle>
-        <CardDescription>{`${currentUser?.displayName} - `}</CardDescription>
+        <CardDescription>{`${currentUser?.displayName} - ${friendUsername}`}</CardDescription>
       </CardHeader>
       <CardContent>
         {messages.map((message: any, index: number) => (
-          <div key={index} className='message'>
-            <span className='user'>{message.user}:</span> {message.text}
+          <div key={index}>
+            <span>{message.user}:</span> {message.text}
           </div>
         ))}
       </CardContent>

@@ -9,7 +9,7 @@ export default function Navbar() {
   return (
     <div className='border-b w-screen'>
       <nav className='flex w-full h-16 items-center justify-between px-3 bg-navBackground'>
-        <Link href='/examples/dashboard' className='font-medium transition-colors hover:text-primary text-lg'>
+        <Link href='/' className='font-medium transition-colors hover:text-primary text-lg'>
           WeChess
         </Link>
         <div className='flex space-x-2 lg:space-x-3 items-center'>

@@ -9,7 +9,7 @@ export default async function AddFriend(currentUserName: string, friendName: str
   //   }
   // }
   const isFriend = await kv.sismember(`${currentUserName}/friends/usernames`, friendName);
-  if (isFriend === 1) return false;
+  if (isFriend === 1) return false; // already friends
 
   const currentUserData = await kv.hgetall(currentUserName);
   const friendData = await kv.hgetall(friendName);

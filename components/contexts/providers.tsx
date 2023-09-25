@@ -1,32 +1,37 @@
-'use server';
+'use client';
 
-import {kv} from '@vercel/kv';
-import getCurrentUser, {mapTokensToUser} from '@/components/server-actions/getCurrentUser';
-import {getFirebaseAuth} from 'next-firebase-auth-edge/lib/auth';
-import {serverConfig} from '@/firebase-config';
+import {useEffect} from 'react';
+import {useAuthStore} from '@/hooks/useAuthStore';
+import type {User} from '@firebase/auth';
+import {onIdTokenChanged} from '@firebase/auth';
+import {auth} from '@/components/firebase';
 import ThemeProvider from './theme-provider';
-import AuthProvider from './auth-provider';
 
-const {getUser} = getFirebaseAuth(serverConfig.serviceAccount, serverConfig.apiKey);
-export default async function Providers({children}: {children: React.ReactNode}) {
-  const currentUser = await getCurrentUser();
-  if (currentUser?.uid) {
-    const userExists = await kv.exists(currentUser?.name.replaceAll(' ', '_') ?? '');
-    // console.log(userExists, await kv.exists(currentUser?.name ?? ''))
-    if (userExists === 0) {
-      console.log('new user', currentUser.name, userExists);
-      const firebaseUser = await getUser(currentUser?.uid ?? '');
-      kv.hset(firebaseUser.displayName?.replaceAll(' ', '_') ?? '', {
-        email: firebaseUser.email,
-        metadata: firebaseUser.metadata,
-        photoURL: firebaseUser.photoURL,
-      });
+export default function Providers({children}: {children: React.ReactNode}) {
+  const {currentUser, setCurrentUser} = useAuthStore();
+  useEffect(() => {
+    (async () => {
+      const data = await fetch('http://localhost:3000/api/getUser', {next: {revalidate: 30}});
+      setCurrentUser(await data.json());
+    })();
+  }, [setCurrentUser]);
+  useEffect(() => {
+    async function handleIdTokenChanged(user: User | null) {
+      if (user) setCurrentUser(user);
     }
-  }
+    async function registerChangeListener() {
+      return onIdTokenChanged(auth, handleIdTokenChanged);
+    }
+    const unsubscribePromise = registerChangeListener();
+
+    return () => {
+      unsubscribePromise.then((unsubscribe) => unsubscribe());
+    };
+  }, [currentUser, setCurrentUser]);
 
   return (
     <ThemeProvider attribute='class' defaultTheme='system' enableSystem>
-      <AuthProvider defaultUser={currentUser ? mapTokensToUser(currentUser) : null}>{children}</AuthProvider>
+      {children}
     </ThemeProvider>
   );
 }

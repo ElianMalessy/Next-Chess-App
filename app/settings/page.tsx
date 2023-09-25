@@ -1,5 +1,5 @@
 import React from 'react';
 
 export default function Page() {
-  return <div>settings</div>;
+  return <div>reset password</div>;
 }

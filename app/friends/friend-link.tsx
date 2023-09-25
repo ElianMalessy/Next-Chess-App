@@ -15,11 +15,11 @@ import {Link, ChevronRight, Mail, MessagesSquare, UserPlus} from 'lucide-react';
 import {CopyIcon} from '@radix-ui/react-icons';
 
 import {useToast} from '@/components/ui/use-toast';
-// import {useAuthStore} from '@/hooks/useAuthStore';
-import {useAuth} from '@/components/contexts/auth-provider';
+import {useAuthStore} from '@/hooks/useAuthStore';
+// import {useAuth} from '@/components/contexts/auth-provider';
 
 export default function FriendLink() {
-  const {currentUser} = useAuth();
+  const {currentUser} = useAuthStore();
   const {toast} = useToast();
   const friendLink = `http://localhost:3000/user/${currentUser?.displayName?.replaceAll(' ', '_')}?friend=true`;
   return (

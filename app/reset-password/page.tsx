@@ -13,7 +13,8 @@ import {Card, CardHeader, CardContent} from '@/components/ui/card';
 import {Button} from '@/components/ui/button';
 import {Separator} from '@/components/ui/separator';
 
-import {useAuth} from '@/components/contexts/auth-provider';
+// import {useAuth} from '@/components/contexts/auth-provider';
+import {useAuthStore} from '@/hooks/useAuthStore';
 //import Background from './Background';
 
 const formSchema = z.object({
@@ -21,7 +22,7 @@ const formSchema = z.object({
 });
 
 export default function Login() {
-  const {anonSignup, googleSignIn, resetPassword} = useAuth();
+  const {anonSignup, googleSignIn, resetPassword} = useAuthStore();
   const router = useRouter();
   const [error, setError] = useState('');
   const {toast} = useToast();

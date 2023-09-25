@@ -12,11 +12,12 @@ import {
 } from '@firebase/firestore';
 import {useState, useEffect, useRef} from 'react';
 import {firestore} from '@/components/firebase';
-import {useAuth} from '@/components/contexts/auth-provider';
+// import {useAuth} from '@/components/contexts/auth-provider';
+import {useAuthStore} from '@/hooks/useAuthStore';
 import {Card, CardHeader, CardContent, CardTitle, CardDescription, CardFooter} from '@/components/ui/card';
 
 export default function FriendChat({friendEmail, friendUsername}: {friendEmail: string; friendUsername: string}) {
-  const {currentUser} = useAuth();
+  const {currentUser} = useAuthStore();
   const [messages, setMessages] = useState<any>([]);
   const [newMessage, setNewMessage] = useState('');
   let room = '';

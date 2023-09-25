@@ -1,4 +1,3 @@
-'use server';
 import {cookies} from 'next/headers';
 import {getTokens} from 'next-firebase-auth-edge/lib/next/tokens';
 import {User} from '@firebase/auth';
@@ -35,6 +34,6 @@ export default async function getCurrentUser() {
     cookieName: 'AuthToken',
     cookieSignatureKeys: ['secret1', 'secret2'],
   });
-    
+
   return tokens?.decodedToken;
 }

@@ -8,38 +8,29 @@ import {Card, CardContent, CardHeader, CardTitle, CardDescription} from '@/compo
 import {Avatar} from '@/components/ui/avatar';
 
 import NonGameBoard from '@/components/board/non-game-board';
-import getCurrentUser from '@/components/server-actions/getCurrentUser';
 import {kv} from '@vercel/kv';
-import AddFriend from './add-friend';
-import Client from './client';
-import AvatarEdit from './avatar-editor';
 
-export default async function Server({username, friend}: {username: string; friend: boolean}) {
-  const currentUserToken = await getCurrentUser();
-  const currentUser: any = await kv.hgetall(currentUserToken?.displayName || '');
+export default async function Server({username, friendRequest}: {username: string; friendRequest: boolean}) {
   const pageUser = await kv.hgetall(username);
-
-  let isNewFriend: boolean = false;
-  if (friend) isNewFriend = await AddFriend(currentUserToken?.displayName, username);
 
   let userImg = pageUser?.photoURL;
   let userEmail: any = pageUser?.email;
-  let alert = '';
+  // let alert = '';
 
-  let since = '';
-  let isFriend = false;
-  let querySnapshot = null;
+  // let since = '';
+  // let isFriend = false;
+  // let querySnapshot = null;
 
-  if (username !== currentUserToken?.displayName) {
-    const friends: any = await kv.lrange(`${currentUserToken?.name.replaceAll(' ', '_')}/friends`, 0, -1);
-    for (let i = 0; i < friends.length; i++) {
-      if (friends[i].username === username) {
-        alert = `You are already friends with ${username}`;
-        isFriend = true;
-        break;
-      }
-    }
-  }
+  // if (username !== currentUserToken?.displayName) {
+  //   const friends: any = await kv.lrange(`${currentUserToken?.name.replaceAll(' ', '_')}/friends`, 0, -1);
+  //   for (let i = 0; i < friends.length; i++) {
+  //     if (friends[i].username === username) {
+  //       alert = `You are already friends with ${username}`;
+  //       isFriend = true;
+  //       break;
+  //     }
+  //   }
+  // }
   const img: any = userImg;
   const defaultImg =
     'https://firebasestorage.googleapis.com/v0/b/wechess-2ecf9.appspot.com/o/default-profile-pic.svg?alt=media&token=cbd585f6-a638-4e25-a502-436d2109ed7a';
@@ -54,25 +45,29 @@ export default async function Server({username, friend}: {username: string; frie
         </div>
       ) : (
         <div className='w-full flex items-center flex-col'>
-          {friend && <Client isOpen={!isNewFriend} alert={alert} />}
           <Card className='flex flex-row items-center w-[50%]'>
             <div className='ml-8'>
-              {username === currentUserToken?.displayName ? (
-                <Avatar className='w-24 h-24'>
-                  <Image src={img || defaultImg} alt='user-profile-picture' width={96} height={96} priority />
-                </Avatar>
-              ) : (
-                <AvatarEdit img={img || defaultImg} />
-              )}
+              {/* {username === currentUserToken?.displayName ? ( */}
+              <Avatar className='w-24 h-24'>
+                <Image src={img || defaultImg} alt='user-profile-picture' width={96} height={96} priority />
+              </Avatar>
+              {/* // ) : (
+              //   <Dialog open={true}>
+              //     <DialogHeader>
+              //       <AvatarEdit img={img || defaultImg} />
+              //     </DialogHeader>
+              //     <DialogContent>upload file</DialogContent>
+              //   </Dialog>
+              // )} */}
             </div>
             <div>
               <CardHeader>
                 <CardTitle>{username.replaceAll('_', ' ') || 'user'}</CardTitle>
-                <CardDescription>{since !== '' && `Friends since: ${since}`}</CardDescription>
+                {/* <CardDescription>{since !== '' && `Friends since: ${since}`}</CardDescription>
                 <CardDescription>
                   {currentUser?.metadata.creationTime &&
                     `Joined: ${new Date(currentUser?.metadata.creationTime).toString()}`}
-                </CardDescription>
+                </CardDescription> */}
               </CardHeader>
               <CardContent className='w-full flex gap-2'>
                 <Swords strokeWidth={1} />

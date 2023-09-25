@@ -12,8 +12,8 @@ import {Card, CardHeader, CardContent} from '@/components/ui/card';
 import {Button} from '@/components/ui/button';
 import {Separator} from '@/components/ui/separator';
 
-import {useAuth} from '@/components/contexts/auth-provider';
-// import {useAuthStore} from '@/hooks/useAuthStore';
+// import {useAuth} from '@/components/contexts/auth-provider';
+import {useAuthStore} from '@/hooks/useAuthStore';
 //import Background from './Background';
 
 const formSchema = z
@@ -28,7 +28,7 @@ const formSchema = z
   });
 
 export default function Signup() {
-  const {signup, anonSignup, googleSignIn} = useAuth();
+  const {signup, anonSignup, googleSignIn} = useAuthStore();
   const router = useRouter();
   const [error, setError] = useState('');
 

@@ -15,10 +15,11 @@ import {
   DropdownMenuShortcut,
 } from '@/components/ui/dropdown-menu';
 import {Button} from '@/components/ui/button';
-import {useAuth} from '@/components/contexts/auth-provider';
+// import {useAuth} from '@/components/contexts/auth-provider';
+import {useAuthStore} from '@/hooks/useAuthStore';
 
 export default function Profile() {
-  const {currentUser, logout} = useAuth();
+  const {currentUser, logout} = useAuthStore();
   const router = useRouter();
 
   const defaultImg =
@@ -59,13 +60,13 @@ export default function Profile() {
               <FaceIcon />
             </DropdownMenuShortcut>
           </DropdownMenuItem>
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={() => router.push('/messages')}>
             Messages
             <DropdownMenuShortcut>
               <EnvelopeClosedIcon />
             </DropdownMenuShortcut>
           </DropdownMenuItem>
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={() => router.push('/settings')}>
             Settings
             <DropdownMenuShortcut>
               <GearIcon />

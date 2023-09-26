@@ -1,36 +1,36 @@
-'use server';
-
+'use client';
 import Image from 'next/image';
 import {UserX, MessageSquarePlus, Swords} from 'lucide-react';
 
-import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import {Card, CardContent, CardHeader, CardTitle, CardDescription} from '@/components/ui/card';
 import {Avatar} from '@/components/ui/avatar';
-
+import AvatarEdit from './avatar-editor';
+import {useAuthStore} from '@/hooks/useAuthStore';
 import NonGameBoard from '@/components/board/non-game-board';
-import {kv} from '@vercel/kv';
+import FriendDialog from './friend-dialog';
+import {useState} from 'react';
 
-export default async function Server({username, friendRequest}: {username: string; friendRequest: boolean}) {
-  const pageUser = await kv.hgetall(username);
-
-  let userImg = pageUser?.photoURL;
-  let userEmail: any = pageUser?.email;
-  // let alert = '';
-
-  // let since = '';
-  // let isFriend = false;
-  // let querySnapshot = null;
-
-  // if (username !== currentUserToken?.displayName) {
-  //   const friends: any = await kv.lrange(`${currentUserToken?.name.replaceAll(' ', '_')}/friends`, 0, -1);
-  //   for (let i = 0; i < friends.length; i++) {
-  //     if (friends[i].username === username) {
-  //       alert = `You are already friends with ${username}`;
-  //       isFriend = true;
-  //       break;
-  //     }
-  //   }
-  // }
+export default function ProfileCard({
+  username,
+  friendRequest,
+  userImg,
+  userEmail,
+}: {
+  username: string;
+  friendRequest: boolean;
+  userImg: string;
+  userEmail: string;
+}) {
+  const {currentUser} = useAuthStore();
+  const [avatarClick, setAvatarClick] = useState(false);
   const img: any = userImg;
   const defaultImg =
     'https://firebasestorage.googleapis.com/v0/b/wechess-2ecf9.appspot.com/o/default-profile-pic.svg?alt=media&token=cbd585f6-a638-4e25-a502-436d2109ed7a';
@@ -47,18 +47,22 @@ export default async function Server({username, friendRequest}: {username: strin
         <div className='w-full flex items-center flex-col'>
           <Card className='flex flex-row items-center w-[50%]'>
             <div className='ml-8'>
-              {/* {username === currentUserToken?.displayName ? ( */}
-              <Avatar className='w-24 h-24'>
+              {false && <FriendDialog username={username} friendRequest={friendRequest} />}
+
+              {username.replaceAll('_', ' ') === currentUser?.displayName && (
+                <Dialog open={avatarClick} onOpenChange={setAvatarClick}>
+                  {/* <DialogHeader>
+                  </DialogHeader> */}
+
+                  <DialogContent>
+                    <AvatarEdit img={img || defaultImg} />
+                    upload file
+                  </DialogContent>
+                </Dialog>
+              )}
+              <Avatar className='w-24 h-24' onClick={() => setAvatarClick(true)}>
                 <Image src={img || defaultImg} alt='user-profile-picture' width={96} height={96} priority />
               </Avatar>
-              {/* // ) : (
-              //   <Dialog open={true}>
-              //     <DialogHeader>
-              //       <AvatarEdit img={img || defaultImg} />
-              //     </DialogHeader>
-              //     <DialogContent>upload file</DialogContent>
-              //   </Dialog>
-              // )} */}
             </div>
             <div>
               <CardHeader>

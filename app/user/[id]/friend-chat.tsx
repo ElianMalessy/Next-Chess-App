@@ -18,6 +18,7 @@ import {Card, CardHeader, CardContent, CardTitle, CardDescription, CardFooter} f
 
 export default function FriendChat({friendEmail, friendUsername}: {friendEmail: string; friendUsername: string}) {
   const {currentUser} = useAuthStore();
+
   const [messages, setMessages] = useState<any>([]);
   const [newMessage, setNewMessage] = useState('');
   let room = '';
@@ -25,7 +26,8 @@ export default function FriendChat({friendEmail, friendUsername}: {friendEmail: 
     const compare = currentUser?.email.localeCompare(friendEmail, 'en', {sensitivity: 'base'});
     room = compare > 0 ? `${friendEmail}_${currentUser.email}` : `${currentUser.email}_${friendEmail}`;
   }
-  const roomRef = collection(firestore, room);
+
+  const roomRef = collection(firestore, room, 'chats', 'rooms');
   const firstRender = useRef(true);
   useEffect(() => {
     if (!room || !roomRef || !firstRender.current) return;
@@ -53,7 +55,6 @@ export default function FriendChat({friendEmail, friendUsername}: {friendEmail: 
     });
     setNewMessage('');
   };
-
   return (
     <Card>
       <CardHeader>

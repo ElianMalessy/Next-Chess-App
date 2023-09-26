@@ -1,9 +1,9 @@
 import Navbar from '@/components/navbar/navbar';
-import Server from './server';
+import ProfileCard from './profile-card';
 import FriendChat from './friend-chat';
-import FriendDialog from './friend-dialog';
+import {kv} from '@vercel/kv';
 
-export default function User({
+export default async function User({
   params,
   searchParams,
 }: {
@@ -11,13 +11,19 @@ export default function User({
   searchParams?: {[key: string]: string | string[] | undefined};
 }) {
   const friendRequest = searchParams?.friend ? true : false;
+  const pageUser: any = await kv.hgetall(params.id);
+
   return (
     <>
       <Navbar />
       <main className='p-2'>
-        <Server username={params.id} friendRequest={friendRequest} />
-        {friendRequest && <FriendDialog username={params.id} />}
-        <FriendChat friendEmail={'eql458@gmail.com'} friendUsername={params.id} />
+        <ProfileCard
+          username={params.id}
+          userImg={pageUser.photoURL}
+          userEmail={pageUser.email}
+          friendRequest={friendRequest}
+        />
+        <FriendChat friendEmail={pageUser.email} friendUsername={params.id} />
       </main>
     </>
   );

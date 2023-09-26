@@ -1,20 +1,13 @@
 'use client';
-
-import {useEffect} from 'react';
+import ThemeProvider from './theme-provider';
 import {useAuthStore} from '@/hooks/useAuthStore';
+import {useEffect} from 'react';
 import type {User} from '@firebase/auth';
 import {onIdTokenChanged} from '@firebase/auth';
 import {auth} from '@/components/firebase';
-import ThemeProvider from './theme-provider';
 
 export default function Providers({children}: {children: React.ReactNode}) {
-  const {currentUser, setCurrentUser} = useAuthStore();
-  useEffect(() => {
-    (async () => {
-      const data = await fetch('http://localhost:3000/api/getUser', {next: {revalidate: 30}});
-      setCurrentUser(await data.json());
-    })();
-  }, [setCurrentUser]);
+  const {setCurrentUser} = useAuthStore();
   useEffect(() => {
     async function handleIdTokenChanged(user: User | null) {
       if (user) setCurrentUser(user);
@@ -27,8 +20,7 @@ export default function Providers({children}: {children: React.ReactNode}) {
     return () => {
       unsubscribePromise.then((unsubscribe) => unsubscribe());
     };
-  }, [currentUser, setCurrentUser]);
-
+  }, [setCurrentUser]);
   return (
     <ThemeProvider attribute='class' defaultTheme='system' enableSystem>
       {children}

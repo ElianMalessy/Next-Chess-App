@@ -54,6 +54,7 @@
     "zustand": "^4.4.1"
   },
   "devDependencies": {
+    "@types/react-avatar-editor": "^13.0.0",
     "encoding": "^0.1.13"
   }
 }

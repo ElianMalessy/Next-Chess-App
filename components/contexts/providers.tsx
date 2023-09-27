@@ -15,7 +15,7 @@ export default function Providers({children}: {children: React.ReactNode}) {
     async function handleIdTokenChanged(user: User | null) {
       if (user) {
         setCurrentUser(user);
-        setImg(user.photoURL);
+        if (user.photoURL) setImg(user.photoURL);
       }
     }
     async function registerChangeListener() {

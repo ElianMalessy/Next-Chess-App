@@ -27,18 +27,20 @@ export default function Profile() {
       <DropdownMenuTrigger asChild>
         <Button variant='ghost' className='relative h-11 w-11 rounded-full'>
           <Avatar className='h-11 w-11'>
-            <Image
-              src={img}
-              alt='currentUser-profile-picture'
-              width={44}
-              height={44}
-              style={{
-                transform: `scale(${scale}) translate(${(startOffset.x / scale) * 0.11}px, ${
-                  (startOffset.y / scale) * 0.11
-                }px)`,
-              }}
-              priority
-            />
+            {img && (
+              <Image
+                src={img}
+                alt='currentUser-profile-picture'
+                width={44}
+                height={44}
+                style={{
+                  transform: `scale(${scale}) translate(${(startOffset.x / scale) * 0.11}px, ${
+                    (startOffset.y / scale) * 0.11
+                  }px)`,
+                }}
+                priority
+              />
+            )}
           </Avatar>
         </Button>
       </DropdownMenuTrigger>

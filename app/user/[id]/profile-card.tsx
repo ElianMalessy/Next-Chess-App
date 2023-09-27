@@ -55,7 +55,7 @@ export default function ProfileCard({
                   </DialogHeader> */}
 
                   <DialogContent>
-                    <AvatarEdit img={img || defaultImg} />
+                    <AvatarEdit />
                     upload file
                   </DialogContent>
                 </Dialog>

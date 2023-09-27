@@ -15,19 +15,29 @@ import {firestore} from '@/components/firebase';
 // import {useAuth} from '@/components/contexts/auth-provider';
 import {useAuthStore} from '@/hooks/useAuthStore';
 import {Card, CardHeader, CardContent, CardTitle, CardDescription, CardFooter} from '@/components/ui/card';
+import type {DecodedIdToken} from 'next-firebase-auth-edge/lib/auth/token-verifier';
 
-export default function FriendChat({friendEmail, friendUsername}: {friendEmail: string; friendUsername: string}) {
-  const {currentUser} = useAuthStore();
-
+export default function FriendChat({
+  friendEmail,
+  friendUsername,
+  currentUserEmail,
+  currentUserName,
+}: {
+  friendEmail: string;
+  friendUsername: string;
+  currentUserEmail: string;
+  currentUserName: string;
+}) {
   const [messages, setMessages] = useState<any>([]);
   const [newMessage, setNewMessage] = useState('');
   let room = '';
-  if (currentUser?.email) {
-    const compare = currentUser?.email.localeCompare(friendEmail, 'en', {sensitivity: 'base'});
-    room = compare > 0 ? `${friendEmail}_${currentUser.email}` : `${currentUser.email}_${friendEmail}`;
+  let roomRef: any = null;
+  if (currentUserEmail) {
+    const compare = currentUserEmail.localeCompare(friendEmail, 'en', {sensitivity: 'base'});
+    room = compare > 0 ? `${friendEmail}_${currentUserEmail}` : `${currentUserEmail}_${friendEmail}`;
+    roomRef = collection(firestore, room, 'chats', 'rooms');
   }
 
-  const roomRef = collection(firestore, room, 'chats', 'rooms');
   const firstRender = useRef(true);
   useEffect(() => {
     if (!room || !roomRef || !firstRender.current) return;
@@ -50,16 +60,17 @@ export default function FriendChat({friendEmail, friendUsername}: {friendEmail: 
     await addDoc(roomRef, {
       text: newMessage,
       createdAt: serverTimestamp(),
-      user: currentUser?.displayName,
+      user: currentUserName,
       room,
     });
     setNewMessage('');
   };
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Chat</CardTitle>
-        <CardDescription>{`${currentUser?.displayName} - ${friendUsername}`}</CardDescription>
+        <CardDescription>{`${currentUserName} - ${friendUsername.replaceAll('_', ' ')}`}</CardDescription>
       </CardHeader>
       <CardContent>
         {messages.map((message: any, index: number) => (

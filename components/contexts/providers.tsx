@@ -1,16 +1,22 @@
 'use client';
 import ThemeProvider from './theme-provider';
-import {useAuthStore} from '@/hooks/useAuthStore';
 import {useEffect} from 'react';
+
 import type {User} from '@firebase/auth';
 import {onIdTokenChanged} from '@firebase/auth';
 import {auth} from '@/components/firebase';
+import {useAuthStore} from '@/hooks/useAuthStore';
+import {useProfilePicStore} from '@/hooks/useProfilePicStore';
 
 export default function Providers({children}: {children: React.ReactNode}) {
   const {setCurrentUser} = useAuthStore();
+  const {setImg} = useProfilePicStore();
   useEffect(() => {
     async function handleIdTokenChanged(user: User | null) {
-      if (user) setCurrentUser(user);
+      if (user) {
+        setCurrentUser(user);
+        setImg(user.photoURL);
+      }
     }
     async function registerChangeListener() {
       return onIdTokenChanged(auth, handleIdTokenChanged);
@@ -20,7 +26,7 @@ export default function Providers({children}: {children: React.ReactNode}) {
     return () => {
       unsubscribePromise.then((unsubscribe) => unsubscribe());
     };
-  }, [setCurrentUser]);
+  }, [setCurrentUser, setImg]);
   return (
     <ThemeProvider attribute='class' defaultTheme='system' enableSystem>
       {children}

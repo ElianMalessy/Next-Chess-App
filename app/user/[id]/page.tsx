@@ -2,6 +2,7 @@ import Navbar from '@/components/navbar/navbar';
 import ProfileCard from './profile-card';
 import FriendChat from './friend-chat';
 import {kv} from '@vercel/kv';
+import getCurrentUser from '@/components/server-actions/getCurrentUser';
 
 export default async function User({
   params,
@@ -12,7 +13,7 @@ export default async function User({
 }) {
   const friendRequest = searchParams?.friend ? true : false;
   const pageUser: any = await kv.hgetall(params.id);
-
+  const currentUser = await getCurrentUser();
   return (
     <>
       <Navbar />
@@ -23,7 +24,14 @@ export default async function User({
           userEmail={pageUser.email}
           friendRequest={friendRequest}
         />
-        <FriendChat friendEmail={pageUser.email} friendUsername={params.id} />
+        {currentUser?.email && currentUser?.email !== pageUser.email && (
+          <FriendChat
+            friendEmail={pageUser.email}
+            friendUsername={params.id}
+            currentUserEmail={currentUser?.email}
+            currentUserName={currentUser?.displayName}
+          />
+        )}
       </main>
     </>
   );

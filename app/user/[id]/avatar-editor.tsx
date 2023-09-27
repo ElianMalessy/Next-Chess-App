@@ -1,47 +1,78 @@
 'use client';
-import {useRef, useState} from 'react';
-import AvatarEditor from 'react-avatar-editor';
+import {useCallback, useEffect, useRef, useState} from 'react';
+import {Avatar} from '@/components/ui/avatar';
+import Image from 'next/image';
+import {useProfilePicStore} from '@/hooks/useProfilePicStore';
 
-export default function AvatarEdit({img}: {img: string}) {
+export default function AvatarEdit() {
+  const {startOffset, scale, setScale, setStartOffset, img} = useProfilePicStore();
+
   const [tempProfilePic, setTempProfilePic] = useState(img);
-
-  const scaledImg = useRef(tempProfilePic);
-  const [state, setState] = useState({
-    position: {x: 0.5, y: 0.5},
-    scale: 1,
-    height: 165,
-    width: 165,
-  });
+  const [tempScale, setTempScale] = useState(scale);
+  const [tempStartOffset, setTempStartOffset] = useState(startOffset);
+  const [offset, setOffset] = useState({x: 0, y: 0});
+  const [isDragging, setIsDragging] = useState(false);
 
   const handleScale = (e: any) => {
-    const scale = parseFloat(e.target.value);
-    setState({...state, scale: scale});
-    setTempProfilePic(scaledImg.current);
+    const newScale = parseFloat(e.target.value);
+    setTempScale(newScale);
   };
 
-  const handlePositionChange = (e: any) => {
-    setState({...state, position: e});
-    setTempProfilePic(scaledImg.current);
-  };
+  const handleMouseMove = useCallback(
+    (e: any) => {
+      e.preventDefault();
+      if (!isDragging) return;
+      setOffset({x: e.clientX - tempStartOffset.x, y: e.clientY - tempStartOffset.y});
+    },
+    [isDragging, tempStartOffset]
+  );
+  const handleMouseUp = useCallback(
+    (e: any) => {
+      if (!isDragging) return;
+      setIsDragging(false);
+      setStartOffset(offset);
+      setScale(tempScale);
+      // setStartOffset({x: 0, y: 0});
+    },
+    [setStartOffset, isDragging, setScale, tempScale, offset]
+  );
+  const handleMouseDown = useCallback((e: any) => {
+    setIsDragging(true);
+    setTempStartOffset({x: e.clientX, y: e.clientY});
+  }, []);
+
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, handleMouseMove, handleMouseUp]);
 
   const setEditorRef = (editor: any) => {
     if (editor) {
-      scaledImg.current = editor.getImageScaledToCanvas().toDataURL();
+      console.log(editor.getBoundingClientRect());
+      // scaledImg.current = editor.getImageScaledToCanvas().toDataURL();
     }
   };
   return (
     <div>
-      <AvatarEditor
-        crossOrigin='anonymous'
-        scale={state.scale}
-        image={tempProfilePic}
-        width={state.width}
-        height={state.height}
-        position={state.position}
-        borderRadius={state.width / 2}
-        onPositionChange={handlePositionChange}
-        ref={(ref: any) => setEditorRef(ref)}
-      />
+      <div className={`h-[25rem] w-[25rem] overflow-hidden relative`} onMouseDown={handleMouseDown}>
+        <Image
+          src={tempProfilePic}
+          layout='fill'
+          objectFit='contain'
+          className={`w-full h-full`}
+          ref={(ref: any) => setEditorRef(ref)}
+          style={{transform: `scale(${tempScale}) translate(${offset.x}px, ${offset.y}px)`}}
+          alt='profile-pic-editor'
+        />
+        <div className='absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] rounded-full border-white border-4 h-[25rem] w-[25rem]' />
+      </div>
       <br />
       <div className='flex items-center justify-center'>
         Zoom:
@@ -49,11 +80,11 @@ export default function AvatarEdit({img}: {img: string}) {
           name='scale'
           type='range'
           onChange={handleScale}
-          min={'1'}
-          max='2'
+          min='1'
+          max='10'
           step='0.01'
           defaultValue='1'
-          style={{width: state.width, marginLeft: '0.15rem', marginTop: '0.2rem'}}
+          style={{width: '250px', marginLeft: '0.15rem', marginTop: '0.2rem'}}
         />
       </div>
     </div>

@@ -33,7 +33,7 @@ export default function Board({realGame}: {realGame: boolean}) {
             key={key}
             color={FEN[i] === FEN[i].toLowerCase() ? 'b' : 'w'}
             piece={FEN[i].toLowerCase()}
-            column={8 - column}
+            column={column - 1}
             row={row - 1}
             realGame={realGame}
           />

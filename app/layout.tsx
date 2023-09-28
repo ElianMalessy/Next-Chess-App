@@ -28,11 +28,13 @@ export default async function RootLayout({children}: {children: React.ReactNode}
     if (userExists === 0) {
       console.log('new user', tokens.name, userExists);
       const firebaseUser = await getUser(tokens.uid ?? '');
-      kv.hset(firebaseUser.displayName?.replaceAll(' ', '_') ?? '', {
-        email: firebaseUser.email,
-        metadata: firebaseUser.metadata,
-        photoURL: firebaseUser.photoURL,
-      });
+      if (firebaseUser.displayName) {
+        kv.hset(firebaseUser.displayName?.replaceAll(' ', '_') ?? '', {
+          email: firebaseUser.email,
+          metadata: firebaseUser.metadata,
+          photoURL: firebaseUser.photoURL,
+        });
+      }
     }
   }
   // const user = await data.json();

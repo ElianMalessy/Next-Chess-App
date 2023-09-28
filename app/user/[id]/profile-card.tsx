@@ -49,7 +49,7 @@ export default function ProfileCard({
             <div className='ml-8'>
               {false && <FriendDialog username={username} friendRequest={friendRequest} />}
 
-              {username.replaceAll('_', ' ') === currentUser?.displayName && (
+              {username && username.replaceAll('_', ' ') === currentUser?.displayName && (
                 <Dialog open={avatarClick} onOpenChange={setAvatarClick}>
                   {/* <DialogHeader>
                   </DialogHeader> */}

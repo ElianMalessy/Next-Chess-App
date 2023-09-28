@@ -29,7 +29,7 @@ export default async function FriendsCard() {
               </div>
               <div>
                 <CardHeader>
-                  <CardTitle>{friend.username.replaceAll('_', ' ')}</CardTitle>
+                  <CardTitle>{friend.username && friend.username.replaceAll('_', ' ')}</CardTitle>
                   <CardDescription>Friends for 10 months</CardDescription>
                 </CardHeader>
                 <CardContent className='w-full flex gap-2'>

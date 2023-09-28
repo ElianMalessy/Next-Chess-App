@@ -227,6 +227,13 @@ export default function Piece({
 
   const handleMouseDown = useCallback(
     (e: any) => {
+      console.log(
+        playerColor,
+        getColor(
+          playerColor === 'w' ? board[piecePosition.y][piecePosition.x] : board[7 - piecePosition.y][piecePosition.x]
+        ),
+        piecePosition
+      );
       if (
         !divRef.current ||
         !Number.isInteger(piecePosition.x) ||
@@ -240,12 +247,6 @@ export default function Piece({
         return;
 
       const rect = divRef.current.getBoundingClientRect();
-      console.log(
-        playerColor,
-        piecePosition,
-        board,
-        playerColor === 'w' ? board[piecePosition.y][piecePosition.x] : board[7 - piecePosition.y][piecePosition.x]
-      );
       setSquares(
         showPossibleMoves(
           playerColor === 'w' ? board[piecePosition.y][piecePosition.x] : board[7 - piecePosition.y][piecePosition.x],

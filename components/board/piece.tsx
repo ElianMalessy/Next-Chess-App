@@ -320,7 +320,7 @@ export default function Piece({
                 className={classes['capture-hint']}
                 style={{
                   top: playerColor === 'w' ? square[0] : (7 - square[0]) * scale,
-                  left: square[1] * scale,
+                  left: playerColor === 'w' ? square[1] : (7 - square[1]) * scale,
                 }}
               />
             );
@@ -329,7 +329,10 @@ export default function Piece({
             <div
               key={key}
               className={classes['hint']}
-              style={{top: playerColor === 'w' ? square[0] : (7 - square[0]) * scale, left: square[1] * scale}}
+              style={{
+                top: playerColor === 'w' ? square[0] : (7 - square[0]) * scale,
+                left: playerColor === 'w' ? square[1] : (7 - square[1]) * scale,
+              }}
             />
           );
         })}

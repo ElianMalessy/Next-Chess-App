@@ -30,10 +30,10 @@ export default function Home() {
                   <Link href='/game/test'>Play with friends</Link>
                 </Button>
                 <Button asChild className='w-full'>
-                  <Link href='/board-editor'>Board Editor & Analysis</Link>
+                  <Link href='/game/test'>Board Editor & Analysis</Link>
                 </Button>
                 <Button asChild className='w-full'>
-                  <Link href='/archive'>Previous Games</Link>
+                  <Link href='/game/test'>Previous Games</Link>
                 </Button>
               </div>
             </div>

@@ -55,5 +55,5 @@ export default function Client({
     });
   }, []);
 
-  return <Board />;
+  return <Board realGame={true} />;
 }

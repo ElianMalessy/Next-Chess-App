@@ -8,7 +8,7 @@ import useGameStore from '@/hooks/useStateStore';
 
 import classes from './board.module.css';
 
-export default function Board() {
+export default function Board({realGame}: {realGame: boolean}) {
   const {playerColor, FEN} = useGameStore((state) => state);
   useEffect(() => {
     useGameStore.persist.rehydrate();
@@ -17,8 +17,7 @@ export default function Board() {
   const boardFiller = useMemo(() => {
     const tempBoardFiller: React.JSX.Element[] = [];
     // go backwards
-    console.log(playerColor)
-    if (playerColor === 'b') {
+    if (playerColor === 'w') {
       for (let i = FEN.length - 1, row = 1, column = 1, index = 0; i >= 0; i--, column++) {
         const spaceNumber = parseInt(FEN[i]);
         if (FEN[i] === '/') {
@@ -40,7 +39,8 @@ export default function Board() {
         );
         index++;
       }
-    } else {
+      return tempBoardFiller;
+    } else if (playerColor === 'b' || (playerColor === 'default' && !realGame)) {
       for (let i = 0, row = 8, column = 1, index = 0; i < FEN.length; i++, column++) {
         const spaceNumber = parseInt(FEN[i]);
         if (FEN[i] === '/') {
@@ -63,8 +63,8 @@ export default function Board() {
         );
         index++;
       }
+      return tempBoardFiller;
     }
-    return tempBoardFiller;
   }, [FEN, playerColor]);
 
   return <div className={cn(classes.board, 'rounded-md')}>{boardFiller}</div>;

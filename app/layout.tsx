@@ -27,7 +27,7 @@ export default async function RootLayout({children}: {children: React.ReactNode}
     const userExists = await kv.exists(tokens.name.replaceAll(' ', '_') ?? '');
     // console.log(userExists, await kv.exists(tokens.decodedToken.name ?? ''))
     if (userExists === 0) {
-      console.log('new user', tokens.name, userExists);
+      // console.log('new user', tokens.name, userExists);
       const firebaseUser = await getUser(tokens.uid ?? '');
       if (firebaseUser.displayName) {
         kv.hset(firebaseUser.displayName?.replaceAll(' ', '_') ?? '', {

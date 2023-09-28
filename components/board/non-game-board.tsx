@@ -18,5 +18,5 @@ export default function NonGameBoard() {
   useEffect(() => {
     localStorage.removeItem('local-store');
   });
-  return <Board />;
+  return <Board realGame={false} />;
 }

@@ -17,7 +17,7 @@ export default function Board({realGame}: {realGame: boolean}) {
   const boardFiller = useMemo(() => {
     const tempBoardFiller: React.JSX.Element[] = [];
     // go backwards
-    if (playerColor === 'w') {
+    if (playerColor === 'b') {
       for (let i = FEN.length - 1, row = 1, column = 1, index = 0; i >= 0; i--, column++) {
         const spaceNumber = parseInt(FEN[i]);
         if (FEN[i] === '/') {
@@ -40,7 +40,7 @@ export default function Board({realGame}: {realGame: boolean}) {
         index++;
       }
       return tempBoardFiller;
-    } else if (playerColor === 'b' || (playerColor === 'default' && !realGame)) {
+    } else if (playerColor === 'w' || (playerColor === 'default' && !realGame)) {
       for (let i = 0, row = 8, column = 1, index = 0; i < FEN.length; i++, column++) {
         const spaceNumber = parseInt(FEN[i]);
         if (FEN[i] === '/') {
@@ -65,7 +65,7 @@ export default function Board({realGame}: {realGame: boolean}) {
       }
       return tempBoardFiller;
     }
-  }, [FEN, playerColor]);
+  }, [FEN, playerColor, realGame]);
 
   return <div className={cn(classes.board, 'rounded-md')}>{boardFiller}</div>;
 }

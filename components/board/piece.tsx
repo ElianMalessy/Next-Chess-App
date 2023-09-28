@@ -227,16 +227,26 @@ export default function Piece({
 
   const handleMouseDown = useCallback(
     (e: any) => {
+      console.log(
+        playerColor,
+        getColor(
+          playerColor === 'w'
+            ? board[piecePosition.y][piecePosition.x]
+            : board[7 - piecePosition.y][7 - piecePosition.x]
+        ),
+        board,
+        piecePosition
+      );
       if (
         !divRef.current ||
         !Number.isInteger(piecePosition.x) ||
         !Number.isInteger(piecePosition.y) ||
-        (getColor(
-          playerColor === 'w'
-            ? board[piecePosition.y][piecePosition.x]
-            : board[7 - piecePosition.y][7 - piecePosition.x]
-        ) !== playerColor &&
-          playerColor !== 'default') ||
+        (playerColor !== 'default' &&
+          getColor(
+            playerColor === 'w'
+              ? board[piecePosition.y][piecePosition.x]
+              : board[7 - piecePosition.y][7 - piecePosition.x]
+          ) !== playerColor) ||
         (playerColor === 'default' && realGame)
       )
         return;

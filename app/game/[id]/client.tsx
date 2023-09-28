@@ -2,7 +2,7 @@
 import Board from '@/components/board/board';
 import useGameStore, {useEndStateStore} from '@/hooks/useStateStore';
 import {realtimeDB} from '@/components/firebase';
-import {ref, get, set, update} from '@firebase/database';
+import {ref, get, set, update, onValue} from '@firebase/database';
 import {useEffect} from 'react';
 
 export default function Client({
@@ -21,9 +21,11 @@ export default function Client({
   const dbRef = ref(realtimeDB, `${gameID}`);
   const {setDbRef} = useEndStateStore();
   const {setPlayerColor, setFENFromFirebase, setTurn, setCastling, setEnPassent} = useGameStore();
+  const {setCheckmate, setStalemate} = useEndStateStore();
 
   useEffect(() => {
     setDbRef(dbRef);
+    setPlayerColor('w');
     get(dbRef).then((snapshot) => {
       if (!snapshot.exists()) {
         set(dbRef, {
@@ -37,21 +39,30 @@ export default function Client({
         });
         return;
       }
-      setPlayerColor('w');
-      if (!snapshot.val().player_2 && snapshot.val().player_1 !== currentUserID) {
+      const data = snapshot.val();
+      if (!data.player_2 && data.player_1 !== currentUserID) {
         update(dbRef, {
           player_2: currentUserID,
         });
         console.log(currentUserID);
         setPlayerColor('b');
-      } else if (currentUserID === snapshot.val().player_2) {
+      } else if (currentUserID === data.player_2) {
         setPlayerColor('b');
       }
 
-      setFENFromFirebase(snapshot.val().FEN);
-      setTurn(snapshot.val().turn, null);
-      setCastling(snapshot.val().castling, null);
-      setEnPassent(snapshot.val().enPassent, null);
+      setFENFromFirebase(data.FEN);
+      setTurn(data.turn, null);
+      setCastling(data.castling, null);
+      setEnPassent(data.enPassent, null);
+    });
+    onValue(ref(realtimeDB, `${gameID}`), (snapshot: any) => {
+      const data = snapshot.val();
+      setFENFromFirebase(data.FEN);
+      setTurn(data.turn, null);
+      setCastling(data.castling, null);
+      setEnPassent(data.enPassent, null);
+      setCheckmate(data.checkmate, null);
+      setStalemate(data.stalemate, null);
     });
   }, []);
 

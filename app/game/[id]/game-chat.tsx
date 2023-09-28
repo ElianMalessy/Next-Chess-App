@@ -3,7 +3,7 @@ import {onValue, ref, push, set, child} from '@firebase/database';
 
 import {useState, useEffect, useRef, useCallback} from 'react';
 import {Card, CardHeader, CardContent, CardTitle, CardDescription, CardFooter} from '@/components/ui/card';
-import {useEndStateStore} from '@/hooks/useStateStore';
+import useGameStore, {useEndStateStore} from '@/hooks/useStateStore';
 import {realtimeDB} from '@/components/firebase';
 import {ScrollArea} from '@/components/ui/scroll-area';
 
@@ -21,6 +21,7 @@ export default function GameChat({
   gameID: string;
 }) {
   const {checkmate} = useEndStateStore();
+  const {playerColor, turn} = useGameStore();
   const dbRef = ref(realtimeDB, gameID + '/chat');
   const [message, setMessage] = useState<string[][]>([]);
   const [typingMessage, setTypingMessage] = useState('');
@@ -77,6 +78,9 @@ export default function GameChat({
     <Card className=' h-full'>
       <CardHeader>
         <CardTitle>Chat</CardTitle>
+        <CardDescription>Turn: {turn}</CardDescription>
+        <CardDescription>Player color: {playerColor}</CardDescription>
+
         {/* <CardDescription>{`${currentUserName} - ${opponentUsername.replaceAll('_', ' ')}`}</CardDescription> */}
       </CardHeader>
       <CardContent className=''>

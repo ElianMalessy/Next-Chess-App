@@ -232,7 +232,8 @@ export default function Piece({
         getColor(
           playerColor === 'w' ? board[piecePosition.y][piecePosition.x] : board[7 - piecePosition.y][piecePosition.x]
         ),
-        piecePosition
+        piecePosition,
+        board
       );
       if (
         !divRef.current ||

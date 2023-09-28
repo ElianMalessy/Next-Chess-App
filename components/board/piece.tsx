@@ -325,7 +325,11 @@ export default function Piece({
             );
           }
           return (
-            <div key={key} className={classes['hint']} style={{top: square[0] * scale, left: square[1] * scale}} />
+            <div
+              key={key}
+              className={classes['hint']}
+              style={{top: playerColor === 'w' ? square[0] : (7 - square[0]) * scale, left: square[1] * scale}}
+            />
           );
         })}
     </>

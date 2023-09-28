@@ -35,6 +35,7 @@ export default function Board({realGame}: {realGame: boolean}) {
             piece={FEN[i].toLowerCase()}
             column={8 - column}
             row={row - 1}
+            realGame={realGame}
           />
         );
         index++;
@@ -59,6 +60,7 @@ export default function Board({realGame}: {realGame: boolean}) {
             piece={FEN[i].toLowerCase()}
             column={column - 1}
             row={8 - row}
+            realGame={realGame}
           />
         );
         index++;

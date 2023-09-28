@@ -13,11 +13,13 @@ export default memo(function Piece({
   color,
   column,
   row,
+  realGame,
 }: {
   piece: string;
   color: string;
   column: number;
   row: number;
+  realGame: boolean;
 }) {
   const divRef: any = useRef();
   const {width} = useWindowDimensions();
@@ -66,7 +68,7 @@ export default memo(function Piece({
       setIsDragging(false);
 
       const newPosition = possibleMove(piecePosition.y, piecePosition.x);
-      if (newPosition && (playerColor === turn || playerColor === 'default')) {
+      if (newPosition && (playerColor === turn || (playerColor === 'default' && !realGame))) {
         console.log(playerColor, turn);
         setPiecePosition({x: newPosition[1], y: newPosition[0]});
         setSquares([]);
@@ -198,6 +200,7 @@ export default memo(function Piece({
     setCapturedPieces,
     capturedPieces,
     dbRef,
+    realGame,
   ]);
 
   const handleMouseMove = useCallback(

@@ -274,7 +274,7 @@ export default function Piece({
       });
       setIsDragging(true);
     },
-    [board, piecePosition, scale, playerColor, castling, enPassent]
+    [board, piecePosition, scale, playerColor, castling, enPassent, realGame]
   );
 
   useEffect(() => {
@@ -320,7 +320,7 @@ export default function Piece({
               <div
                 key={key}
                 className={classes['capture-hint']}
-                style={{top: square[0] * scale, left: square[1] * scale}}
+                style={{top: playerColor === 'w' ? square[0] : (7 - square[0]) * scale, left: square[1] * scale}}
               />
             );
           }

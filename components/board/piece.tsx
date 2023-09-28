@@ -234,11 +234,13 @@ export default function Piece({
         (getColor(
           playerColor === 'w' ? board[piecePosition.y][piecePosition.x] : board[7 - piecePosition.y][piecePosition.x]
         ) !== playerColor &&
-          playerColor !== 'default')
+          playerColor !== 'default') ||
+        (playerColor === 'default' && realGame)
       )
         return;
 
       const rect = divRef.current.getBoundingClientRect();
+      console.log(playerColor, piecePosition);
       setSquares(
         showPossibleMoves(
           playerColor === 'w' ? board[piecePosition.y][piecePosition.x] : board[7 - piecePosition.y][piecePosition.x],

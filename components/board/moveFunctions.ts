@@ -318,7 +318,7 @@ function getBlackPawnMoves(row: number, col: number, board: string[][], enPassen
   if (row === 4 && enPassent[1] === '3' && Math.abs(enPassent.charCodeAt(0) - 'a'.charCodeAt(0) - col) === 1) {
     possibleMoves.push([row + 1, enPassent.charCodeAt(0) - 'a'.charCodeAt(0), row]);
   }
-
+  console.log(row, col, possibleMoves, board);
   return removeDiscoveredChecks(possibleMoves, row, col, board, 'b', enPassent);
 }
 

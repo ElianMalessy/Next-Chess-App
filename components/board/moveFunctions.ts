@@ -236,6 +236,7 @@ function removeDiscoveredChecks(
     if (tempPossibleMoves[i].length === 3)
       board[tempPossibleMoves[i][2]][tempPossibleMoves[i][1]] = piece === 'P' ? 'p' : 'P';
   }
+  console.log(possibleMoves);
   return possibleMoves;
 }
 
@@ -300,7 +301,6 @@ function getWhitePawnMoves(row: number, col: number, board: string[][], enPassen
   if (row === 3 && enPassent[1] === '6' && Math.abs(enPassent.charCodeAt(0) - 'a'.charCodeAt(0) - col) === 1) {
     possibleMoves.push([row - 1, enPassent.charCodeAt(0) - 'a'.charCodeAt(0), row]);
   }
-  console.log(row, col, board, possibleMoves);
   return removeDiscoveredChecks(possibleMoves, row, col, board, 'w', enPassent);
 }
 

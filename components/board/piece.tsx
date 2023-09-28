@@ -323,6 +323,7 @@ export default function Piece({
       {scale &&
         squares.length > 0 &&
         squares.map((square, key) => {
+          console.log(square);
           if (board[square[0]][square[1]] !== '1') {
             return (
               <div

@@ -21,7 +21,7 @@ export default memo(function Piece({
 }) {
   const divRef: any = useRef();
   const {width} = useWindowDimensions();
-  const scale = Math.min((0.95 * width) / 8, 70);
+  const scale = Math.min((width - 16) / 8, 70);
   const [zIndex, setZIndex] = useState(1);
 
   const {

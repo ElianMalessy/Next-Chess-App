@@ -22,7 +22,7 @@ export default function GameChat({
 }) {
   const {checkmate} = useEndStateStore();
   const dbRef = ref(realtimeDB, gameID + '/chat');
-  const [message, setMessage] = useState([]);
+  const [message, setMessage] = useState<string[][]>([]);
   const [typingMessage, setTypingMessage] = useState('');
 
   useEffect(() => {
@@ -74,21 +74,23 @@ export default function GameChat({
   );
 
   return (
-    <Card className='2xs:max-w-[min(560px,95vw)] lg:max-w-[20rem]'>
+    <Card className=' h-full'>
       <CardHeader>
         <CardTitle>Chat</CardTitle>
         {/* <CardDescription>{`${currentUserName} - ${opponentUsername.replaceAll('_', ' ')}`}</CardDescription> */}
       </CardHeader>
-      <CardContent className='w-full'>
-        <ScrollArea className='w-full'>
+      <CardContent className=''>
+        <ScrollArea className=''>
           {message &&
             message.map((message, index) => {
               return (
-                <li key={index} className='flex items-center w-full '>
-                  <span className='w-full break-all'>{`${message[0]}: ${message[1]}`}</span>
-                  <span style={{color: 'rgba(56, 56, 56, 0.825)', fontSize: '0.9rem', marginLeft: 'auto'}}>
-                    {message[2] ? message[2] : getTime()}
-                  </span>
+                <li key={index} className='flex items-center '>
+                  <div className='text-xs'>
+                    {`${message[0]}: `}
+                    <span className='break-all text-sm'>{` ${message[1]}`}</span>
+                  </div>
+
+                  <span className='ml-auto text-xs'>{message[2] ? message[2] : getTime()}</span>
                 </li>
               );
             })}
@@ -102,7 +104,7 @@ export default function GameChat({
             onChange={handleChange}
             value={typingMessage}
             aria-label='Chat input'
-            className='w-full'
+            className=''
           />
           <button type='submit' className='send-button'>
             Send

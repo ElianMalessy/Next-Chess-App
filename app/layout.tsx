@@ -23,6 +23,7 @@ export default async function RootLayout({children}: {children: React.ReactNode}
   const tokens = await getCurrentUser();
   if (tokens?.uid) {
     useAuthStore.setState({currentUser: mapTokensToUser(tokens)});
+    if(!tokens.name) return;
     const userExists = await kv.exists(tokens.name.replaceAll(' ', '_') ?? '');
     // console.log(userExists, await kv.exists(tokens.decodedToken.name ?? ''))
     if (userExists === 0) {

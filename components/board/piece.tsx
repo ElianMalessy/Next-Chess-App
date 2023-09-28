@@ -265,7 +265,7 @@ export default function Piece({
       });
       setIsDragging(true);
     },
-    [board, piecePosition, scale, playerColor, castling, enPassent]
+    [board, piecePosition, scale, playerColor, castling, enPassent, realGame]
   );
 
   useEffect(() => {

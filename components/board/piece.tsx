@@ -8,7 +8,7 @@ import isCheckmate, {isStalemate, showPossibleMoves} from './moveFunctions';
 import findPositionOf, {getColor} from './utilityFunctions';
 
 import classes from './board.module.css';
-export default memo(function Piece({
+export default function Piece({
   piece,
   color,
   column,
@@ -227,6 +227,7 @@ export default memo(function Piece({
 
   const handleMouseDown = useCallback(
     (e: any) => {
+      console.log(getColor(board[piecePosition.y][piecePosition.x]), playerColor, realGame);
       if (
         !divRef.current ||
         !Number.isInteger(piecePosition.x) ||
@@ -320,4 +321,4 @@ export default memo(function Piece({
         })}
     </>
   );
-});
+}

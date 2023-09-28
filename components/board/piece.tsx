@@ -240,7 +240,9 @@ export default function Piece({
         !Number.isInteger(piecePosition.x) ||
         !Number.isInteger(piecePosition.y) ||
         (getColor(
-          playerColor === 'w' ? board[piecePosition.y][piecePosition.x] : board[7 - piecePosition.y][piecePosition.x]
+          playerColor === 'w'
+            ? board[piecePosition.y][piecePosition.x]
+            : board[7 - piecePosition.y][7 - piecePosition.x]
         ) !== playerColor &&
           playerColor !== 'default') ||
         (playerColor === 'default' && realGame)
@@ -250,9 +252,11 @@ export default function Piece({
       const rect = divRef.current.getBoundingClientRect();
       setSquares(
         showPossibleMoves(
-          playerColor === 'w' ? board[piecePosition.y][piecePosition.x] : board[7 - piecePosition.y][piecePosition.x],
+          playerColor === 'w'
+            ? board[piecePosition.y][piecePosition.x]
+            : board[7 - piecePosition.y][7 - piecePosition.x],
           playerColor === 'w' ? piecePosition.y : 7 - piecePosition.y,
-          piecePosition.x,
+          playerColor === 'w' ? piecePosition.x : 7 - piecePosition.x,
           board,
           enPassent,
           castling
@@ -322,7 +326,10 @@ export default function Piece({
               <div
                 key={key}
                 className={classes['capture-hint']}
-                style={{top: playerColor === 'w' ? square[0] : (7 - square[0]) * scale, left: square[1] * scale}}
+                style={{
+                  top: playerColor === 'w' ? square[0] : (7 - square[0]) * scale,
+                  left: playerColor === 'w' ? square[1] : (7 - square[1]) * scale,
+                }}
               />
             );
           }

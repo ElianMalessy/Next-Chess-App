@@ -1,11 +1,33 @@
 import Navbar from '@/components/navbar/navbar';
-import Server from './server';
-export default function Game({params}: {params: {id: string}}) {
+import Client from './client';
+import GameChat from './game-chat';
+import getCurrentUser from '@/components/server-actions/getCurrentUser';
+import {kv} from '@vercel/kv';
+export default async function Game({params}: {params: {id: string}}) {
+  const currentUser = await getCurrentUser();
+  // const opponent = await kv.hgetall()
   return (
     <>
       <Navbar />
-      <main className='h-screen w-screen p-2'>
-        <Server id={params.id} />
+      <main className='p-2'>
+        <div className='flex h-full w-full flex-row items-center justify-center'>
+          <div className='grid 2xs:grid-rows-3 2xs:grid-cols-1 2xs:gap-2 lg:grid-rows-1 lg:grid-cols-5 lg:gap-8 lg:mt-12'>
+            <div className='flex justify-center items-center 2xs:row-span-2 2xs:row-start-2 lg:col-span-3 lg:row-span-1 2xs:h-[100vw] sm:h-auto'>
+              <div className='relative h-[min(560px,95vw)] w-[min(560px,95vw)]'>
+                <Client
+                  currentUserName={currentUser?.name}
+                  currentUserEmail={currentUser?.email || ''}
+                  currentUserImg={currentUser?.picture || ''}
+                  currentUserID={currentUser?.uid || ''}
+                  gameID={params.id}
+                />
+              </div>
+            </div>
+            <div className='2xs:row-start-1 lg:row-start-1 lg:col-span-2 lg:col-start-4 flex items-center w-full'>
+              <GameChat currentUserName={currentUser?.name} gameID={params.id} />
+            </div>
+          </div>
+        </div>
       </main>
     </>
   );

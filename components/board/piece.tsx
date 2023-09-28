@@ -21,7 +21,7 @@ export default memo(function Piece({
 }) {
   const divRef: any = useRef();
   const {width} = useWindowDimensions();
-  const scale = Math.min((0.95 * (width)) / 8, 70);
+  const scale = Math.min((0.95 * width) / 8, 70);
   const [zIndex, setZIndex] = useState(1);
 
   const {
@@ -39,7 +39,9 @@ export default memo(function Piece({
     setPlayerColor,
     setCheck,
   } = useGameStore((state: any) => state);
-  const {setCheckmate, setStalemate, capturedPieces, setCapturedPieces, dbRef} = useEndStateStore((state: any) => state);
+  const {setCheckmate, setStalemate, capturedPieces, setCapturedPieces, dbRef} = useEndStateStore(
+    (state: any) => state
+  );
 
   const [piecePosition, setPiecePosition] = useState({x: column, y: row});
   const [isDragging, setIsDragging] = useState(false);
@@ -65,6 +67,7 @@ export default memo(function Piece({
 
       const newPosition = possibleMove(piecePosition.y, piecePosition.x);
       if (newPosition && (playerColor === turn || playerColor === 'default')) {
+        console.log(playerColor, turn);
         setPiecePosition({x: newPosition[1], y: newPosition[0]});
         setSquares([]);
         setZIndex(1);
@@ -194,7 +197,7 @@ export default memo(function Piece({
     setStalemate,
     setCapturedPieces,
     capturedPieces,
-    dbRef
+    dbRef,
   ]);
 
   const handleMouseMove = useCallback(

@@ -12,10 +12,7 @@ import {
 } from '@firebase/firestore';
 import {useState, useEffect, useRef} from 'react';
 import {firestore} from '@/components/firebase';
-// import {useAuth} from '@/components/contexts/auth-provider';
-import {useAuthStore} from '@/hooks/useAuthStore';
 import {Card, CardHeader, CardContent, CardTitle, CardDescription, CardFooter} from '@/components/ui/card';
-import type {DecodedIdToken} from 'next-firebase-auth-edge/lib/auth/token-verifier';
 
 export default function FriendChat({
   friendEmail,

@@ -1,30 +1,58 @@
 'use client';
 import Board from '@/components/board/board';
 import useGameStore, {useEndStateStore} from '@/hooks/useStateStore';
+import {realtimeDB} from '@/components/firebase';
+import {ref, get, set, update} from '@firebase/database';
+import {useEffect} from 'react';
+
 export default function Client({
-  FEN,
-  playerColor,
-  turn,
-  castling,
-  enPassent,
-  ref
+  currentUserName,
+  currentUserEmail,
+  currentUserImg,
+  currentUserID,
+  gameID,
 }: {
-  FEN: string;
-  playerColor: string;
-  turn: string;
-  castling: string;
-  enPassent: string;
-  ref: any
+  currentUserName: string;
+  currentUserEmail: string;
+  currentUserImg: string;
+  currentUserID: string;
+  gameID: string;
 }) {
-  const {setTurn, setCastling, setEnPassent, setFENFromFirebase, setPlayerColor} = useGameStore();
-  setFENFromFirebase(FEN);
-  setPlayerColor(playerColor);
-  setTurn(turn, null);
-  setCastling(castling, null);
-  setEnPassent(enPassent, null);
-  const {setDbRef} = useEndStateStore()
-  setDbRef(ref)
-  
+  const dbRef = ref(realtimeDB, `${gameID}`);
+  const {setDbRef} = useEndStateStore();
+  const {setPlayerColor, setFENFromFirebase, setTurn, setCastling, setEnPassent} = useGameStore();
+
+  useEffect(() => {
+    setDbRef(dbRef);
+    get(dbRef).then((snapshot) => {
+      if (!snapshot.exists()) {
+        set(dbRef, {
+          checkmate: false,
+          stalemate: false,
+          FEN: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR',
+          turn: 'w',
+          castling: 'KQkq',
+          enPassent: '-',
+          player_1: currentUserID,
+        });
+        return;
+      }
+      setPlayerColor('w');
+      if (!snapshot.val().player_2 && snapshot.val().player_1 !== currentUserID) {
+        update(dbRef, {
+          player_2: currentUserID,
+        });
+        setPlayerColor('b');
+      } else if (currentUserID === snapshot.val().player_2) {
+        setPlayerColor('b');
+      }
+
+      setFENFromFirebase(snapshot.val().FEN);
+      setTurn(snapshot.val().turn, null);
+      setCastling(snapshot.val().castling, null);
+      setEnPassent(snapshot.val().enPassent, null);
+    });
+  }, []);
 
   return <Board />;
 }

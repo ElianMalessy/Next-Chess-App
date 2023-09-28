@@ -67,7 +67,7 @@ export default function Piece({
     if (isDragging) {
       setIsDragging(false);
 
-      const newPosition = possibleMove(piecePosition.y, piecePosition.x);
+      const newPosition = possibleMove(playerColor === 'w' ? piecePosition.y : 7 - piecePosition.y, piecePosition.x);
       if (newPosition && (playerColor === turn || (playerColor === 'default' && !realGame))) {
         console.log(playerColor, turn);
         setPiecePosition({x: newPosition[1], y: newPosition[0]});
@@ -227,20 +227,22 @@ export default function Piece({
 
   const handleMouseDown = useCallback(
     (e: any) => {
-      console.log(getColor(board[piecePosition.y][piecePosition.x]), playerColor, realGame);
       if (
         !divRef.current ||
         !Number.isInteger(piecePosition.x) ||
         !Number.isInteger(piecePosition.y) ||
-        (getColor(board[piecePosition.y][piecePosition.x]) !== playerColor && playerColor !== 'default')
+        (getColor(
+          playerColor === 'w' ? board[piecePosition.y][piecePosition.x] : board[7 - piecePosition.y][piecePosition.x]
+        ) !== playerColor &&
+          playerColor !== 'default')
       )
         return;
 
       const rect = divRef.current.getBoundingClientRect();
       setSquares(
         showPossibleMoves(
-          board[piecePosition.y][piecePosition.x],
-          piecePosition.y,
+          playerColor === 'w' ? board[piecePosition.y][piecePosition.x] : board[7 - piecePosition.y][piecePosition.x],
+          playerColor === 'w' ? piecePosition.y : 7 - piecePosition.y,
           piecePosition.x,
           board,
           enPassent,
@@ -265,7 +267,7 @@ export default function Piece({
       });
       setIsDragging(true);
     },
-    [board, piecePosition, scale, playerColor, castling, enPassent, realGame]
+    [board, piecePosition, scale, playerColor, castling, enPassent]
   );
 
   useEffect(() => {

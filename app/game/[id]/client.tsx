@@ -42,7 +42,7 @@ export default function Client({
         update(dbRef, {
           player_2: currentUserID,
         });
-        console.log(currentUserID);s
+        console.log(currentUserID);
         setPlayerColor('b');
       } else if (currentUserID === snapshot.val().player_2) {
         setPlayerColor('b');

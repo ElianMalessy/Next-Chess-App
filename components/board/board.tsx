@@ -17,6 +17,7 @@ export default function Board() {
   const boardFiller = useMemo(() => {
     const tempBoardFiller: React.JSX.Element[] = [];
     // go backwards
+    console.log(playerColor)
     if (playerColor === 'b') {
       for (let i = FEN.length - 1, row = 1, column = 1, index = 0; i >= 0; i--, column++) {
         const spaceNumber = parseInt(FEN[i]);

@@ -240,7 +240,7 @@ export default function Piece({
         return;
 
       const rect = divRef.current.getBoundingClientRect();
-      console.log(playerColor, piecePosition);
+      console.log(playerColor, piecePosition, board);
       setSquares(
         showPossibleMoves(
           playerColor === 'w' ? board[piecePosition.y][piecePosition.x] : board[7 - piecePosition.y][piecePosition.x],

@@ -236,7 +236,6 @@ function removeDiscoveredChecks(
     if (tempPossibleMoves[i].length === 3)
       board[tempPossibleMoves[i][2]][tempPossibleMoves[i][1]] = piece === 'P' ? 'p' : 'P';
   }
-  console.log(possibleMoves);
   return possibleMoves;
 }
 

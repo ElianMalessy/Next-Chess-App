@@ -227,16 +227,16 @@ export default function Piece({
 
   const handleMouseDown = useCallback(
     (e: any) => {
-      console.log(
-        playerColor,
-        getColor(
-          playerColor === 'w'
-            ? board[piecePosition.y][piecePosition.x]
-            : board[7 - piecePosition.y][7 - piecePosition.x]
-        ),
-        board,
-        piecePosition
-      );
+      // console.log(
+      //   playerColor,
+      //   getColor(
+      //     playerColor === 'w'
+      //       ? board[piecePosition.y][piecePosition.x]
+      //       : board[7 - piecePosition.y][7 - piecePosition.x]
+      //   ),
+      //   board,
+      //   piecePosition
+      // );
       if (
         !divRef.current ||
         !Number.isInteger(piecePosition.x) ||
@@ -330,8 +330,8 @@ export default function Piece({
                 key={key}
                 className={classes['capture-hint']}
                 style={{
-                  top: playerColor === 'w' ? square[0] : (7 - square[0]) * scale,
-                  left: playerColor === 'w' ? square[1] : (7 - square[1]) * scale,
+                  top: playerColor === 'w' ? square[0] * scale : (7 - square[0]) * scale,
+                  left: playerColor === 'w' ? square[1] * scale : (7 - square[1]) * scale,
                 }}
               />
             );
@@ -341,8 +341,8 @@ export default function Piece({
               key={key}
               className={classes['hint']}
               style={{
-                top: playerColor === 'w' ? square[0] : (7 - square[0]) * scale,
-                left: playerColor === 'w' ? square[1] : (7 - square[1]) * scale,
+                top: playerColor === 'w' ? square[0] * scale : (7 - square[0]) * scale,
+                left: playerColor === 'w' ? square[1] * scale : (7 - square[1]) * scale,
               }}
             />
           );

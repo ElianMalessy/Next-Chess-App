@@ -67,9 +67,11 @@ export default function Piece({
     if (isDragging) {
       setIsDragging(false);
 
-      const newPosition = possibleMove(playerColor === 'w' ? piecePosition.y : 7 - piecePosition.y, piecePosition.x);
-      if (newPosition && (playerColor === turn || (playerColor === 'default' && !realGame))) {
-        console.log(playerColor, turn);
+      const newPosition = possibleMove(
+        playerColor === 'w' || playerColor === 'default' ? piecePosition.y : 7 - piecePosition.y,
+        piecePosition.x
+      );
+      if (newPosition && ((playerColor === turn && turn === color) || (playerColor === 'default' && !realGame))) {
         setPiecePosition({x: newPosition[1], y: newPosition[0]});
         setSquares([]);
         setZIndex(1);
@@ -169,12 +171,14 @@ export default function Piece({
         initialPiecePosition.current = {x: newPosition[1], y: newPosition[0]};
         initialMousePosition.current = {x: 0, y: 0};
         initialOffsetPiecePosition.current = {x: 0, y: 0};
+        setZIndex(0);
         return;
       }
       initialMousePosition.current.x = initialPiecePosition.current.x * scale;
       initialMousePosition.current.y = initialPiecePosition.current.y * scale;
 
       setPiecePosition({x: initialPiecePosition.current.x, y: initialPiecePosition.current.y});
+      setZIndex(0);
     }
   }, [
     board,
@@ -227,16 +231,6 @@ export default function Piece({
 
   const handleMouseDown = useCallback(
     (e: any) => {
-      // console.log(
-      //   playerColor,
-      //   getColor(
-      //     playerColor === 'w'
-      //       ? board[piecePosition.y][piecePosition.x]
-      //       : board[7 - piecePosition.y][7 - piecePosition.x]
-      //   ),
-      //   board,
-      //   piecePosition
-      // );
       if (
         !divRef.current ||
         !Number.isInteger(piecePosition.x) ||
@@ -254,11 +248,11 @@ export default function Piece({
       const rect = divRef.current.getBoundingClientRect();
       setSquares(
         showPossibleMoves(
-          playerColor === 'w'
+          playerColor === 'w' || playerColor === 'default'
             ? board[piecePosition.y][piecePosition.x]
             : board[7 - piecePosition.y][7 - piecePosition.x],
-          playerColor === 'w' ? piecePosition.y : 7 - piecePosition.y,
-          playerColor === 'w' ? piecePosition.x : 7 - piecePosition.x,
+          playerColor === 'w' || playerColor === 'default' ? piecePosition.y : 7 - piecePosition.y,
+          playerColor === 'w' || playerColor === 'default' ? piecePosition.x : 7 - piecePosition.x,
           board,
           enPassent,
           castling
@@ -323,15 +317,14 @@ export default function Piece({
       {scale &&
         squares.length > 0 &&
         squares.map((square, key) => {
-          console.log(square);
           if (board[square[0]][square[1]] !== '1') {
             return (
               <div
                 key={key}
                 className={classes['capture-hint']}
                 style={{
-                  top: playerColor === 'w' ? square[0] * scale : (7 - square[0]) * scale,
-                  left: playerColor === 'w' ? square[1] * scale : (7 - square[1]) * scale,
+                  top: playerColor === 'w' || playerColor === 'default' ? square[0] * scale : (7 - square[0]) * scale,
+                  left: playerColor === 'w' || playerColor === 'default' ? square[1] * scale : (7 - square[1]) * scale,
                 }}
               />
             );
@@ -341,8 +334,8 @@ export default function Piece({
               key={key}
               className={classes['hint']}
               style={{
-                top: playerColor === 'w' ? square[0] * scale : (7 - square[0]) * scale,
-                left: playerColor === 'w' ? square[1] * scale : (7 - square[1]) * scale,
+                top: playerColor === 'w' || playerColor === 'default' ? square[0] * scale : (7 - square[0]) * scale,
+                left: playerColor === 'w' || playerColor === 'default' ? square[1] * scale : (7 - square[1]) * scale,
               }}
             />
           );

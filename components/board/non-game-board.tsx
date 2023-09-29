@@ -16,7 +16,7 @@ export default function NonGameBoard() {
     setCheck(false, null);
   }, [setPlayerColor, setFENFromFirebase, setCastling, setEnPassent, setTurn, setCheck]);
   useEffect(() => {
-    localStorage.removeItem('local-store');
+    localStorage.removeItem('game-store');
   });
   return <Board realGame={false} />;
 }

@@ -11,6 +11,7 @@ import {useProfilePicStore} from '@/hooks/useProfilePicStore';
 export default function Providers({children}: {children: React.ReactNode}) {
   const {setCurrentUser} = useAuthStore();
   const {setImg} = useProfilePicStore();
+
   useEffect(() => {
     async function handleIdTokenChanged(user: User | null) {
       if (user) {

@@ -12,8 +12,9 @@ export default async function User({
   searchParams?: {[key: string]: string | string[] | undefined};
 }) {
   const friendRequest = searchParams?.friend ? true : false;
-  const pageUser: any = await kv.hgetall(params.id);
   const currentUser = await getCurrentUser();
+  const userID: any = await kv.get(params.id.replaceAll('_', ' '));
+  const pageUser: any = await kv.hgetall(userID ?? '');
   return (
     <>
       <Navbar />
@@ -21,7 +22,7 @@ export default async function User({
         <ProfileCard
           username={params.id}
           userImg={pageUser.photoURL}
-          userEmail={pageUser.email}
+          currentUserName={currentUser?.name}
           friendRequest={friendRequest}
         />
         {currentUser?.email && currentUser?.email !== pageUser.email && (

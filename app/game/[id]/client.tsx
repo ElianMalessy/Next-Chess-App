@@ -5,19 +5,7 @@ import {realtimeDB} from '@/components/firebase';
 import {ref, get, set, update, onValue} from '@firebase/database';
 import {useEffect} from 'react';
 
-export default function Client({
-  currentUserName,
-  currentUserEmail,
-  currentUserImg,
-  currentUserID,
-  gameID,
-}: {
-  currentUserName: string;
-  currentUserEmail: string;
-  currentUserImg: string;
-  currentUserID: string;
-  gameID: string;
-}) {
+export default function Client({currentUserID, gameID}: {currentUserID: string; gameID: string}) {
   const dbRef = ref(realtimeDB, `${gameID}`);
   const {setDbRef} = useEndStateStore();
   const {setPlayerColor, setFENFromFirebase, setTurn, setCastling, setEnPassent} = useGameStore();

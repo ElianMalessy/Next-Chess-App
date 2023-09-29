@@ -1,42 +1,32 @@
-'use client';
 import Image from 'next/image';
 import {UserX, MessageSquarePlus, Swords} from 'lucide-react';
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import {Card, CardContent, CardHeader, CardTitle, CardDescription} from '@/components/ui/card';
+import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import {Avatar} from '@/components/ui/avatar';
 import AvatarEdit from './avatar-editor';
-import {useAuthStore} from '@/hooks/useAuthStore';
 import NonGameBoard from '@/components/board/non-game-board';
 import FriendDialog from './friend-dialog';
-import {useState} from 'react';
 
-export default function ProfileCard({
-  username,
+export default async function ProfileCard({
   friendRequest,
+  username,
   userImg,
-  userEmail,
+  currentUserName,
 }: {
-  username: string;
   friendRequest: boolean;
+  username: string;
   userImg: string;
-  userEmail: string;
+  currentUserName: string;
 }) {
-  const {currentUser} = useAuthStore();
-  const [avatarClick, setAvatarClick] = useState(false);
   const img: any = userImg;
   const defaultImg =
     'https://firebasestorage.googleapis.com/v0/b/wechess-2ecf9.appspot.com/o/default-profile-pic.svg?alt=media&token=cbd585f6-a638-4e25-a502-436d2109ed7a';
+  const uuidPattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+  let replacementUserName = null;
+  if (username && uuidPattern.test(username)) replacementUserName = 'anonymous';
   return (
     <>
-      {false ? (
+      {!currentUserName ? (
         <div className='w-[calc(100vw-1rem)] flex items-center flex-col gap-2'>
           <div className='text-2xl'>404 - User Not Found</div>
           <div className='relative h-[min(560px,95vw)] w-[min(560px,95vw)]'>
@@ -47,22 +37,15 @@ export default function ProfileCard({
         <div className='w-full flex items-center flex-col'>
           <Card className='flex flex-row items-center w-[50%]'>
             <div className='ml-8'>
-              {false && <FriendDialog username={username} friendRequest={friendRequest} />}
+              {false && <FriendDialog username={replacementUserName ?? username} friendRequest={friendRequest} />}
 
-              {username && username.replaceAll('_', ' ') === currentUser?.displayName && (
-                <Dialog open={avatarClick} onOpenChange={setAvatarClick}>
-                  {/* <DialogHeader>
-                  </DialogHeader> */}
-
-                  <DialogContent>
-                    <AvatarEdit />
-                    upload file
-                  </DialogContent>
-                </Dialog>
+              {username && username.replaceAll('_', ' ') === currentUserName ? (
+                <AvatarEdit img={img} />
+              ) : (
+                <Avatar className='w-24 h-24'>
+                  <Image src={img} alt='user-profile-picture' width={96} height={96} priority />
+                </Avatar>
               )}
-              <Avatar className='w-24 h-24' onClick={() => setAvatarClick(true)}>
-                <Image src={img || defaultImg} alt='user-profile-picture' width={96} height={96} priority />
-              </Avatar>
             </div>
             <div>
               <CardHeader>

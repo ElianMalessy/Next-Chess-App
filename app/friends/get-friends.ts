@@ -4,5 +4,5 @@ import {kv} from '@vercel/kv';
 
 export default async function getFriends() {
   const currentUser = await getCurrentUser();
-  return await kv.lrange(`${currentUser?.name.replaceAll(' ', '_')}/friends`, 0, -1);
+  return await kv.lrange(`${currentUser?.uid}/friends`, 0, -1);
 }

@@ -1,10 +1,8 @@
-import Link from 'next/link';
-
 import {CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
-import {Button} from '@/components/ui/button';
-
 import Navbar from '@/components/navbar/navbar';
 import NonGameBoard from '@/components/board/non-game-board';
+
+import LinkButtons from './link-buttons';
 
 export default function Home() {
   return (
@@ -26,15 +24,7 @@ export default function Home() {
                     <CardDescription>Discover chess as you wait for your friends!</CardDescription>
                   </CardHeader>
                 </div>
-                <Button asChild className='w-full'>
-                  <Link href='/game/test'>Play with friends</Link>
-                </Button>
-                <Button asChild className='w-full'>
-                  <Link href='/game/test'>Board Editor & Analysis</Link>
-                </Button>
-                <Button asChild className='w-full'>
-                  <Link href='/game/test'>Previous Games</Link>
-                </Button>
+                <LinkButtons/>
               </div>
             </div>
           </div>

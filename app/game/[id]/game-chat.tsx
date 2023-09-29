@@ -63,7 +63,7 @@ export default function GameChat({
       if (typingMessage === '') return;
 
       const currTime = getTime();
-      const sentMessage: any = [currentUserName, typingMessage, currTime];
+      const sentMessage: any = [currentUserName ? currentUserName : 'anonymous', typingMessage, currTime];
       const newList = message.concat([sentMessage]);
       setMessage(newList);
       setTypingMessage('');
@@ -75,7 +75,7 @@ export default function GameChat({
   );
 
   return (
-    <Card className=' h-full'>
+    <Card className='w-full h-full relative'>
       <CardHeader>
         <CardTitle>Chat</CardTitle>
         <CardDescription>Turn: {turn}</CardDescription>
@@ -83,18 +83,18 @@ export default function GameChat({
 
         {/* <CardDescription>{`${currentUserName} - ${opponentUsername.replaceAll('_', ' ')}`}</CardDescription> */}
       </CardHeader>
-      <CardContent className=''>
-        <ScrollArea className=''>
+      <CardContent className='w-full relative'>
+        <ScrollArea className='w-full 2xs:h-[8rem] lg:h-[23rem] absolute pr-3'>
           {message &&
             message.map((message, index) => {
               return (
-                <li key={index} className='flex items-center '>
-                  <div className='text-xs'>
+                <li key={index} className='flex items-center'>
+                  <div className='text-xs text-muted-foreground'>
                     {`${message[0]}: `}
-                    <span className='break-all text-sm'>{` ${message[1]}`}</span>
+                    <span className='break-all text-sm text-primary'>{` ${message[1]}`}</span>
                   </div>
 
-                  <span className='ml-auto text-xs'>{message[2] ? message[2] : getTime()}</span>
+                  <span className='ml-auto text-xs text-muted-foreground'>{message[2] ? message[2] : getTime()}</span>
                 </li>
               );
             })}

@@ -23,7 +23,7 @@ export default async function Game({params}: {params: {id: string}}) {
                 />
               </div>
             </div>
-            <div className='2xs:row-start-3 lg:row-start-1 lg:col-span-2 lg:col-start-4 lg:max-w-[20rem] flex items-center 2xs:max-w-[min(560px,calc(100vw-1rem))] max-h-[min(560px,calc(100vw-1rem))]'>
+            <div className='2xs:row-start-3 lg:row-start-1 lg:col-span-2 lg:col-start-4 flex items-center 2xs:h-[20rem] 2xs:max-w-[min(560px,calc(100vw-1rem))] lg:h-[min(560px,calc(100vw-1rem))] lg:max-w-[20rem]'>
               <GameChat currentUserName={currentUser?.name} gameID={params.id} />
             </div>
           </div>

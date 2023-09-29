@@ -56,6 +56,7 @@ export default function Client({
       setEnPassent(data.enPassent, null);
     });
     onValue(ref(realtimeDB, `${gameID}`), (snapshot: any) => {
+      if (!snapshot.exists()) return;
       const data = snapshot.val();
       setFENFromFirebase(data.FEN);
       setTurn(data.turn, null);

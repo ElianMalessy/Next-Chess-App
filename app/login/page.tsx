@@ -41,6 +41,7 @@ export default function Login() {
     });
     router.push('/');
   }
+
   return (
     <main className='h-full w-full flex items-center justify-center p-2'>
       <Card className='p-5'>
@@ -116,11 +117,13 @@ export default function Login() {
             </Button>
             <Button
               variant={'link'}
+              className='col-span-1'
               onClick={async () => {
+                console.log('BRUHHHHHHHHHHHHHHHHHHHHHHHHH');
                 await anonSignup();
+                console.log('OKKKKKKKKKKKKKKKKKKKKKKK');
                 router.push('/');
               }}
-              className='col-span-1'
             >
               Play as guest
             </Button>

@@ -43,6 +43,7 @@ const authStore = (set: any, get: any) => ({
   setTokens: async (credential: UserCredential) => {
     const tokenResult = await credential?.user.getIdTokenResult();
     // Sets authentication cookies
+    // some error here with anon signup now idk why bruh
     await fetch('/api/login', {
       method: 'GET',
       headers: {
@@ -90,6 +91,7 @@ const authStore = (set: any, get: any) => ({
 
   login: async (email: string, password: string) => {
     const credential = await signInWithEmailAndPassword(auth, email, password);
+    // console.log(credential);
     await get().setTokens(credential);
     return credential;
   },

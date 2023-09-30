@@ -19,11 +19,6 @@ export default async function ProfileCard({
   currentUserName: string;
 }) {
   const img: any = userImg;
-  const defaultImg =
-    'https://firebasestorage.googleapis.com/v0/b/wechess-2ecf9.appspot.com/o/default-profile-pic.svg?alt=media&token=cbd585f6-a638-4e25-a502-436d2109ed7a';
-  const uuidPattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
-  let replacementUserName = null;
-  if (username && uuidPattern.test(username)) replacementUserName = 'anonymous';
   return (
     <>
       {!currentUserName ? (
@@ -37,7 +32,7 @@ export default async function ProfileCard({
         <div className='w-full flex items-center flex-col'>
           <Card className='flex flex-row items-center w-[50%]'>
             <div className='ml-8'>
-              {false && <FriendDialog username={replacementUserName ?? username} friendRequest={friendRequest} />}
+              {false && <FriendDialog username={username} friendRequest={friendRequest} />}
 
               {username && username.replaceAll('_', ' ') === currentUserName ? (
                 <AvatarEdit img={img} />

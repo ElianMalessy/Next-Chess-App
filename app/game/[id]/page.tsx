@@ -4,9 +4,6 @@ import GameChat from './game-chat';
 import getCurrentUser from '@/components/server-actions/getCurrentUser';
 export default async function Game({params}: {params: {id: string}}) {
   const currentUser = await getCurrentUser();
-  const uuidPattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
-  let replacementUserName = null;
-  if (currentUser?.name && uuidPattern.test(currentUser?.name)) replacementUserName = 'anonymous';
   return (
     <>
       <Navbar />
@@ -19,7 +16,7 @@ export default async function Game({params}: {params: {id: string}}) {
               </div>
             </div>
             <div className='2xs:row-start-3 lg:row-start-1 lg:col-span-2 lg:col-start-4 flex items-center 2xs:h-[20rem] 2xs:max-w-[min(560px,calc(100vw-1rem))] lg:h-[min(560px,calc(100vw-1rem))] lg:max-w-[20rem]'>
-              <GameChat currentUserName={replacementUserName ?? currentUser?.name} gameID={params.id} />
+              <GameChat currentUserName={currentUser?.name} gameID={params.id} />
             </div>
           </div>
         </div>

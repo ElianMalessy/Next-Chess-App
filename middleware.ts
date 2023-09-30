@@ -2,6 +2,7 @@ import {NextRequest} from 'next/server';
 import {NextResponse} from 'next/server';
 import {authentication} from 'next-firebase-auth-edge/lib/next/middleware';
 import {serverConfig} from './firebase-config';
+import createUser from '@/app/create-user';
 
 const PUBLIC_PATHS = ['/register', '/login', '/reset-password'];
 function redirectToLogin(request: NextRequest) {
@@ -43,7 +44,8 @@ export async function middleware(request: NextRequest) {
     handleInvalidToken: async () => {
       return redirectToLogin(request);
     },
-    handleValidToken: async () => {
+    handleValidToken: async ({decodedToken}) => {
+      await createUser(decodedToken);
       return redirectToHome(request);
     },
     handleError: async (error: any) => {

@@ -3,7 +3,7 @@ import {onValue, ref, push, set, child} from '@firebase/database';
 
 import {useState, useEffect, useRef, useCallback} from 'react';
 import {Card, CardHeader, CardContent, CardTitle, CardDescription, CardFooter} from '@/components/ui/card';
-import useGameStore, {useEndStateStore} from '@/hooks/useStateStore';
+import useGameStore, {useEndStateStore} from '@/lib/hooks/useStateStore';
 import {realtimeDB} from '@/components/firebase';
 import {ScrollArea} from '@/components/ui/scroll-area';
 

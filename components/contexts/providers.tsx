@@ -5,8 +5,8 @@ import {useEffect} from 'react';
 import type {User} from '@firebase/auth';
 import {onIdTokenChanged} from '@firebase/auth';
 import {auth} from '@/components/firebase';
-import {useAuthStore} from '@/hooks/useAuthStore';
-import {useProfilePicStore} from '@/hooks/useProfilePicStore';
+import {useAuthStore} from '@/lib/hooks/useAuthStore';
+import {useProfilePicStore} from '@/lib/hooks/useProfilePicStore';
 
 export default function Providers({children}: {children: React.ReactNode}) {
   const {setCurrentUser} = useAuthStore();

@@ -4,7 +4,7 @@ import {cn} from '@/lib/utils';
 import {onValue, ref, push, set, child} from '@firebase/database';
 
 import Piece from './piece';
-import useGameStore from '@/hooks/useStateStore';
+import useGameStore from '@/lib/hooks/useStateStore';
 
 import classes from './board.module.css';
 

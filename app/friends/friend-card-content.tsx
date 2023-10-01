@@ -2,7 +2,7 @@ import {UserX, MessageSquarePlus, Swords} from 'lucide-react';
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from '@/components/ui/tooltip';
 
 import {CardContent} from '@/components/ui/card';
-import removeFriend from '@/components/server-actions/remove-friend';
+import removeFriend from '@/lib/server-actions/remove-friend';
 
 export default function FriendCardContent({
   currentUserID,

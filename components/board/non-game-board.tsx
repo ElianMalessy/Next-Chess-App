@@ -1,5 +1,5 @@
 'use client';
-import useGameStore from '@/hooks/useStateStore';
+import useGameStore from '@/lib/hooks/useStateStore';
 import {useEffect} from 'react';
 import Board from './board';
 export default function NonGameBoard() {

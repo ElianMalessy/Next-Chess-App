@@ -1,6 +1,6 @@
 'use client';
 import Board from '@/components/board/board';
-import useGameStore, {useEndStateStore} from '@/hooks/useStateStore';
+import useGameStore, {useEndStateStore} from '@/lib/hooks/useStateStore';
 import {realtimeDB} from '@/components/firebase';
 import {ref, get, set, update, onValue} from '@firebase/database';
 import {useEffect} from 'react';

@@ -2,8 +2,8 @@ import Navbar from '@/components/navbar/navbar';
 import ProfileCard from './profile-card';
 import FriendChat from './friend-chat';
 import {kv} from '@vercel/kv';
-import getCurrentUser from '@/components/server-actions/get-current-user';
-import AddFriend from '../../../components/server-actions/add-friend';
+import getCurrentUser from '@/lib/server-actions/get-current-user';
+import AddFriend from '../../../lib/server-actions/add-friend';
 
 export default async function User({
   params,

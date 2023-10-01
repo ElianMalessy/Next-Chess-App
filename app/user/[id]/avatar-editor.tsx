@@ -2,7 +2,7 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {Avatar} from '@/components/ui/avatar';
 import Image from 'next/image';
-import {useProfilePicStore} from '@/hooks/useProfilePicStore';
+import {useProfilePicStore} from '@/lib/hooks/useProfilePicStore';
 import {Dialog, DialogContent} from '@/components/ui/dialog';
 
 export default function AvatarEdit({img}: {img: string}) {

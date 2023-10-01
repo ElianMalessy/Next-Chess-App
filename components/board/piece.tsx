@@ -1,8 +1,8 @@
 import {useState, useRef, useEffect, useContext, useCallback, memo} from 'react';
 import {update} from '@firebase/database';
 
-import useGameStore, {useEndStateStore} from '@/hooks/useStateStore';
-import useWindowDimensions from '@/hooks/useWindowDimensions';
+import useGameStore, {useEndStateStore} from '@/lib/hooks/useStateStore';
+import useWindowDimensions from '@/lib/hooks/useWindowDimensions';
 
 import isCheckmate, {isStalemate, showPossibleMoves} from './moveFunctions';
 import findPositionOf, {getColor} from './utilityFunctions';

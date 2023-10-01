@@ -12,17 +12,18 @@ import {
 } from '@/components/ui/dropdown-menu';
 import {Button} from '@/components/ui/button';
 // import {useAuth} from '@/components/contexts/auth-provider';
-import {useAuthStore} from '@/hooks/useAuthStore';
-import {useProfilePicStore} from '@/hooks/useProfilePicStore';
+import {useAuthStore} from '@/lib/hooks/useAuthStore';
+import {useProfilePicStore} from '@/lib/hooks/useProfilePicStore';
 import ProfileDropdown from './profile-dropdown';
 import {validate} from 'uuid';
 
 export default function Profile() {
   const {scale, startOffset, img} = useProfilePicStore();
+  const {currentUser} = useAuthStore();
+
   useEffect(() => {
     useProfilePicStore.persist.rehydrate();
   }, []);
-  const uuidPattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -49,13 +50,13 @@ export default function Profile() {
         <DropdownMenuLabel className='font-normal'>
           <div className='flex flex-col space-y-1'>
             <p className='text-sm font-medium leading-none'>
-              {useAuthStore.getState().currentUser?.displayName
-                ? validate(useAuthStore.getState().currentUser?.displayName ?? '')
+              {currentUser?.displayName
+                ? validate(currentUser?.displayName)
                   ? 'anonymous'
-                  : useAuthStore.getState().currentUser?.displayName
+                  : currentUser?.displayName
                 : 'user'}
             </p>
-            <p className='text-xs leading-none text-muted-foreground'>{useAuthStore.getState().currentUser?.email}</p>
+            <p className='text-xs leading-none text-muted-foreground'>{currentUser?.email}</p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />

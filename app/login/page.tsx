@@ -13,7 +13,7 @@ import {Button} from '@/components/ui/button';
 import {Separator} from '@/components/ui/separator';
 
 // import {useAuth} from '@/components/contexts/auth-provider';
-import {useAuthStore} from '@/hooks/useAuthStore';
+import {useAuthStore} from '@/lib/hooks/useAuthStore';
 //import Background from './Background';
 
 const formSchema = z.object({
@@ -120,7 +120,7 @@ export default function Login() {
               className='col-span-1'
               onClick={async () => {
                 await anonSignup();
-                router.push('/');
+                // router.push('/');
               }}
             >
               Play as guest

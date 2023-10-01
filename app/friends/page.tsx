@@ -1,23 +1,25 @@
-import {Link, ChevronRight, Mail, MessagesSquare, Loader2} from 'lucide-react';
+import {kv} from '@vercel/kv';
 
 import {Card, CardHeader, CardTitle, CardContent, CardDescription} from '@/components/ui/card';
-import {Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList} from '@/components/ui/command';
-import {Button} from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import {Input} from '@/components/ui/input';
 
 import Navbar from '@/components/navbar/navbar';
 import FriendsCard from './friends-card';
 import FriendLink from './friend-link';
-
+import ChallengeLink from './challenge-link';
+import getFriends from '@/lib/server-actions/get-friends';
+import getCurrentUser from '@/lib/server-actions/get-current-user';
 export default async function Friends() {
+  const currentUser = await getCurrentUser();
+  let friends: any = null;
+  let friendData: any = [];
+  if (currentUser) {
+    friends = await getFriends(currentUser);
+    if (friends && friends.length) {
+      for (let i = 0; i < friends.length; i++) {
+        friendData.push(await kv.hgetall(friends[i].uid));
+      }
+    }
+  }
   return (
     <>
       <Navbar />
@@ -26,9 +28,10 @@ export default async function Friends() {
           <CardHeader>
             <CardTitle>Friends</CardTitle>
           </CardHeader>
-          <div className='grid grid-cols-2 grid-rows-2 gap-4'>
+          {/* <div className='grid grid-cols-2 grid-rows-2 gap-4'> */}
+          <div className='grid grid-cols-2 grid-rows-1 gap-4'>
             <FriendLink />
-            <Dialog>
+            {/* <Dialog>
               <DialogTrigger asChild>
                 <Button variant='outline' className='text-2xl py-9 px-5 gap-4'>
                   <Mail />
@@ -43,23 +46,9 @@ export default async function Friends() {
                 </DialogHeader>
                 <Input />
               </DialogContent>
-            </Dialog>
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant='outline' className='text-2xl py-9 px-5 gap-4'>
-                  <Link />
-                  Create Challenge Link
-                  <ChevronRight className='ml-auto' />
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle className='w-full text-center'>Create Challenge Link</DialogTitle>
-                </DialogHeader>
-                <Input />
-              </DialogContent>
-            </Dialog>
-            <Dialog>
+            </Dialog> */}
+            <ChallengeLink />
+            {/* <Dialog>
               <DialogTrigger asChild>
                 <Button variant='outline' className='text-2xl py-9 px-5 gap-4'>
                   <MessagesSquare />
@@ -73,18 +62,9 @@ export default async function Friends() {
                 </DialogHeader>
                 <Input />
               </DialogContent>
-            </Dialog>
+            </Dialog> */}
           </div>
-          <Card className='w-[50%] p-2'>
-            <CardContent className='flex justify-center'>
-              <Command className='rounded-lg border shadow-md w-[20vw]'>
-                <CommandInput placeholder='Search for friends...' />
-              </Command>
-            </CardContent>
-            <CardContent>
-              <FriendsCard />
-            </CardContent>
-          </Card>
+          <FriendsCard friends={friendData} />
         </div>
       </main>
     </>

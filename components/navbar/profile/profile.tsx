@@ -15,6 +15,7 @@ import {Button} from '@/components/ui/button';
 import {useAuthStore} from '@/hooks/useAuthStore';
 import {useProfilePicStore} from '@/hooks/useProfilePicStore';
 import ProfileDropdown from './profile-dropdown';
+import {validate} from 'uuid';
 
 export default function Profile() {
   const {scale, startOffset, img} = useProfilePicStore();
@@ -49,7 +50,7 @@ export default function Profile() {
           <div className='flex flex-col space-y-1'>
             <p className='text-sm font-medium leading-none'>
               {useAuthStore.getState().currentUser?.displayName
-                ? uuidPattern.test(useAuthStore.getState().currentUser?.displayName ?? '')
+                ? validate(useAuthStore.getState().currentUser?.displayName ?? '')
                   ? 'anonymous'
                   : useAuthStore.getState().currentUser?.displayName
                 : 'user'}

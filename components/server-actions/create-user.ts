@@ -1,7 +1,7 @@
 'use server';
-import {randomUUID} from 'crypto';
 
 import {kv} from '@vercel/kv';
+import {v4} from 'uuid';
 import {getFirebaseAuth} from 'next-firebase-auth-edge/lib/auth';
 
 import {serverConfig} from '@/firebase-config';
@@ -19,27 +19,26 @@ export default async function createUser(decodedToken: DecodedIdToken) {
   const firebaseUser = await getUser(decodedToken.uid ?? '');
   if (!firebaseUser.uid) return;
 
-  const profilePic =
-    firebaseUser.photoURL ||
+  const defaultProfilePic =
     'https://firebasestorage.googleapis.com/v0/b/wechess-2ecf9.appspot.com/o/default-profile-pic.svg?alt=media&token=cbd585f6-a638-4e25-a502-436d2109ed7a';
   await kv.hset(decodedToken.uid ?? '', {
     // email: firebaseUser.email, anon users dont have this
     metadata: firebaseUser.metadata,
-    photoURL: profilePic,
+    photoURL: defaultProfilePic,
   });
   const currentUserValue = mapTokensToUser(decodedToken);
   if (firebaseUser.displayName) {
     useAuthStore.setState({
       currentUser: {
         ...currentUserValue,
-        photoURL: profilePic,
+        photoURL: firebaseUser.photoURL || defaultProfilePic,
       },
     });
     kv.set(firebaseUser.displayName, decodedToken.uid);
   } else {
-    const idName = randomUUID();
-    updateUser(decodedToken.uid, {displayName: idName});
-    useAuthStore.setState({currentUser: {...currentUserValue, displayName: idName, photoURL: profilePic}});
+    const idName = v4();
+    updateUser(decodedToken.uid, {displayName: idName, photoURL: defaultProfilePic});
+    useAuthStore.setState({currentUser: {...currentUserValue, displayName: idName, photoURL: defaultProfilePic}});
     kv.set(idName, decodedToken.uid);
   }
 }

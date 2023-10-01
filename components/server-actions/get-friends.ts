@@ -1,5 +1,5 @@
 'use server';
-import getCurrentUser from '@/components/server-actions/getCurrentUser';
+import getCurrentUser from '@/components/server-actions/get-current-user';
 import {kv} from '@vercel/kv';
 
 export default async function getFriends() {

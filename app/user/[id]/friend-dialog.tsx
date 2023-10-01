@@ -2,8 +2,8 @@
 import {useState} from 'react';
 import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from '@/components/ui/dialog';
 
-export default function FriendDialog({username, friends, old}: {username: string; friends: boolean; old: boolean}) {
-  const [openDialog, setOpenDialog] = useState(friends);
+export default function FriendDialog({username, friend, old}: {username: string; friend: boolean; old: boolean}) {
+  const [openDialog, setOpenDialog] = useState(friend);
 
   return (
     <Dialog open={openDialog} onOpenChange={setOpenDialog}>

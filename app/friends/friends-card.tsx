@@ -5,7 +5,7 @@ import {Suspense, useEffect, useState} from 'react';
 
 import {Card, CardHeader, CardTitle, CardContent, CardDescription} from '@/components/ui/card';
 import {Avatar} from '@/components/ui/avatar';
-import getFriends from './get-friends';
+import getFriends from '../../components/server-actions/get-friends';
 
 export default async function FriendsCard() {
   let friends: any = await getFriends();
@@ -35,7 +35,7 @@ export default async function FriendsCard() {
                       ? 'anonymous'
                       : friend.username.replaceAll('_', ' ')}
                   </CardTitle>
-                  <CardDescription>Friends for 10 months</CardDescription>
+                  <CardDescription>{friend.since !== '' && `Friends since: ${friend.since}`}</CardDescription>
                 </CardHeader>
                 <CardContent className='w-full flex gap-2'>
                   <Swords strokeWidth={1} />

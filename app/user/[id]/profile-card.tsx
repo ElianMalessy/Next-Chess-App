@@ -12,14 +12,14 @@ export default async function ProfileCard({
   username,
   userImg,
   currentUserName,
-  friends,
+  friend,
   userCreationTime,
 }: {
   friendRequest: boolean;
   username: string;
   userImg: string;
   currentUserName: string;
-  friends: any;
+  friend: any;
   userCreationTime: any;
 }) {
   const uuidPattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
@@ -36,7 +36,7 @@ export default async function ProfileCard({
         <div className='w-full flex items-center flex-col'>
           <Card className='flex flex-row items-center w-[50%]'>
             <div className='ml-8'>
-              <FriendDialog username={username} friends={friends ? true : false} old={friends?.old} />
+              <FriendDialog username={username} friend={friend ? true : false} old={friend?.old} />
 
               {username && username.replaceAll('_', ' ') === currentUserName ? (
                 <AvatarEdit img={userImg} />
@@ -51,8 +51,8 @@ export default async function ProfileCard({
                 <CardTitle>
                   {username ? (uuidPattern.test(username) ? 'anonymous' : username.replaceAll('_', ' ')) : 'user'}
                 </CardTitle>
-                {friendRequest && friends && (
-                  <CardDescription>{friends.since !== '' && `Friends since: ${friends.since}`}</CardDescription>
+                {friendRequest && friend && (
+                  <CardDescription>{friend.since !== '' && `friend since: ${friend.since}`}</CardDescription>
                 )}
                 <CardDescription>
                   {userCreationTime && `Joined: ${new Date(userCreationTime).toString()}`}

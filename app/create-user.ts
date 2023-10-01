@@ -5,7 +5,7 @@ import {getFirebaseAuth} from 'next-firebase-auth-edge/lib/auth';
 
 import {serverConfig} from '@/firebase-config';
 import {useAuthStore} from '@/hooks/useAuthStore';
-import {mapTokensToUser} from '@/components/server-actions/getCurrentUser';
+import {mapTokensToUser} from '@/components/server-actions/get-current-user';
 import {DecodedIdToken} from 'next-firebase-auth-edge/lib/auth/token-verifier';
 
 const {getUser, updateUser} = getFirebaseAuth(serverConfig.serviceAccount, serverConfig.apiKey);

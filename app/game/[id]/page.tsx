@@ -1,7 +1,7 @@
 import Navbar from '@/components/navbar/navbar';
 import Client from './client';
 import GameChat from './game-chat';
-import getCurrentUser from '@/components/server-actions/getCurrentUser';
+import getCurrentUser from '@/components/server-actions/get-current-user';
 export default async function Game({params}: {params: {id: string}}) {
   const currentUser = await getCurrentUser();
   return (

@@ -4,19 +4,7 @@ import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from '@/compon
 import {CardContent} from '@/components/ui/card';
 import removeFriend from '@/lib/server-actions/remove-friend';
 
-export default function FriendCardContent({
-  currentUserID,
-  friendID,
-  currentUserData,
-  friendData,
-  timestamp,
-}: {
-  currentUserID: string;
-  friendID: string;
-  currentUserData: any;
-  friendData: any;
-  timestamp: number;
-}) {
+export default function FriendCardContent({currentUser, friend}: {currentUser: any; friend: any}) {
   return (
     <CardContent className='w-full flex gap-2'>
       <TooltipProvider delayDuration={350}>
@@ -42,10 +30,7 @@ export default function FriendCardContent({
       <TooltipProvider delayDuration={350}>
         <Tooltip>
           <TooltipTrigger asChild>
-            <UserX
-              strokeWidth={1}
-              onClick={() => removeFriend(currentUserID, friendID, currentUserData, friendData, timestamp)}
-            />
+            <UserX strokeWidth={1} onClick={() => removeFriend(currentUser, friend)} />
           </TooltipTrigger>
           <TooltipContent>
             <p>unfriend</p>

@@ -12,13 +12,10 @@ export default async function Friends() {
   const currentUser = await getCurrentUser();
   let friends: any = null;
   let friendData: any = [];
+  let currentUserData: any = null;
   if (currentUser) {
-    friends = await getFriends(currentUser);
-    if (friends && friends.length) {
-      for (let i = 0; i < friends.length; i++) {
-        friendData.push(await kv.hgetall(friends[i].uid));
-      }
-    }
+    friends = await getFriends(currentUser.uid);
+    currentUserData = await kv.hgetall(currentUser.uid);
   }
   return (
     <>
@@ -64,7 +61,7 @@ export default async function Friends() {
               </DialogContent>
             </Dialog> */}
           </div>
-          <FriendsCard friends={friendData} />
+          <FriendsCard friends={friends} currentUser={currentUser} />
         </div>
       </main>
     </>

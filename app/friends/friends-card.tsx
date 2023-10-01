@@ -7,9 +7,9 @@ import Fuse from 'fuse.js';
 import {Card, CardHeader, CardTitle, CardContent, CardDescription} from '@/components/ui/card';
 import {Avatar} from '@/components/ui/avatar';
 import {Command, CommandInput} from '@/components/ui/command';
-import {Input} from '@/components/ui/input';
+import FriendCardContent from './friend-card-content';
 
-export default function FriendsCard({friends}: {friends: any[]}) {
+export default function FriendsCard({friends, currentUser}: {friends: any[]; currentUser: any}) {
   const inputRef = useRef<HTMLInputElement | null>();
   const [isPending, startTransition] = useTransition();
 
@@ -62,6 +62,7 @@ export default function FriendsCard({friends}: {friends: any[]}) {
                     </CardTitle>
                     <CardDescription>{friend.since !== '' && `Friends since: ${friend.since}`}</CardDescription>
                   </CardHeader>
+                  <FriendCardContent currentUser={currentUser} friend={friend} />
                 </div>
               </Card>
             );

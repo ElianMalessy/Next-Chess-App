@@ -27,13 +27,11 @@ export default async function createUser(decodedToken: DecodedIdToken) {
   }
   const currentUserValue = mapTokensToUser(decodedToken);
   if (firebaseUser.displayName) {
-    console.log(firebaseUser.displayName, 'nameeeeeeeeeeeeeeeeeeeeeee');
     useAuthStore.setState({currentUser: currentUserValue});
     kv.set(firebaseUser.displayName, decodedToken.uid);
   } else {
     const idName = randomUUID();
     updateUser(decodedToken.uid, {displayName: idName});
-    console.log(idName, 'hereeeeeeeeeeeeeeeeeeeeeeeeeeeeee');
     useAuthStore.setState({currentUser: {...currentUserValue, displayName: idName}});
     kv.set(idName, decodedToken.uid);
   }

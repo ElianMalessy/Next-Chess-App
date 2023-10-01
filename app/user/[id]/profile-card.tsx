@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import {UserX, MessageSquarePlus, Swords} from 'lucide-react';
 
-import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
+import {Card, CardContent, CardHeader, CardTitle, CardDescription} from '@/components/ui/card';
 import {Avatar} from '@/components/ui/avatar';
 import AvatarEdit from './avatar-editor';
 import NonGameBoard from '@/components/board/non-game-board';
@@ -12,11 +12,15 @@ export default async function ProfileCard({
   username,
   userImg,
   currentUserName,
+  friends,
+  userCreationTime,
 }: {
   friendRequest: boolean;
   username: string;
   userImg: string;
   currentUserName: string;
+  friends: any;
+  userCreationTime: any;
 }) {
   const uuidPattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
   return (
@@ -32,7 +36,7 @@ export default async function ProfileCard({
         <div className='w-full flex items-center flex-col'>
           <Card className='flex flex-row items-center w-[50%]'>
             <div className='ml-8'>
-              {false && <FriendDialog username={username} friendRequest={friendRequest} />}
+              <FriendDialog username={username} friends={friends ? true : false} old={friends?.old} />
 
               {username && username.replaceAll('_', ' ') === currentUserName ? (
                 <AvatarEdit img={userImg} />
@@ -47,16 +51,21 @@ export default async function ProfileCard({
                 <CardTitle>
                   {username ? (uuidPattern.test(username) ? 'anonymous' : username.replaceAll('_', ' ')) : 'user'}
                 </CardTitle>
-                {/* <CardDescription>{since !== '' && `Friends since: ${since}`}</CardDescription>
+                {friendRequest && friends && (
+                  <CardDescription>{friends.since !== '' && `Friends since: ${friends.since}`}</CardDescription>
+                )}
                 <CardDescription>
-                  {currentUser?.metadata.creationTime &&
-                    `Joined: ${new Date(currentUser?.metadata.creationTime).toString()}`}
-                </CardDescription> */}
+                  {userCreationTime && `Joined: ${new Date(userCreationTime).toString()}`}
+                </CardDescription>
               </CardHeader>
               <CardContent className='w-full flex gap-2'>
-                <Swords strokeWidth={1} />
-                <MessageSquarePlus strokeWidth={1} />
-                <UserX strokeWidth={1} />
+                {username && username.replaceAll('_', ' ') !== currentUserName && (
+                  <>
+                    <Swords strokeWidth={1} />
+                    <MessageSquarePlus strokeWidth={1} />
+                    <UserX strokeWidth={1} />
+                  </>
+                )}
               </CardContent>
             </div>
           </Card>

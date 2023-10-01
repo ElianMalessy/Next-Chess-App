@@ -1,22 +1,18 @@
 'use server';
 import {kv} from '@vercel/kv';
 
-export default async function AddFriend(currentUserID: string, friendName: string) {
-  // const currentUserFriends: any = await kv.lrange(`${currentUserName}/friends`, 0, -1);
-  // for (let i = 0; i < currentUserFriends.length; i++) {
-  //   if (currentUserFriends[i].username === friendName) {
-  //     return false;
-  //   }
-  // }
-  const isFriend = await kv.sismember(`${currentUserID}/friends/usernames`, friendName);
-  if (isFriend === 1) return false; // already friends
+export default async function AddFriend(currentUserID: string, friendID: string) {
+  const isFriend = await kv.sismember(`${currentUserID}/friends/IDs`, friendID);
+  if (isFriend === 1) {
+    const oldFriend = await kv.hgetall(friendID);
+    return oldFriend && {since: oldFriend.since, photoURL: oldFriend.photoURL, old: true};
+  }
 
   const currentUserData = await kv.hgetall(currentUserID);
-  const friendID: any = await kv.get(friendName);
-
-  if (!friendID) return false;
   const friendData = await kv.hgetall(friendID);
-  const timestamp = kv.time;
+  if (!friendData) return;
+
+  const timestamp = await kv.time();
   await kv.lpush(`${currentUserID}/friends`, {
     photoURL: friendData?.photoURL,
     email: friendData?.email,
@@ -29,8 +25,8 @@ export default async function AddFriend(currentUserID: string, friendName: strin
     username: currentUserID,
     since: timestamp,
   });
-  await kv.sadd(`${currentUserID}/friends/usernames`, friendID);
-  await kv.sadd(`${friendID}/friends/usernames`, currentUserID);
+  await kv.sadd(`${currentUserID}/friends/IDs`, friendID);
+  await kv.sadd(`${friendID}/friends/IDs`, currentUserID);
 
-  return true;
+  return {since: timestamp, photoURL: friendData?.photoURL, old: false};
 }

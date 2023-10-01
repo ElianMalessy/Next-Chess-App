@@ -1,14 +1,10 @@
-'use client';
 import {CardDescription, CardHeader, CardTitle} from '@/components/ui/card';
 import Navbar from '@/components/navbar/navbar';
 import NonGameBoard from '@/components/board/non-game-board';
 
 import LinkButtons from './link-buttons';
-import {useAuthStore} from '@/hooks/useAuthStore';
 
 export default function Home() {
-  const {currentUser} = useAuthStore();
-  console.log(currentUser?.displayName);
   return (
     <>
       <Navbar />

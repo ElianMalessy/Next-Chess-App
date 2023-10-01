@@ -3,6 +3,7 @@ import ProfileCard from './profile-card';
 import FriendChat from './friend-chat';
 import {kv} from '@vercel/kv';
 import getCurrentUser from '@/components/server-actions/getCurrentUser';
+import AddFriend from './add-friend';
 
 export default async function User({
   params,
@@ -15,6 +16,8 @@ export default async function User({
   const currentUser = await getCurrentUser();
   const userID: any = await kv.get(params.id.replaceAll('_', ' '));
   const pageUser: any = await kv.hgetall(userID ?? '');
+  let friends = null
+  if(friendRequest && currentUser?.uid) friends = await AddFriend(currentUser?.uid, userID);
   return (
     <>
       <Navbar />
@@ -24,6 +27,8 @@ export default async function User({
           userImg={pageUser.photoURL}
           currentUserName={currentUser?.name}
           friendRequest={friendRequest}
+          friends={friends}
+          userCreationTime={pageUser.metadata.creationTime}
         />
         {currentUser?.email && currentUser?.email !== pageUser.email && (
           <FriendChat

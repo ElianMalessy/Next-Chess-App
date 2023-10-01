@@ -16,10 +16,8 @@ import {Input} from '@/components/ui/input';
 import Navbar from '@/components/navbar/navbar';
 import FriendsCard from './friends-card';
 import FriendLink from './friend-link';
-import {Skeleton} from '@/components/ui/skeleton';
-import {Suspense} from 'react';
 
-export default function Friends() {
+export default async function Friends() {
   return (
     <>
       <Navbar />
@@ -84,9 +82,7 @@ export default function Friends() {
               </Command>
             </CardContent>
             <CardContent>
-              {/* <Suspense fallback={<Loader2 className='h-4 w-4 animate-spin' />}> */}
               <FriendsCard />
-              {/* </Suspense> */}
             </CardContent>
           </Card>
         </div>

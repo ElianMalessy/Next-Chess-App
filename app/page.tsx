@@ -28,7 +28,7 @@ export default function Home() {
                     <CardDescription>Discover chess as you wait for your friends!</CardDescription>
                   </CardHeader>
                 </div>
-                {/* <LinkButtons /> */}
+                <LinkButtons />
               </div>
             </div>
           </div>

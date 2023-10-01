@@ -11,6 +11,7 @@ export default async function FriendsCard() {
   let friends: any = await getFriends();
   const defaultImg =
     'https://firebasestorage.googleapis.com/v0/b/wechess-2ecf9.appspot.com/o/default-profile-pic.svg?alt=media&token=cbd585f6-a638-4e25-a502-436d2109ed7a';
+  const uuidPattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
   return (
     <>
       {friends &&
@@ -29,7 +30,11 @@ export default async function FriendsCard() {
               </div>
               <div>
                 <CardHeader>
-                  <CardTitle>{friend.username && friend.username.replaceAll('_', ' ')}</CardTitle>
+                  <CardTitle>
+                    {friend.username && uuidPattern.test(friend.username)
+                      ? 'anonymous'
+                      : friend.username.replaceAll('_', ' ')}
+                  </CardTitle>
                   <CardDescription>Friends for 10 months</CardDescription>
                 </CardHeader>
                 <CardContent className='w-full flex gap-2'>

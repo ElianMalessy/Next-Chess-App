@@ -18,7 +18,7 @@ export default async function ProfileCard({
   userImg: string;
   currentUserName: string;
 }) {
-  const img: any = userImg;
+  const uuidPattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
   return (
     <>
       {!currentUserName ? (
@@ -35,16 +35,18 @@ export default async function ProfileCard({
               {false && <FriendDialog username={username} friendRequest={friendRequest} />}
 
               {username && username.replaceAll('_', ' ') === currentUserName ? (
-                <AvatarEdit img={img} />
+                <AvatarEdit img={userImg} />
               ) : (
                 <Avatar className='w-24 h-24'>
-                  <Image src={img} alt='user-profile-picture' width={96} height={96} priority />
+                  <Image src={userImg} alt='user-profile-picture' width={96} height={96} priority />
                 </Avatar>
               )}
             </div>
             <div>
               <CardHeader>
-                <CardTitle>{username.replaceAll('_', ' ') || 'user'}</CardTitle>
+                <CardTitle>
+                  {username ? (uuidPattern.test(username) ? 'anonymous' : username.replaceAll('_', ' ')) : 'user'}
+                </CardTitle>
                 {/* <CardDescription>{since !== '' && `Friends since: ${since}`}</CardDescription>
                 <CardDescription>
                   {currentUser?.metadata.creationTime &&

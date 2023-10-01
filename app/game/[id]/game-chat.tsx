@@ -62,8 +62,14 @@ export default function GameChat({
       e.preventDefault();
       if (typingMessage === '') return;
 
+      const uuidPattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
       const currTime = getTime();
-      const sentMessage: any = [currentUserName ? currentUserName : 'anonymous', typingMessage, currTime];
+      const sentMessage: any = [
+        currentUserName ? (uuidPattern.test(currentUserName) ? 'anonymous' : currentUserName) : 'user',
+        typingMessage,
+        currTime,
+        playerColor,
+      ];
       const newList = message.concat([sentMessage]);
       setMessage(newList);
       setTypingMessage('');
@@ -71,7 +77,7 @@ export default function GameChat({
       const key = push(dbRef).key;
       if (key) set(child(dbRef, key), sentMessage);
     },
-    [dbRef, currentUserName, message, typingMessage, getTime]
+    [dbRef, currentUserName, message, typingMessage, getTime, playerColor]
   );
 
   return (
@@ -90,7 +96,7 @@ export default function GameChat({
               return (
                 <li key={index} className='flex items-center'>
                   <div className='text-xs text-muted-foreground'>
-                    {`${message[0]}: `}
+                    {`${message[0]} (${message[3]}): `}
                     <span className='break-all text-sm text-primary'>{` ${message[1]}`}</span>
                   </div>
 

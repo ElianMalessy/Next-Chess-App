@@ -21,7 +21,7 @@ export default function Profile() {
   useEffect(() => {
     useProfilePicStore.persist.rehydrate();
   }, []);
-
+  const uuidPattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -48,7 +48,11 @@ export default function Profile() {
         <DropdownMenuLabel className='font-normal'>
           <div className='flex flex-col space-y-1'>
             <p className='text-sm font-medium leading-none'>
-              {useAuthStore.getState().currentUser?.displayName || 'user'}
+              {useAuthStore.getState().currentUser?.displayName
+                ? uuidPattern.test(useAuthStore.getState().currentUser?.displayName ?? '')
+                  ? 'anonymous'
+                  : useAuthStore.getState().currentUser?.displayName
+                : 'user'}
             </p>
             <p className='text-xs leading-none text-muted-foreground'>{useAuthStore.getState().currentUser?.email}</p>
           </div>

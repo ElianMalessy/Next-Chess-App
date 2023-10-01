@@ -119,9 +119,7 @@ export default function Login() {
               variant={'link'}
               className='col-span-1'
               onClick={async () => {
-                console.log('BRUHHHHHHHHHHHHHHHHHHHHHHHHH');
                 await anonSignup();
-                console.log('OKKKKKKKKKKKKKKKKKKKKKKK');
                 router.push('/');
               }}
             >

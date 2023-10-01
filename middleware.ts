@@ -45,7 +45,7 @@ export async function middleware(request: NextRequest) {
       return redirectToLogin(request);
     },
     handleValidToken: async ({decodedToken}) => {
-      await createUser(decodedToken);
+      if (request.nextUrl.pathname === '/') await createUser(decodedToken); // logging in will only redirect you to '/'
       return redirectToHome(request);
     },
     handleError: async (error: any) => {

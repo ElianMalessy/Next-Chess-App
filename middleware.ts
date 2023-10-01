@@ -2,7 +2,7 @@ import {NextRequest} from 'next/server';
 import {NextResponse} from 'next/server';
 import {authentication} from 'next-firebase-auth-edge/lib/next/middleware';
 import {serverConfig} from './firebase-config';
-import createUser from '@/app/create-user';
+import createUser from '@/components/server-actions/create-user';
 
 const PUBLIC_PATHS = ['/register', '/login', '/reset-password'];
 function redirectToLogin(request: NextRequest) {

@@ -1,3 +1,4 @@
+'use server';
 import {randomUUID} from 'crypto';
 
 import {kv} from '@vercel/kv';
@@ -16,23 +17,29 @@ export default async function createUser(decodedToken: DecodedIdToken) {
 
   // new users do this:
   const firebaseUser = await getUser(decodedToken.uid ?? '');
-  if (firebaseUser.uid) {
-    await kv.hset(decodedToken.uid ?? '', {
-      // email: firebaseUser.email, anon users dont have this btw
-      metadata: firebaseUser.metadata,
-      photoURL:
-        firebaseUser.photoURL ||
-        'https://firebasestorage.googleapis.com/v0/b/wechess-2ecf9.appspot.com/o/default-profile-pic.svg?alt=media&token=cbd585f6-a638-4e25-a502-436d2109ed7a',
-    });
-  }
+  if (!firebaseUser.uid) return;
+
+  const profilePic =
+    firebaseUser.photoURL ||
+    'https://firebasestorage.googleapis.com/v0/b/wechess-2ecf9.appspot.com/o/default-profile-pic.svg?alt=media&token=cbd585f6-a638-4e25-a502-436d2109ed7a';
+  await kv.hset(decodedToken.uid ?? '', {
+    // email: firebaseUser.email, anon users dont have this
+    metadata: firebaseUser.metadata,
+    photoURL: profilePic,
+  });
   const currentUserValue = mapTokensToUser(decodedToken);
   if (firebaseUser.displayName) {
-    useAuthStore.setState({currentUser: currentUserValue});
+    useAuthStore.setState({
+      currentUser: {
+        ...currentUserValue,
+        photoURL: profilePic,
+      },
+    });
     kv.set(firebaseUser.displayName, decodedToken.uid);
   } else {
     const idName = randomUUID();
     updateUser(decodedToken.uid, {displayName: idName});
-    useAuthStore.setState({currentUser: {...currentUserValue, displayName: idName}});
+    useAuthStore.setState({currentUser: {...currentUserValue, displayName: idName, photoURL: profilePic}});
     kv.set(idName, decodedToken.uid);
   }
 }

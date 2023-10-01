@@ -10,23 +10,22 @@ export default async function AddFriend(currentUserID: string, friendID: string)
 
   const currentUserData = await kv.hgetall(currentUserID);
   const friendData = await kv.hgetall(friendID);
-  if (!friendData) return;
 
   const timestamp = await kv.time();
   await kv.lpush(`${currentUserID}/friends`, {
     photoURL: friendData?.photoURL,
     email: friendData?.email,
     username: friendID,
-    since: timestamp,
+    since: timestamp[0],
   });
   await kv.lpush(`${friendID}/friends`, {
     photoURL: currentUserData?.photoURL,
     email: currentUserData?.email,
     username: currentUserID,
-    since: timestamp,
+    since: timestamp[0],
   });
   await kv.sadd(`${currentUserID}/friends/IDs`, friendID);
   await kv.sadd(`${friendID}/friends/IDs`, currentUserID);
 
-  return {since: timestamp, photoURL: friendData?.photoURL, old: false};
+  return {since: timestamp[0], photoURL: friendData?.photoURL, old: false};
 }

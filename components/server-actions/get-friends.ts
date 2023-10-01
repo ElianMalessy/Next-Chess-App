@@ -1,9 +1,8 @@
 'use server';
-import getCurrentUser from '@/components/server-actions/get-current-user';
 import {kv} from '@vercel/kv';
+import type {DecodedIdToken} from 'next-firebase-auth-edge/lib/auth/token-verifier';
 
-export default async function getFriends() {
-  const currentUser = await getCurrentUser();
+export default async function getFriends(currentUser: DecodedIdToken) {
   const names: string[] = await kv.lrange(`${currentUser?.uid}/friends`, 0, -1);
   const friends = [];
   for (let i = 0; i < names.length; i++) {

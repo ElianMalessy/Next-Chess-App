@@ -5,6 +5,7 @@ import {Card, CardContent, CardHeader, CardTitle, CardDescription} from '@/compo
 import {Avatar} from '@/components/ui/avatar';
 import AvatarEdit from './avatar-editor';
 import NonGameBoard from '@/components/board/non-game-board';
+import removeFriend from '@/lib/server-actions/remove-friend';
 import FriendDialog from './friend-dialog';
 
 export default async function ProfileCard({

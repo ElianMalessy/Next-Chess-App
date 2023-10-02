@@ -23,7 +23,6 @@ export default function ChallengeLink() {
   const {toast} = useToast();
 
   useEffect(() => {
-    console.log(window.location.host + '/game/' + Date.now().toString());
     setLink(window.location.host + '/game/' + Date.now().toString());
   }, []);
 

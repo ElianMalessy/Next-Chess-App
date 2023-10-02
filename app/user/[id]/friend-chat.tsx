@@ -18,12 +18,12 @@ export default function FriendChat({
   friendEmail,
   friendUsername,
   currentUserEmail,
-  currentUserName,
+  currentUsername,
 }: {
   friendEmail: string;
   friendUsername: string;
   currentUserEmail: string;
-  currentUserName: string;
+  currentUsername: string;
 }) {
   const [messages, setMessages] = useState<any>([]);
   const [newMessage, setNewMessage] = useState('');
@@ -57,7 +57,7 @@ export default function FriendChat({
     await addDoc(roomRef, {
       text: newMessage,
       createdAt: serverTimestamp(),
-      user: currentUserName,
+      user: currentUsername,
       room,
     });
     setNewMessage('');
@@ -67,7 +67,7 @@ export default function FriendChat({
     <Card>
       <CardHeader>
         <CardTitle>Chat</CardTitle>
-        <CardDescription>{`${currentUserName} - ${friendUsername.replaceAll('_', ' ')}`}</CardDescription>
+        <CardDescription>{`${currentUsername} - ${friendUsername.replaceAll('_', ' ')}`}</CardDescription>
       </CardHeader>
       <CardContent>
         {messages.map((message: any, index: number) => (

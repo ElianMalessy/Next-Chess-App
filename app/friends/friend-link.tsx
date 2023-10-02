@@ -1,4 +1,5 @@
 'use client';
+import {useState, useEffect} from 'react';
 import {Link, ChevronRight, Mail, MessagesSquare, UserPlus} from 'lucide-react';
 import {CopyIcon} from '@radix-ui/react-icons';
 
@@ -21,7 +22,11 @@ import {useAuthStore} from '@/lib/hooks/useAuthStore';
 export default function FriendLink() {
   const {currentUser} = useAuthStore();
   const {toast} = useToast();
-  const friendLink = `http://localhost:3000/user/${currentUser?.displayName?.replaceAll(' ', '_')}?friend=true`;
+  const [link, setLink] = useState('');
+  useEffect(() => {
+    if (!currentUser?.displayName) return;
+    setLink(window.location.host + `user/${currentUser?.displayName?.replaceAll(' ', '_')}?friend=true`);
+  }, [currentUser?.displayName]);
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -39,7 +44,7 @@ export default function FriendLink() {
           </DialogDescription>
         </DialogHeader>
         <div className='w-full relative'>
-          <Input id='friend-link' value={friendLink} readOnly aria-readonly autoFocus />
+          <Input id='friend-link' value={link} readOnly aria-readonly autoFocus />
           <div className='absolute h-full w-9 margin-0 flex items-center justify-end top-0 right-[-0.1rem] p-2 pl-0'>
             <div className='h-full w-full flex items-center justify-end bg-background'>
               <TooltipProvider delayDuration={350}>
@@ -47,10 +52,10 @@ export default function FriendLink() {
                   <TooltipTrigger asChild>
                     <CopyIcon
                       onClick={() => {
-                        navigator.clipboard.writeText(friendLink);
+                        navigator.clipboard.writeText(link);
                         toast({
                           title: 'Copied to clipboard:',
-                          description: friendLink,
+                          description: link,
                         });
                       }}
                     />

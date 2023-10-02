@@ -120,7 +120,7 @@ export default function Login() {
               className='col-span-1'
               onClick={async () => {
                 await anonSignup();
-                // router.push('/');
+                router.push('/');
               }}
             >
               Play as guest

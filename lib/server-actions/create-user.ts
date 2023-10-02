@@ -21,11 +21,7 @@ export default async function createUser(decodedToken: DecodedIdToken) {
 
   const defaultProfilePic =
     'https://firebasestorage.googleapis.com/v0/b/wechess-2ecf9.appspot.com/o/default-profile-pic.svg?alt=media&token=cbd585f6-a638-4e25-a502-436d2109ed7a';
-  await kv.hset(decodedToken.uid ?? '', {
-    // email: firebaseUser.email, anon users dont have this
-    metadata: firebaseUser.metadata,
-    photoURL: defaultProfilePic,
-  });
+
   const currentUserValue = mapTokensToUser(decodedToken);
   if (firebaseUser.displayName) {
     useAuthStore.setState({
@@ -34,11 +30,21 @@ export default async function createUser(decodedToken: DecodedIdToken) {
         photoURL: firebaseUser.photoURL || defaultProfilePic,
       },
     });
-    kv.set(firebaseUser.displayName, decodedToken.uid);
+    await kv.hset(decodedToken.uid ?? '', {
+      // email: firebaseUser.email, anon users dont have this
+      metadata: firebaseUser.metadata,
+      photoURL: firebaseUser.photoURL,
+    });
+    kv.set(firebaseUser.displayName.replaceAll(' ', '_'), decodedToken.uid);
   } else {
     const idName = v4();
     updateUser(decodedToken.uid, {displayName: idName, photoURL: defaultProfilePic});
     useAuthStore.setState({currentUser: {...currentUserValue, displayName: idName, photoURL: defaultProfilePic}});
+    await kv.hset(decodedToken.uid ?? '', {
+      // email: firebaseUser.email, anon users dont have this
+      metadata: firebaseUser.metadata,
+      photoURL: defaultProfilePic,
+    });
     kv.set(idName, decodedToken.uid);
   }
 }

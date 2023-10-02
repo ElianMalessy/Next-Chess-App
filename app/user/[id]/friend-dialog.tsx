@@ -1,9 +1,12 @@
 'use client';
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from '@/components/ui/dialog';
 
-export default function FriendDialog({username, friend, old}: {username: string; friend: boolean; old: boolean}) {
-  const [openDialog, setOpenDialog] = useState(friend);
+export default function FriendDialog({username, old}: {username: string;  old: boolean}) {
+  const [openDialog, setOpenDialog] = useState(false);
+  useEffect(() => {
+    setOpenDialog(true)
+  }, [])
 
   return (
     <Dialog open={openDialog} onOpenChange={setOpenDialog}>

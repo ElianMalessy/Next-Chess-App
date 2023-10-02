@@ -1,32 +1,35 @@
 import Image from 'next/image';
-import {UserX, MessageSquarePlus, Swords} from 'lucide-react';
+import {validate} from 'uuid';
 
 import {Card, CardContent, CardHeader, CardTitle, CardDescription} from '@/components/ui/card';
 import {Avatar} from '@/components/ui/avatar';
 import AvatarEdit from './avatar-editor';
 import NonGameBoard from '@/components/board/non-game-board';
-import removeFriend from '@/lib/server-actions/remove-friend';
 import FriendDialog from './friend-dialog';
+import PageUserCardContent from './profile-card-content';
 
 export default async function ProfileCard({
   friendRequest,
-  username,
-  userImg,
-  currentUserName,
+  pageUser,
+  pageUsername,
+  pageUserID,
+  currentUser,
   friend,
   userCreationTime,
+  isFriend,
 }: {
   friendRequest: boolean;
-  username: string;
-  userImg: string;
-  currentUserName: string;
+  pageUser: any;
+  pageUsername: string;
+  pageUserID: string;
+  currentUser: any;
   friend: any;
   userCreationTime: any;
+  isFriend: number;
 }) {
-  const uuidPattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
   return (
     <>
-      {!currentUserName ? (
+      {!pageUser ? (
         <div className='w-[calc(100vw-1rem)] flex items-center flex-col gap-2'>
           <div className='text-2xl'>404 - User Not Found</div>
           <div className='relative h-[min(560px,95vw)] w-[min(560px,95vw)]'>
@@ -37,36 +40,34 @@ export default async function ProfileCard({
         <div className='w-full flex items-center flex-col'>
           <Card className='flex flex-row items-center w-[50%]'>
             <div className='ml-8'>
-              <FriendDialog username={username} friend={friend ? true : false} old={friend?.old} />
+              {friend && friend.old && <FriendDialog username={pageUsername} old={friend?.old} />}
 
-              {username && username.replaceAll('_', ' ') === currentUserName ? (
-                <AvatarEdit img={userImg} />
+              {pageUsername && pageUsername === currentUser.name ? (
+                <AvatarEdit img={pageUser.photoURL} />
               ) : (
                 <Avatar className='w-24 h-24'>
-                  <Image src={userImg} alt='user-profile-picture' width={96} height={96} priority />
+                  <Image src={pageUser.photoURL} alt='user-profile-picture' width={96} height={96} priority />
                 </Avatar>
               )}
             </div>
             <div>
               <CardHeader>
-                <CardTitle>
-                  {username ? (uuidPattern.test(username) ? 'anonymous' : username.replaceAll('_', ' ')) : 'user'}
-                </CardTitle>
+                <CardTitle>{pageUsername ? (validate(pageUsername) ? 'anonymous' : pageUsername) : 'user'}</CardTitle>
                 {friendRequest && friend && (
-                  <CardDescription>{friend.since !== '' && `friend since: ${friend.since}`}</CardDescription>
+                  <CardDescription>
+                    {friend.since !== '' && `Friends since: ${new Date(friend.since * 1000)}`}
+                  </CardDescription>
                 )}
-                <CardDescription>
-                  {userCreationTime && `Joined: ${new Date(userCreationTime).toString()}`}
-                </CardDescription>
+                <CardDescription>{userCreationTime && `Joined: ${new Date(userCreationTime)}`}</CardDescription>
               </CardHeader>
               <CardContent className='w-full flex gap-2'>
-                {username && username.replaceAll('_', ' ') !== currentUserName && (
-                  <>
-                    <Swords strokeWidth={1} />
-                    <MessageSquarePlus strokeWidth={1} />
-                    <UserX strokeWidth={1} />
-                  </>
-                )}
+                <PageUserCardContent
+                  pageUser={pageUser}
+                  currentUser={currentUser}
+                  pageUsername={pageUsername}
+                  pageUserID={pageUserID}
+                  isFriend={isFriend}
+                />
               </CardContent>
             </div>
           </Card>

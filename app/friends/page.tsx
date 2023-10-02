@@ -11,11 +11,8 @@ import getCurrentUser from '@/lib/server-actions/get-current-user';
 export default async function Friends() {
   const currentUser = await getCurrentUser();
   let friends: any = null;
-  let friendData: any = [];
-  let currentUserData: any = null;
   if (currentUser) {
     friends = await getFriends(currentUser.uid);
-    currentUserData = await kv.hgetall(currentUser.uid);
   }
   return (
     <>

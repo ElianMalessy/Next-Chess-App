@@ -3,7 +3,8 @@ import ProfileCard from './profile-card';
 import FriendChat from './friend-chat';
 import {kv} from '@vercel/kv';
 import getCurrentUser from '@/lib/server-actions/get-current-user';
-import AddFriend from '../../../lib/server-actions/add-friend';
+import addFriend from '@/lib/server-actions/add-friend';
+import getFriends, {getFriend} from '@/lib/server-actions/get-friends';
 
 export default async function User({
   params,
@@ -13,29 +14,40 @@ export default async function User({
   searchParams?: {[key: string]: string | string[] | undefined};
 }) {
   const friendRequest = searchParams?.friend ? true : false;
+
   const currentUser = await getCurrentUser();
-  const userID: any = await kv.get(params.id.replaceAll('_', ' '));
-  const pageUser: any = await kv.hgetall(userID ?? '');
+  const pageUserID: any = await kv.get(params.id);
+  const pageUser: any = await kv.hgetall(pageUserID ?? '');
+  const isFriend = await kv.sismember(`${currentUser?.uid}/friends/IDs`, pageUserID);
+  console.log(pageUser);
+
   let friend = null;
-  if (friendRequest && currentUser?.uid) friend = await AddFriend(currentUser?.uid, userID);
+  if (!isFriend && friendRequest && currentUser?.uid && pageUser) {
+    friend = await addFriend(currentUser, pageUser.photoURL, pageUserID, params.id, isFriend);
+  } else if (isFriend && currentUser?.uid) {
+    // getFriends(currentUser.uid)
+    friend = await getFriend(currentUser.uid, params.id);
+  }
   return (
     <>
       <Navbar />
       <main className='p-2'>
         <ProfileCard
-          username={params.id}
-          userImg={pageUser.photoURL}
-          currentUserName={currentUser?.name}
+          pageUser={pageUser}
+          pageUsername={params.id.replaceAll('_', ' ')}
+          pageUserID={pageUserID}
+          currentUser={currentUser}
           friendRequest={friendRequest}
           friend={friend}
           userCreationTime={pageUser.metadata.creationTime}
+          isFriend={isFriend}
         />
         {currentUser?.email && currentUser?.email !== pageUser.email && (
           <FriendChat
             friendEmail={pageUser.email}
             friendUsername={params.id}
             currentUserEmail={currentUser?.email}
-            currentUserName={currentUser?.displayName}
+            currentUsername={currentUser?.displayName}
           />
         )}
       </main>

@@ -52,7 +52,9 @@ export default async function ProfileCard({
             </div>
             <div>
               <CardHeader>
-                <CardTitle>{pageUsername ? (validate(pageUsername) ? 'anonymous' : pageUsername) : 'user'}</CardTitle>
+                <CardTitle>
+                  {pageUsername ? (validate(pageUsername) ? `anonymous (${pageUsername})` : pageUsername) : 'user'}
+                </CardTitle>
                 {friendRequest && friend && (
                   <CardDescription>
                     {friend.since !== '' && `Friends since: ${new Date(friend.since * 1000)}`}

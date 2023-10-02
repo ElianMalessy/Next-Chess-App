@@ -15,14 +15,14 @@ export default async function addFriend(
 
   const timestamp = await kv.time();
   await kv.lpush(`${currentUser.uid}/friends`, {
+    uid: friendID,
     photoURL: friendPhotoURL,
-    // email: friendData?.email,
     username: friendName,
     since: timestamp[0],
   });
   await kv.lpush(`${friendID}/friends`, {
+    uid: currentUser.uid,
     photoURL: currentUser?.photoURL,
-    // email: currentUserData?.email,
     username: currentUser.name,
     since: timestamp[0],
   });

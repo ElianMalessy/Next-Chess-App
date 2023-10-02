@@ -6,7 +6,7 @@ export default async function getFriends(currentUserID: string) {
 }
 
 export async function getFriend(currentUserID: string, friendUsername: string) {
-  const friends = await kv.lrange(`${currentUserID}/friends`, 0, -1);
+  const friends: any = await kv.lrange(`${currentUserID}/friends`, 0, -1);
 
   for (let i = 0; i < friends.length; i++) {
     if (friends[i].username === friendUsername) return friends[i];

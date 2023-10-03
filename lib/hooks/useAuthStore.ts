@@ -1,5 +1,5 @@
 import {create} from 'zustand';
-import {devtools} from 'zustand/middleware';
+// import {devtools} from 'zustand/middleware';
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -13,13 +13,15 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   getAdditionalUserInfo,
+  linkWithCredential,
 } from '@firebase/auth';
-import type {User, UserCredential} from '@firebase/auth';
+import type {AuthCredential, User, UserCredential} from '@firebase/auth';
 import {auth, firestore} from '@/components/firebase';
 import {collection, doc, setDoc} from '@firebase/firestore';
 
 export interface AuthState {
   currentUser?: User;
+  upgradeUserFromAnonymous: (credential: AuthCredential) => void;
   setCurrentUser: (user: User) => void;
   setTokens: (credential: UserCredential) => Promise<any>;
   login: (email: string, password: string) => Promise<any>;
@@ -34,6 +36,16 @@ export interface AuthState {
   googleSignIn: () => Promise<any>;
 }
 const authStore = (set: any, get: any) => ({
+  upgradeUserFromAnonymous: (credential: AuthCredential) => {
+    linkWithCredential(get().currentUser, credential)
+      .then((usercred) => {
+        console.log('Anonymous account successfully upgraded', usercred.user);
+        get().setTokens(usercred);
+      })
+      .catch((error) => {
+        console.log('Error upgrading anonymous account', error);
+      });
+  },
   setCurrentUser: (user: User) => {
     set((state: AuthState) => ({
       ...state,
@@ -130,4 +142,4 @@ const authStore = (set: any, get: any) => ({
     return deleteUser(get().currentUser);
   },
 });
-export const useAuthStore = create<AuthState>()(devtools(authStore));
+export const useAuthStore = create<AuthState>()(authStore);

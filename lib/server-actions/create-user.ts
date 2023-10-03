@@ -35,16 +35,16 @@ export default async function createUser(decodedToken: DecodedIdToken) {
       metadata: firebaseUser.metadata,
       photoURL: firebaseUser.photoURL,
     });
-    kv.set(firebaseUser.displayName.replaceAll(' ', '_'), decodedToken.uid);
+    await kv.set(firebaseUser.displayName.replaceAll(' ', '_'), decodedToken.uid);
   } else {
     const idName = v4();
-    updateUser(decodedToken.uid, {displayName: idName, photoURL: defaultProfilePic});
     useAuthStore.setState({currentUser: {...currentUserValue, displayName: idName, photoURL: defaultProfilePic}});
+    updateUser(decodedToken.uid, {displayName: idName, photoURL: defaultProfilePic});
     await kv.hset(decodedToken.uid ?? '', {
       // email: firebaseUser.email, anon users dont have this
       metadata: firebaseUser.metadata,
       photoURL: defaultProfilePic,
     });
-    kv.set(idName, decodedToken.uid);
+    await kv.set(idName, decodedToken.uid);
   }
 }

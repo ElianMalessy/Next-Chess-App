@@ -3,12 +3,12 @@ import {validate} from 'uuid';
 
 import {Card, CardContent, CardHeader, CardTitle, CardDescription} from '@/components/ui/card';
 import {Avatar} from '@/components/ui/avatar';
-import AvatarEdit from './avatar-editor';
 import NonGameBoard from '@/components/board/non-game-board';
 import FriendDialog from './friend-dialog';
 import PageUserCardContent from './profile-card-content';
+import {useProfilePicStore} from '@/lib/hooks/useProfilePicStore';
 
-export default async function ProfileCard({
+export default function ProfileCard({
   friendRequest,
   pageUser,
   pageUsername,
@@ -42,13 +42,22 @@ export default async function ProfileCard({
             <div className='ml-8'>
               {friend && friend.old && <FriendDialog username={pageUsername} old={friend?.old} />}
 
-              {pageUsername && pageUsername === currentUser.name ? (
-                <AvatarEdit img={pageUser.photoURL} />
-              ) : (
-                <Avatar className='w-24 h-24'>
-                  <Image src={pageUser.photoURL} alt='user-profile-picture' width={96} height={96} priority />
-                </Avatar>
-              )}
+              <Avatar className='w-24 h-24'>
+                <Image
+                  src={pageUser.photoURL}
+                  alt='user-profile-picture'
+                  width={96}
+                  height={96}
+                  priority
+                  style={{
+                    transform: `scale(${useProfilePicStore.getState().scale}) translate(${
+                      (useProfilePicStore.getState().startOffset.x / useProfilePicStore.getState().scale) * 0.11
+                    }px, ${
+                      (useProfilePicStore.getState().startOffset.y / useProfilePicStore.getState().scale) * 0.11
+                    }px)`,
+                  }}
+                />
+              </Avatar>
             </div>
             <div>
               <CardHeader>

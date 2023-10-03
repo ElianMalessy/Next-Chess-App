@@ -5,10 +5,9 @@ import Image from 'next/image';
 import {useProfilePicStore} from '@/lib/hooks/useProfilePicStore';
 import {Dialog, DialogContent} from '@/components/ui/dialog';
 
-export default function AvatarEdit({img}: {img: string}) {
-  const {startOffset, scale, setScale, setStartOffset} = useProfilePicStore();
+export default function AvatarEdit() {
+  const {startOffset, scale, setScale, setStartOffset, img} = useProfilePicStore();
 
-  const [tempProfilePic, setTempProfilePic] = useState(img);
   const [tempScale, setTempScale] = useState(scale);
   const [tempStartOffset, setTempStartOffset] = useState(startOffset);
   const [offset, setOffset] = useState({x: 0, y: 0});
@@ -69,7 +68,7 @@ export default function AvatarEdit({img}: {img: string}) {
           <div>
             <div className={`h-[25rem] w-[25rem] overflow-hidden relative`} onMouseDown={handleMouseDown}>
               <Image
-                src={tempProfilePic}
+                src={img}
                 layout='fill'
                 objectFit='contain'
                 className={`w-full h-full`}
@@ -97,8 +96,19 @@ export default function AvatarEdit({img}: {img: string}) {
           upload file
         </DialogContent>
       </Dialog>
-      <Avatar className='w-24 h-24' onClick={() => setAvatarClick(true)}>
-        <Image src={img} alt='user-profile-picture' width={96} height={96} priority />
+      <Avatar className='w-24 h-24 cursor-pointer opacity-100 hover:opacity-75' onClick={() => setAvatarClick(true)}>
+        <Image
+          src={img}
+          alt='user-profile-picture'
+          width={96}
+          height={96}
+          priority
+          style={{
+            transform: `scale(${scale}) translate(${(startOffset.x / scale) * 0.11}px, ${
+              (startOffset.y / scale) * 0.11
+            }px)`,
+          }}
+        />
       </Avatar>
     </>
   );

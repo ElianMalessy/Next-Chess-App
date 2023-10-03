@@ -26,10 +26,8 @@ const profilePicStore = (set: any) => ({
 });
 
 export const useProfilePicStore = create<any>()(
-  devtools(
-    persist(profilePicStore, {
-      name: 'profile-pic-data',
-      skipHydration: true,
-    })
-  )
+  persist(profilePicStore, {
+    name: 'profile-pic-data',
+    skipHydration: true,
+  })
 );

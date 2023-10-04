@@ -15,8 +15,9 @@ function redirectToLogin(request: NextRequest) {
   url.search = `redirect=${request.nextUrl.pathname}`;
   return NextResponse.redirect(url);
 }
-function redirectToHome(request: NextRequest) {
+function redirectToHome(request: NextRequest, res: any) {
   if (!PUBLIC_PATHS.includes(request.nextUrl.pathname)) {
+    if (res) return res;
     return NextResponse.next();
   }
 
@@ -44,9 +45,10 @@ export async function middleware(request: NextRequest) {
     handleInvalidToken: async () => {
       return redirectToLogin(request);
     },
-    handleValidToken: async ({decodedToken}) => {
-      if (request.nextUrl.pathname === '/' && decodedToken.uid) await createUser(decodedToken); // logging in will only redirect you to '/'
-      return redirectToHome(request);
+    handleValidToken: async (token) => {
+      let res = null;
+      if (request.nextUrl.pathname === '/' && token.decodedToken.uid) res = await createUser(token); // logging in will only redirect you to '/'
+      return redirectToHome(request, res);
     },
     handleError: async (error: any) => {
       console.error('Unhandled authentication error', {error});

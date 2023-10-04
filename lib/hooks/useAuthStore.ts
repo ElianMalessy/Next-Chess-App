@@ -1,5 +1,5 @@
 import {create} from 'zustand';
-// import {devtools} from 'zustand/middleware';
+import {devtools, persist} from 'zustand/middleware';
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -21,7 +21,7 @@ import {collection, doc, setDoc} from '@firebase/firestore';
 
 export interface AuthState {
   currentUser?: User;
-  upgradeUserFromAnonymous: (credential: AuthCredential) => void;
+  upgradeUserFromAnonymous: (currentUser: User, credential: AuthCredential) => void;
   setCurrentUser: (user: User) => void;
   setTokens: (credential: UserCredential) => Promise<any>;
   login: (email: string, password: string) => Promise<any>;
@@ -36,11 +36,12 @@ export interface AuthState {
   googleSignIn: () => Promise<any>;
 }
 const authStore = (set: any, get: any) => ({
-  upgradeUserFromAnonymous: (credential: AuthCredential) => {
-    linkWithCredential(get().currentUser, credential)
+  upgradeUserFromAnonymous: (currentUser: User, credential: AuthCredential) => {
+    console.log('', '\n\n\n\n\n currentUser: ', currentUser, '\n credential: ', credential, '\n\n\n\n');
+    linkWithCredential(currentUser, credential)
       .then((usercred) => {
         console.log('Anonymous account successfully upgraded', usercred.user);
-        get().setTokens(usercred);
+        // get().setTokens(usercred);
       })
       .catch((error) => {
         console.log('Error upgrading anonymous account', error);
@@ -55,7 +56,6 @@ const authStore = (set: any, get: any) => ({
   setTokens: async (credential: UserCredential) => {
     const tokenResult = await credential?.user.getIdTokenResult();
     // Sets authentication cookies
-    // some error here with anon signup now idk why bruh
     await fetch('/api/login', {
       method: 'GET',
       headers: {
@@ -77,11 +77,12 @@ const authStore = (set: any, get: any) => ({
     await get().setTokens(credential);
 
     if (getAdditionalUserInfo(credential)?.isNewUser && credential.user.email) {
-      const usersRef = collection(firestore, 'users');
-      await setDoc(doc(usersRef, credential.user.email), {
-        name: credential.user.displayName,
-        profilePic: credential.user.photoURL,
-      });
+      // convert to kv
+      // const usersRef = collection(firestore, 'users');
+      // await setDoc(doc(usersRef, credential.user.email), {
+      //   name: credential.user.displayName,
+      //   profilePic: credential.user.photoURL,
+      // });
     }
     return credential;
   },

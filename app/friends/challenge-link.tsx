@@ -29,10 +29,10 @@ export default function ChallengeLink() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant='outline' className='text-2xl py-9 px-5 gap-4'>
-          <Link />
+        <Button variant='outline' className='2xs:text-base sm:text-2xl py-9 px-5 gap-4'>
+          <Link className='2xs:hidden sm:block'/>
           Create Challenge Link
-          <ChevronRight className='ml-auto' />
+          <ChevronRight className='ml-auto 2xs:hidden sm:block' />
         </Button>
       </DialogTrigger>
       <DialogContent>

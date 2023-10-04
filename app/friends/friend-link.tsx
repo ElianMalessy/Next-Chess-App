@@ -25,15 +25,15 @@ export default function FriendLink() {
   const [link, setLink] = useState('');
   useEffect(() => {
     if (!currentUser?.displayName) return;
-    setLink(window.location.host + `user/${currentUser?.displayName?.replaceAll(' ', '_')}?friend=true`);
+    setLink(window.location.host + `/user/${currentUser?.displayName?.replaceAll(' ', '_')}?friend=true`);
   }, [currentUser?.displayName]);
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant='outline' className='text-2xl py-9 px-5 flex items-center text-left gap-4'>
-          <UserPlus />
+        <Button variant='outline' className='2xs:text-base sm:text-2xl py-9 px-5 flex items-center text-left gap-4'>
+          <UserPlus className='2xs:hidden sm:block' />
           Friend Link
-          <ChevronRight className='ml-auto' />
+          <ChevronRight className='ml-auto 2xs:hidden sm:block' />
         </Button>
       </DialogTrigger>
       <DialogContent className='w-full'>

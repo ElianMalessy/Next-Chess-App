@@ -4,7 +4,7 @@ import NonGameBoard from '@/components/board/non-game-board';
 
 import LinkButtons from './link-buttons';
 
-export default async function Home() {
+export default function Home() {
   return (
     <>
       <Navbar />

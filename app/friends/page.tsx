@@ -6,13 +6,15 @@ import Navbar from '@/components/navbar/navbar';
 import FriendsCard from './friends-card';
 import FriendLink from './friend-link';
 import ChallengeLink from './challenge-link';
-import getFriends from '@/lib/server-actions/get-friends';
+import getFriends, {getFriendRequests} from '@/lib/server-actions/get-friends';
 import getCurrentUser from '@/lib/server-actions/get-current-user';
 export default async function Friends() {
   const currentUser = await getCurrentUser();
   let friends: any = null;
+  let friendRequests: any = null;
   if (currentUser) {
     friends = await getFriends(currentUser.uid);
+    friendRequests = await getFriendRequests(currentUser.uid);
   }
   return (
     <>
@@ -58,7 +60,7 @@ export default async function Friends() {
               </DialogContent>
             </Dialog> */}
           </div>
-          <FriendsCard friends={friends} currentUser={currentUser} />
+          <FriendsCard friends={friends} currentUser={currentUser} friendRequests={friendRequests} />
         </div>
       </main>
     </>

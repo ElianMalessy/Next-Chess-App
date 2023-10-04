@@ -34,6 +34,5 @@ export default async function getCurrentUser() {
     cookieName: 'AuthToken',
     cookieSignatureKeys: ['secret1', 'secret2'],
   });
-
   return tokens?.decodedToken;
 }

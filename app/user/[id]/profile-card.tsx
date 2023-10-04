@@ -5,27 +5,26 @@ import {Card, CardContent, CardHeader, CardTitle, CardDescription} from '@/compo
 import {Avatar} from '@/components/ui/avatar';
 import NonGameBoard from '@/components/board/non-game-board';
 import FriendDialog from './friend-dialog';
-import PageUserCardContent from './profile-card-content';
+import FriendRequestDialog from './friend-request-dialog';
 import {useProfilePicStore} from '@/lib/hooks/useProfilePicStore';
+import UserCardContent from '@/components/user-card-content';
 
 export default function ProfileCard({
   friendRequest,
   pageUser,
   pageUsername,
-  pageUserID,
   currentUser,
   friend,
   userCreationTime,
-  isFriend,
+  isOldFriend,
 }: {
   friendRequest: boolean;
   pageUser: any;
   pageUsername: string;
-  pageUserID: string;
   currentUser: any;
   friend: any;
   userCreationTime: any;
-  isFriend: number;
+  isOldFriend: number;
 }) {
   return (
     <>
@@ -41,6 +40,7 @@ export default function ProfileCard({
           <Card className='flex flex-row items-center w-[50%]'>
             <div className='ml-8'>
               {friend && friend.old && <FriendDialog username={pageUsername} old={friend?.old} />}
+              {friend && !friend.photoURL && <FriendRequestDialog username={pageUsername} since={friend.since} />}
 
               <Avatar className='w-24 h-24'>
                 <Image
@@ -64,7 +64,7 @@ export default function ProfileCard({
                 <CardTitle>
                   {pageUsername ? (validate(pageUsername) ? `anonymous (${pageUsername})` : pageUsername) : 'user'}
                 </CardTitle>
-                {friendRequest && friend && (
+                {friendRequest && friend && friend.photoURL && (
                   <CardDescription>
                     {friend.since !== '' && `Friends since: ${new Date(friend.since * 1000)}`}
                   </CardDescription>
@@ -72,12 +72,11 @@ export default function ProfileCard({
                 <CardDescription>{userCreationTime && `Joined: ${new Date(userCreationTime)}`}</CardDescription>
               </CardHeader>
               <CardContent className='w-full flex gap-2'>
-                <PageUserCardContent
-                  pageUser={pageUser}
+                <UserCardContent
                   currentUser={currentUser}
-                  pageUsername={pageUsername}
-                  pageUserID={pageUserID}
-                  isFriend={isFriend}
+                  pageUser={pageUser}
+                  isOldFriend={isOldFriend}
+                  isFriend={friend && friend.photoURL ? true : false}
                 />
               </CardContent>
             </div>

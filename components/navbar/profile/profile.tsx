@@ -11,7 +11,6 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import {Button} from '@/components/ui/button';
-// import {useAuth} from '@/components/contexts/auth-provider';
 import {useAuthStore} from '@/lib/hooks/useAuthStore';
 import {useProfilePicStore} from '@/lib/hooks/useProfilePicStore';
 import ProfileDropdown from './profile-dropdown';
@@ -23,7 +22,7 @@ export default function Profile() {
 
   useEffect(() => {
     useProfilePicStore.persist.rehydrate();
-  }, []);
+  }, [currentUser]);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

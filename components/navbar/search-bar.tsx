@@ -21,7 +21,7 @@ export default function SearchBar({users}: {users: any}) {
   const fuseOptions = {
     keys: ['username'],
   };
-  const usersFuse = useRef(new Fuse(usersSearchList, fuseOptions));
+  const usersFuse = useRef(new Fuse(users, fuseOptions));
   const searchUsersMemo = useMemo(() => {
     const usersDivArray: any[] = [];
     if (typeof window !== 'undefined' && usersSearchList) {
@@ -44,7 +44,6 @@ export default function SearchBar({users}: {users: any}) {
     return usersDivArray;
   }, [usersSearchList]);
   useEffect(() => {
-    console.log(usersSearchList, searchUsersMemo);
     if (users && usersSearchList.length === 0 && search === '') setUsersSearchList(users);
   }, [usersSearchList, users, search]);
 

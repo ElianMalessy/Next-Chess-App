@@ -1,6 +1,8 @@
 'use client';
-import {useState, useRef, useEffect} from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
+
+import {useState, useRef, useEffect} from 'react';
 import {validate} from 'uuid';
 import Fuse from 'fuse.js';
 
@@ -10,6 +12,7 @@ import {Command, CommandInput} from '@/components/ui/command';
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
 import FriendCardContent from './friend-card-content';
 import UserCardContent from '@/components/user-card-content';
+import {Button} from '@/components/ui/button';
 
 export default function FriendsCard({
   friends,
@@ -20,14 +23,16 @@ export default function FriendsCard({
   currentUser: any;
   friendRequests: any[];
 }) {
-  const [friendsSearchList, setFriendsSearchList] = useState(friends);
-  const [friendRequestsSearchList, setFriendRequestsSearchList] = useState(friendRequests);
+  const [friendsList, setFriendsList] = useState(friends);
+  const [friendRequestsList, setFriendRequestsList] = useState(friendRequests);
+  const [friendsSearchList, setFriendsSearchList] = useState(friendsList);
+  const [friendRequestsSearchList, setFriendRequestsSearchList] = useState(friendRequestsList);
   const [search, setSearch] = useState('');
   const fuseOptions = {
     keys: ['username'],
   };
-  const friendsFuse = useRef(new Fuse(friendsSearchList, fuseOptions));
-  const friendRequestsFuse = useRef(new Fuse(friendRequestsSearchList, fuseOptions));
+  const friendsFuse = useRef(new Fuse(friends, fuseOptions));
+  const friendRequestsFuse = useRef(new Fuse(friendRequests, fuseOptions));
 
   useEffect(() => {
     if (friends && friendsSearchList.length === 0 && search === '') setFriendsSearchList(friends);
@@ -75,11 +80,26 @@ export default function FriendsCard({
                     </Avatar>
                     <CardHeader>
                       <CardTitle>
-                        {friendValues.username
-                          ? validate(friendValues.username)
-                            ? 'anonymous'
-                            : friendValues.username.replaceAll('_', ' ')
-                          : 'user'}
+                        {typeof window !== 'undefined' ? (
+                          <Button variant={'link'} asChild>
+                            <Link
+                              href={
+                                window.location.protocol +
+                                '//' +
+                                window.location.host +
+                                `/user/${friendValues.username.replaceAll(' ', '_')}`
+                              }
+                            ></Link>
+                          </Button>
+                        ) : (
+                          <>
+                            {friendValues.username
+                              ? validate(friendValues.username)
+                                ? 'anonymous'
+                                : friendValues.username.replaceAll('_', ' ')
+                              : 'user'}
+                          </>
+                        )}
                       </CardTitle>
                       <CardDescription>
                         {friendValues.since !== '' && `Friends since: ${new Date(friendValues.since * 1000)}`}
@@ -91,6 +111,7 @@ export default function FriendsCard({
                         pageUser={friendValues}
                         isFriend={true}
                         isOldFriend={1}
+                        setFriends={setFriendsList}
                       />
                     </CardContent>
                   </Card>
@@ -122,7 +143,9 @@ export default function FriendsCard({
                         pageUser={friendRequestValues}
                         isFriend={false}
                         isOldFriend={0}
-                        friendRequest={true}
+                        friendRequest={friendRequest}
+                        setFriends={setFriendsList}
+                        setRequests={setFriendRequestsList}
                       />
                     </CardContent>
                   </Card>

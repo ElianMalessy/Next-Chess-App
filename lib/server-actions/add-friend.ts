@@ -16,6 +16,7 @@ export default async function addFriend(currentUser: any, friend: any, isOldFrie
     if (theirFriendRequests[i].uid === currentUser.uid) {
       await kv.lrem(`${friend.uid}/friendRequests`, 1, theirFriendRequests[i]);
       isFriendable = true;
+      break;
     }
   }
   if (!isFriendable) {
@@ -23,6 +24,7 @@ export default async function addFriend(currentUser: any, friend: any, isOldFrie
       if (currentUserFriendRequests[i] === friend.uid) {
         await kv.lrem(`${currentUser.uid}/friendRequests`, 1, currentUserFriendRequests[i]);
         isFriendable = true;
+        break;
       }
     }
   }

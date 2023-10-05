@@ -3,6 +3,7 @@ import ThemeToggle from './theme-toggle';
 import Profile from './profile/profile';
 import {BellIcon} from '@radix-ui/react-icons';
 import Search from './search-users';
+import ProfileServer from './profile/profile-server';
 
 export default function Navbar() {
   return (
@@ -15,7 +16,7 @@ export default function Navbar() {
           <Search />
           {/* <BellIcon className='h-[1.5rem] w-[1.5rem]' /> */}
           <ThemeToggle />
-          <Profile />
+          <ProfileServer />
         </div>
       </nav>
     </div>

@@ -6,8 +6,10 @@ import {MagnifyingGlassIcon} from '@radix-ui/react-icons';
 import {Input} from '@/components/ui/input';
 import Fuse from 'fuse.js';
 import {Button} from '@/components/ui/button';
+import {useAuthStore} from '@/lib/hooks/useAuthStore';
 
 export default function SearchBar({users}: {users: any}) {
+  const {currentUser} = useAuthStore();
   const [usersSearchList, setUsersSearchList] = useState(users);
   const [search, setSearch] = useState('');
   const [clicked, setClicked] = useState(false);
@@ -25,16 +27,26 @@ export default function SearchBar({users}: {users: any}) {
   const searchUsersMemo = useMemo(() => {
     const usersDivArray: any[] = [];
     if (typeof window !== 'undefined' && usersSearchList) {
-      for (let i = 0; i < Math.min(6, usersSearchList.length); i++) {
+      let updatedIndex = 6;
+      for (let i = 0; i < Math.min(updatedIndex, usersSearchList.length); i++) {
         let userValues = usersSearchList[i];
         if (usersSearchList[i].item) userValues = userValues.item;
+        if (userValues.uid === currentUser?.uid) {
+          updatedIndex++;
+          continue;
+        }
         usersDivArray.push(
           <Button key={i} className='w-full h-[1.5rem] p-1' variant={'link'} asChild>
             <Link
               className='w-full h-full'
-              href={window.location.protocol + '//' + window.location.host + `/user/${userValues.replaceAll(' ', '_')}`} // do this for friends as well
+              href={
+                window.location.protocol +
+                '//' +
+                window.location.host +
+                `/user/${userValues.username.replaceAll(' ', '_')}`
+              } // do this for friends as well
             >
-              {userValues}
+              {userValues.username}
             </Link>
           </Button>
         );
@@ -42,7 +54,7 @@ export default function SearchBar({users}: {users: any}) {
     }
 
     return usersDivArray;
-  }, [usersSearchList]);
+  }, [usersSearchList, currentUser]);
   useEffect(() => {
     if (users && usersSearchList.length === 0 && search === '') setUsersSearchList(users);
   }, [usersSearchList, users, search]);
@@ -64,7 +76,7 @@ export default function SearchBar({users}: {users: any}) {
           >
             <Input
               type='search'
-              placeholder='Search for players...'
+              placeholder='Search for users...'
               onChange={(search: any) => {
                 setSearch(search.target.value);
                 setUsersSearchList(usersFuse.current.search(search.target.value));

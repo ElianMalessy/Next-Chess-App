@@ -10,9 +10,9 @@ import {Card, CardHeader, CardTitle, CardContent, CardDescription} from '@/compo
 import {Avatar} from '@/components/ui/avatar';
 import {Command, CommandInput} from '@/components/ui/command';
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
-import FriendCardContent from './friend-card-content';
 import UserCardContent from '@/components/user-card-content';
 import {Button} from '@/components/ui/button';
+import {useFriendsStore} from '@/lib/hooks/useFriendsStore';
 
 export default function FriendsCard({
   friends,
@@ -23,8 +23,8 @@ export default function FriendsCard({
   currentUser: any;
   friendRequests: any[];
 }) {
-  const [friendsList, setFriendsList] = useState(friends);
-  const [friendRequestsList, setFriendRequestsList] = useState(friendRequests);
+  const {friendsList, friendRequestsList} = useFriendsStore();
+
   const [friendsSearchList, setFriendsSearchList] = useState(friendsList);
   const [friendRequestsSearchList, setFriendRequestsSearchList] = useState(friendRequestsList);
   const [search, setSearch] = useState('');
@@ -34,13 +34,21 @@ export default function FriendsCard({
   const friendsFuse = useRef(new Fuse(friends, fuseOptions));
   const friendRequestsFuse = useRef(new Fuse(friendRequests, fuseOptions));
 
+  const [windowDefined, setWindowDefined] = useState(false);
   useEffect(() => {
-    if (friends && friendsSearchList.length === 0 && search === '') setFriendsSearchList(friends);
-  }, [friendsSearchList, friends, search]);
+    if (friendsList.length === 0 && friendRequestsList.length === 0) {
+      useFriendsStore.setState({friendsList: friends, friendRequestsList: friendRequests});
+    }
+    setWindowDefined(true);
+  }, []);
+
   useEffect(() => {
-    if (friendRequests && friendRequestsSearchList.length === 0 && search === '')
-      setFriendRequestsSearchList(friendRequests);
-  }, [friendRequestsSearchList, friendRequests, search]);
+    if (friendsList && friendsSearchList.length === 0 && search === '') setFriendsSearchList(friendsList);
+  }, [friendsList, search, friendsSearchList]);
+  useEffect(() => {
+    if (friendRequestsList && friendRequestsSearchList.length === 0 && search === '')
+      setFriendRequestsSearchList(friendRequestsList);
+  }, [friendRequestsList, search, friendRequestsSearchList]);
   const defaultImg =
     'https://firebasestorage.googleapis.com/v0/b/wechess-2ecf9.appspot.com/o/default-profile-pic.svg?alt=media&token=cbd585f6-a638-4e25-a502-436d2109ed7a';
   return (
@@ -80,8 +88,8 @@ export default function FriendsCard({
                     </Avatar>
                     <CardHeader>
                       <CardTitle>
-                        {typeof window !== 'undefined' ? (
-                          <Button variant={'link'} asChild>
+                        {windowDefined && friendValues.username && (
+                          <Button variant={'link'} asChild className='2xs:text-lg sm:text-2xl p-0'>
                             <Link
                               href={
                                 window.location.protocol +
@@ -89,16 +97,14 @@ export default function FriendsCard({
                                 window.location.host +
                                 `/user/${friendValues.username.replaceAll(' ', '_')}`
                               }
-                            ></Link>
+                            >
+                              {friendValues.username
+                                ? validate(friendValues.username)
+                                  ? 'anonymous'
+                                  : friendValues.username.replaceAll('_', ' ')
+                                : 'user'}
+                            </Link>
                           </Button>
-                        ) : (
-                          <>
-                            {friendValues.username
-                              ? validate(friendValues.username)
-                                ? 'anonymous'
-                                : friendValues.username.replaceAll('_', ' ')
-                              : 'user'}
-                          </>
                         )}
                       </CardTitle>
                       <CardDescription>
@@ -106,13 +112,7 @@ export default function FriendsCard({
                       </CardDescription>
                     </CardHeader>
                     <CardContent className='p-2'>
-                      <UserCardContent
-                        currentUser={currentUser}
-                        pageUser={friendValues}
-                        isFriend={true}
-                        isOldFriend={1}
-                        setFriends={setFriendsList}
-                      />
+                      <UserCardContent currentUser={currentUser} pageUser={friendValues} isOldFriend={true} />
                     </CardContent>
                   </Card>
                 );
@@ -127,25 +127,37 @@ export default function FriendsCard({
                   <Card key={index} className='flex flex-row items-center w-full'>
                     <CardHeader className='2xs:p-2 sm:p-6'>
                       <CardTitle className='2xs:text-lg sm:text-2xl'>
-                        {friendRequestValues.username
-                          ? validate(friendRequestValues.username)
-                            ? `anonymous (${friendRequestValues.username})`
-                            : friendRequestValues.username.replaceAll('_', ' ')
-                          : 'user'}
+                        {windowDefined && friendRequestValues.username && (
+                          <Button variant={'link'} asChild className='2xs:text-lg sm:text-2xl p-0'>
+                            <Link
+                              href={
+                                window.location.protocol +
+                                '//' +
+                                window.location.host +
+                                `/user/${friendRequestValues.username.replaceAll(' ', '_')}`
+                              }
+                            >
+                              {friendRequestValues.username
+                                ? validate(friendRequestValues.username)
+                                  ? 'anonymous'
+                                  : friendRequestValues.username.replaceAll('_', ' ')
+                                : 'user'}
+                            </Link>
+                          </Button>
+                        )}
                       </CardTitle>
                       <CardDescription>
-                        {friendRequestValues.since !== '' && `Requested: ${new Date(friendRequestValues.since * 1000)}`}
+                        {friendRequestValues &&
+                          friendRequestValues.since !== '' &&
+                          `Requested: ${new Date(friendRequestValues.since * 1000)}`}
                       </CardDescription>
                     </CardHeader>
                     <CardContent className='p-2'>
                       <UserCardContent
                         currentUser={currentUser}
                         pageUser={friendRequestValues}
-                        isFriend={false}
-                        isOldFriend={0}
-                        friendRequest={friendRequest}
-                        setFriends={setFriendsList}
-                        setRequests={setFriendRequestsList}
+                        isOldFriend={false}
+                        friendRequestValue={friendRequestValues}
                       />
                     </CardContent>
                   </Card>

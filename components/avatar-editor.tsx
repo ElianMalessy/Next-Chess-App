@@ -4,9 +4,13 @@ import {Avatar} from '@/components/ui/avatar';
 import Image from 'next/image';
 import {useProfilePicStore} from '@/lib/hooks/useProfilePicStore';
 import {Dialog, DialogContent} from '@/components/ui/dialog';
+import {Button} from './ui/button';
+import {uploadProfilePic} from '@/lib/server-actions/upload-profile-pic';
+import {useAuthStore} from '@/lib/hooks/useAuthStore';
 
 export default function AvatarEdit() {
   const {startOffset, scale, setScale, setStartOffset, img} = useProfilePicStore();
+  const {currentUser} = useAuthStore();
 
   const [tempScale, setTempScale] = useState(scale);
   const [tempStartOffset, setTempStartOffset] = useState(startOffset);
@@ -53,12 +57,6 @@ export default function AvatarEdit() {
     };
   }, [isDragging, handleMouseMove, handleMouseUp]);
 
-  const setEditorRef = (editor: any) => {
-    if (editor) {
-      console.log(editor.getBoundingClientRect());
-      // scaledImg.current = editor.getImageScaledToCanvas().toDataURL();
-    }
-  };
   const [avatarClick, setAvatarClick] = useState(false);
 
   return (
@@ -72,7 +70,6 @@ export default function AvatarEdit() {
                 layout='fill'
                 objectFit='contain'
                 className={`w-full h-full`}
-                ref={(ref: any) => setEditorRef(ref)}
                 style={{transform: `scale(${tempScale}) translate(${offset.x}px, ${offset.y}px)`}}
                 alt='profile-pic-editor'
               />
@@ -93,7 +90,16 @@ export default function AvatarEdit() {
               />
             </div>
           </div>
-          upload file
+          <Button
+            variant='outline'
+            onClick={async () => {
+              if (!currentUser?.uid) return;
+              uploadProfilePic(currentUser?.uid, startOffset, scale, img);
+            }}
+          >
+            Update
+          </Button>
+          {/* upload file */}
         </DialogContent>
       </Dialog>
       <Avatar className='w-24 h-24 cursor-pointer opacity-100 hover:opacity-75' onClick={() => setAvatarClick(true)}>

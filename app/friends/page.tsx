@@ -1,21 +1,11 @@
-import {kv} from '@vercel/kv';
+import Navbar from '@/components/navbar/navbar';
+import FriendLink from './friend-link';
+import ChallengeLink from './challenge-link';
+import FriendCardServer from './friend-card-server';
 
 import {Card, CardHeader, CardTitle, CardContent, CardDescription} from '@/components/ui/card';
 
-import Navbar from '@/components/navbar/navbar';
-import FriendsCard from './friends-card';
-import FriendLink from './friend-link';
-import ChallengeLink from './challenge-link';
-import getFriends, {getFriendRequests} from '@/lib/server-actions/get-friends';
-import getCurrentUser from '@/lib/server-actions/get-current-user';
-export default async function Friends() {
-  const currentUser = await getCurrentUser();
-  let friends: any = null;
-  let friendRequests: any = null;
-  if (currentUser) {
-    friends = await getFriends(currentUser.uid);
-    friendRequests = await getFriendRequests(currentUser.uid);
-  }
+export default function Friends() {
   return (
     <>
       <Navbar />
@@ -60,7 +50,7 @@ export default async function Friends() {
               </DialogContent>
             </Dialog> */}
           </div>
-          <FriendsCard friends={friends} currentUser={currentUser} friendRequests={friendRequests} />
+          <FriendCardServer />
         </div>
       </main>
     </>

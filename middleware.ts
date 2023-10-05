@@ -47,7 +47,7 @@ export async function middleware(request: NextRequest) {
     },
     handleValidToken: async (token) => {
       let res = null;
-      if (request.nextUrl.pathname === '/' && token.decodedToken.uid) res = await createUser(token); // logging in will only redirect you to '/'
+      if (token.decodedToken.uid) res = await createUser(token); // logging in will only redirect you to '/'
       return redirectToHome(request, res);
     },
     handleError: async (error: any) => {

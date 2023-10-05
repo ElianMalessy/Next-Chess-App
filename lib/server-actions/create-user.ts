@@ -40,18 +40,22 @@ export default async function createUser(token: Tokens) {
       // email: firebaseUser.email, anon users dont have this
       metadata: firebaseUser.metadata,
       photoURL: firebaseUser.photoURL,
+      scale: 1,
+      startOffset: {x: 0, y: 0},
     });
     await kv.set(firebaseUser.displayName.replaceAll(' ', '_'), decodedToken.uid);
-    await kv.sadd('users', firebaseUser.displayName);
+    await kv.lpush('users', {username: firebaseUser.displayName, uid: decodedToken.uid});
   } else {
     const idName = v4();
     await kv.hset(decodedToken.uid ?? '', {
       // email: firebaseUser.email, anon users dont have this
       metadata: firebaseUser.metadata,
       photoURL: defaultProfilePic,
+      scale: 1,
+      startOffset: {x: 0, y: 0},
     });
     await kv.set(idName, decodedToken.uid);
-    await kv.lpush('users', idName);
+    await kv.lpush('users', {username: idName, uid: decodedToken.uid});
 
     await updateUser(decodedToken.uid, {displayName: idName, photoURL: defaultProfilePic});
     const response = new NextResponse(

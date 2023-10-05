@@ -1,18 +1,27 @@
 'use client';
-import {useRef, useState} from 'react';
+import {useState} from 'react';
+import {useRouter} from 'next/navigation';
 import {useForm} from 'react-hook-form';
 import * as z from 'zod';
 import {zodResolver} from '@hookform/resolvers/zod';
-import {GoogleAuthProvider, EmailAuthProvider, signInWithPopup} from '@firebase/auth';
 
 import {useAuthStore} from '@/lib/hooks/useAuthStore';
 import {Card, CardDescription, CardHeader, CardTitle, CardContent} from '@/components/ui/card';
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from '@/components/ui/form';
 import {Input} from '@/components/ui/input';
 import {Button} from '@/components/ui/button';
-import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from '@/components/ui/dialog';
-import {Separator} from '@/components/ui/separator';
-import {auth} from '@/components/firebase';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import {deleteUser} from '@/lib/server-actions/delete-user';
 
 const emailPasswordFormSchema = z
   .object({
@@ -38,27 +47,11 @@ const usernameFormSchema = z.object({
 });
 
 export default function UpdateProfile() {
-  const {
-    deleteCurrentUser,
-    updateUserPassword,
-    updateProfilePic,
-    updateUsername,
-    currentUser,
-    upgradeUserFromAnonymous,
-    googleSignIn,
-  } = useAuthStore();
+  const router = useRouter();
+  const {deleteCurrentUser, updateProfilePic, updateUsername, currentUser} = useAuthStore();
 
-  const [openDialog, setOpenDialog] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
-  const passwordForm = useForm<z.infer<typeof passwordFormSchema>>({
-    resolver: zodResolver(passwordFormSchema),
-    defaultValues: {
-      password: '',
-      confirm: '',
-    },
-  });
 
   const usernameForm = useForm<z.infer<typeof usernameFormSchema>>({
     resolver: zodResolver(passwordFormSchema),
@@ -67,141 +60,26 @@ export default function UpdateProfile() {
     },
   });
 
-  const permanentAccountForm = useForm<z.infer<typeof emailPasswordFormSchema>>({
-    resolver: zodResolver(emailPasswordFormSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-      confirm: '',
-    },
-  });
-  function onPermanentAccountFormSubmit(values: z.infer<typeof emailPasswordFormSchema>) {
-    if (!currentUser) return;
-    const credential = EmailAuthProvider.credential(values.email, values.password);
-    upgradeUserFromAnonymous(currentUser, credential);
-  }
-
   function onUsernameFormSubmit(values: z.infer<typeof usernameFormSchema>) {
-    updateUsername(values.username).finally(() => setLoading(false));
-  }
-  function onPasswordFormSubmit(values: z.infer<typeof passwordFormSchema>) {
-    if (!currentUser?.email && values.password) {
-      setError('Must have a permanent account');
-      setOpenDialog(true);
-      return;
-    }
     setLoading(true);
-    setError('');
-
-    if (values.password) {
-      updateUserPassword(values.password).finally(() => setLoading(false));
-    }
+    updateUsername(values.username)
+      .catch((error: any) => {
+        console.log(Object.keys(error), error.name, error.code);
+        setError(error.code);
+        return;
+      })
+      .finally(() => setLoading(false));
   }
 
   return (
     <>
-      {/* <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-        <DialogHeader>
-          <DialogTitle>
-            {currentUser?.uid && !currentUser?.email && (
-              <Button variant='ghost' onClick={() => setOpenDialog(true)}>
-                Convert anonymous account to permanent account
-              </Button>
-            )}
-          </DialogTitle>
-        </DialogHeader>
-
-        <DialogContent className='p-2'> */}
-      {/* <div className='w-full px-6'>
-            <Button
-              onClick={() => {
-                if (!currentUser) return;
-                const provider = new GoogleAuthProvider();
-                provider.addScope('profile');
-                provider.addScope('email');
-
-                signInWithPopup(auth, provider).then((result) => {
-                  const credential = GoogleAuthProvider.credential(result._tokenResponse.oauthIdToken);
-                  console.log(result, credential);
-                  upgradeUserFromAnonymous(currentUser, credential);
-                });
-              }}
-            >
-              Google
-            </Button>
-          </div> */}
-      {/* <Separator className='my-2' /> */}
-      {/* 
-          <Form {...permanentAccountForm}>
-            <form onSubmit={permanentAccountForm.handleSubmit(onPermanentAccountFormSubmit)}>
-              <div className='grid gap-6'>
-                <div className='grid gap-4'>
-                  <FormField
-                    control={permanentAccountForm.control}
-                    name='email'
-                    render={({field}) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input type='text' {...field} autoComplete='off' id='email' placeholder='Email' />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <div>
-                    <FormField
-                      control={permanentAccountForm.control}
-                      name='password'
-                      render={({field}) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input type='password' {...field} autoComplete='off' id='password' placeholder='Password' />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={permanentAccountForm.control}
-                      name='confirm'
-                      render={({field}) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              type='password'
-                              {...field}
-                              autoComplete='off'
-                              id='confirm'
-                              placeholder='Password Confirmation'
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-                {error && (
-                  <div className='border-destructive border-2 rounded-md text-center bg-background text-sm text-destructive p-1'>
-                    {error}
-                  </div>
-                )}
-                <Button type='submit' variant={'outline'} className='w-full'>
-                  Create
-                </Button>
-              </div>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog> */}
-      <Card>
-        <CardHeader>
+      <Card className='w-full my-4'>
+        <CardHeader className='p-2'>
           <CardTitle>Update Profile</CardTitle>
-          <h1>{error}</h1>
         </CardHeader>
-        <CardTitle>Change Username</CardTitle>
+        <CardTitle></CardTitle>
 
-        <CardContent>
+        <CardContent className='p-2 grid gap-8'>
           <Form {...usernameForm}>
             <form onSubmit={usernameForm.handleSubmit(onUsernameFormSubmit)}>
               <div className='grid gap-6'>
@@ -210,8 +88,9 @@ export default function UpdateProfile() {
                   name='username'
                   render={({field}) => (
                     <FormItem>
+                      <FormLabel htmlFor='username'>Change Username</FormLabel>
                       <FormControl>
-                        <Input type='text' {...field} autoComplete='off' id='email' placeholder='Email' />
+                        <Input type='text' {...field} autoComplete='off' id='username' placeholder='Username' />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -228,53 +107,38 @@ export default function UpdateProfile() {
               </div>
             </form>
           </Form>
-          <CardTitle>Change Password</CardTitle>
-          <Form {...passwordForm}>
-            <form onSubmit={passwordForm.handleSubmit(onPasswordFormSubmit)}>
-              <div className='grid gap-6'>
-                <div className='grid gap-4'>
-                  <FormField
-                    control={passwordForm.control}
-                    name='password'
-                    render={({field}) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input type='password' {...field} autoComplete='off' id='password' placeholder='Password' />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={passwordForm.control}
-                    name='confirm'
-                    render={({field}) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input
-                            type='password'
-                            {...field}
-                            autoComplete='off'
-                            id='confirm'
-                            placeholder='Password Confirmation'
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                {error && (
-                  <div className='border-destructive border-2 rounded-md text-center bg-background text-sm text-destructive p-1'>
-                    {error}
-                  </div>
-                )}
-                <Button type='submit' variant={'outline'} className='w-full' disabled={loading}>
-                  Update
-                </Button>
-              </div>
-            </form>
-          </Form>
+
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant='outline' disabled={loading}>
+                Delete User
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete your account and remove your data from our
+                  servers.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={async () => {
+                    if (!currentUser || !currentUser?.displayName || !currentUser?.photoURL) return;
+                    setLoading(true);
+                    await deleteCurrentUser();
+                    await deleteUser(currentUser?.uid, currentUser?.displayName, currentUser?.photoURL);
+                    setLoading(false);
+                    router.push('/login');
+                  }}
+                >
+                  Continue
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </CardContent>
       </Card>
     </>

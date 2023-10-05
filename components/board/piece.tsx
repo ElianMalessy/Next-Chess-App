@@ -40,8 +40,9 @@ export default function Piece({
     setEnPassent,
     setPlayerColor,
     setCheck,
+    setFENFromFirebase,
   } = useGameStore((state: any) => state);
-  const {setCheckmate, setStalemate, capturedPieces, setCapturedPieces, dbRef} = useEndStateStore(
+  const {setCheckmate, setStalemate, capturedPieces, setCapturedPieces, dbRef, checkmate, stalemate} = useEndStateStore(
     (state: any) => state
   );
 
@@ -122,9 +123,19 @@ export default function Piece({
             dbRef
           );
           if (checkStatus !== 'check') {
-            setPlayerColor('');
+            if (playerColor === 'default') {
+              setPlayerColor('default');
+              setFENFromFirebase('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR');
+              setCastling('KQkq', null);
+              setEnPassent('-', null);
+              setTurn('w', null);
+              setCheck(false, null);
+              setCheckmate(true, dbRef);
+              return;
+            }
             setCheckmate(true, dbRef);
-            console.log('checkmate');
+
+            // console.log('checkmate');
           }
         } else {
           setCheck(false, dbRef);
@@ -205,6 +216,7 @@ export default function Piece({
     capturedPieces,
     dbRef,
     realGame,
+    setFENFromFirebase,
   ]);
 
   const handleMouseMove = useCallback(
@@ -241,7 +253,9 @@ export default function Piece({
               ? board[piecePosition.y][piecePosition.x]
               : board[7 - piecePosition.y][7 - piecePosition.x]
           ) !== playerColor) ||
-        (playerColor === 'default' && realGame)
+        (playerColor === 'default' && realGame) ||
+        checkmate ||
+        stalemate
       )
         return;
 
@@ -276,7 +290,7 @@ export default function Piece({
       });
       setIsDragging(true);
     },
-    [board, piecePosition, scale, playerColor, castling, enPassent, realGame]
+    [board, piecePosition, scale, playerColor, castling, enPassent, realGame, checkmate, stalemate]
   );
 
   useEffect(() => {

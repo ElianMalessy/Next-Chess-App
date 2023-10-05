@@ -16,13 +16,16 @@ import {useProfilePicStore} from '@/lib/hooks/useProfilePicStore';
 import ProfileDropdown from './profile-dropdown';
 import {validate} from 'uuid';
 
-export default function Profile() {
+export default function Profile({currentUserData}: {currentUserData: any}) {
   const {scale, startOffset, img} = useProfilePicStore();
+  const serverScale = scale ?? currentUserData.scale;
+  const serverStartOffset = startOffset ?? currentUserData;
+  const serverImg = img ?? currentUserData.photoURL;
   const {currentUser} = useAuthStore();
 
   useEffect(() => {
     useProfilePicStore.persist.rehydrate();
-  }, [currentUser]);
+  }, []);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -35,8 +38,8 @@ export default function Profile() {
                 width={44}
                 height={44}
                 style={{
-                  transform: `scale(${scale}) translate(${(startOffset.x / scale) * 0.11}px, ${
-                    (startOffset.y / scale) * 0.11
+                  transform: `scale(${serverScale}) translate(${(serverStartOffset.x / serverScale) * 0.11}px, ${
+                    (serverStartOffset.y / serverScale) * 0.11
                   }px)`,
                 }}
                 priority

@@ -22,6 +22,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import {deleteUser} from '@/lib/server-actions/delete-user';
+import {updateUsernameKV} from '@/lib/server-actions/update-username';
 
 const emailPasswordFormSchema = z
   .object({
@@ -48,7 +49,7 @@ const usernameFormSchema = z.object({
 
 export default function UpdateProfile() {
   const router = useRouter();
-  const {deleteCurrentUser, updateProfilePic, updateUsername, currentUser} = useAuthStore();
+  const {deleteCurrentUser, updateUsername, currentUser} = useAuthStore();
 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -61,13 +62,16 @@ export default function UpdateProfile() {
   });
 
   function onUsernameFormSubmit(values: z.infer<typeof usernameFormSchema>) {
+    if (!currentUser) return;
     setLoading(true);
+
     updateUsername(values.username)
       .catch((error: any) => {
         console.log(Object.keys(error), error.name, error.code);
         setError(error.code);
         return;
       })
+      .then(() => updateUsernameKV(currentUser?.uid, values.username, currentUser?.displayName ?? ''))
       .finally(() => setLoading(false));
   }
 

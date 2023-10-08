@@ -31,9 +31,9 @@ export default function Profile({currentUserData}: {currentUserData: any}) {
       <DropdownMenuTrigger asChild>
         <Button variant='ghost' className='relative h-11 w-11 rounded-full'>
           <Avatar className='h-11 w-11'>
-            {img && (
+            {serverImg && (
               <Image
-                src={img}
+                src={serverImg}
                 alt='currentUser-profile-picture'
                 width={44}
                 height={44}

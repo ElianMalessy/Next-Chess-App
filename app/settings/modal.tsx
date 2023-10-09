@@ -1,3 +1,4 @@
+'use client';
 import Image from 'next/image';
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {z} from 'zod';
@@ -8,23 +9,18 @@ import {Dialog, DialogContent} from '@/components/ui/dialog';
 import {Button} from '@/components/ui/button';
 import {uploadProfilePicKV} from '@/lib/server-actions/upload-profile-pic';
 import {Avatar} from '@/components/ui/avatar';
+import {Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage} from '@/components/ui/form';
+import {Input} from '@/components/ui/input';
 import AvatarEdit from './avatar-editor';
 
 import {useAuthStore} from '@/lib/hooks/useAuthStore';
 import {useProfilePicStore} from '@/lib/hooks/useProfilePicStore';
-import dataURLtoFile from '@/lib/convertToFile';
+import {toDataURL} from '@/lib/convertToFile';
+import {FileController} from './file-controller';
 
-const MAX_FILE_SIZE = 500000;
-const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 const formSchema = z.object({
   imgURL: z.coerce.string(),
-  imgFile: z
-    .any()
-    .refine((file) => file?.size <= MAX_FILE_SIZE, `Max image size is 5MB.`)
-    .refine(
-      (file) => ACCEPTED_IMAGE_TYPES.includes(file?.type),
-      'Only .jpg, .jpeg, .png and .webp formats are supported.'
-    ),
+  imgFile: z.instanceof(File),
 });
 export default function Modal({currentUserId}: {currentUserId: string}) {
   const {startOffset, scale, setScale, setStartOffset, img, setImg} = useProfilePicStore();
@@ -34,12 +30,13 @@ export default function Modal({currentUserId}: {currentUserId: string}) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       imgURL: '',
-      imgFile: new File([], 'file'),
+      imgFile: new File([], ''),
     },
   });
-  function onSubmit(values: z.infer<typeof formSchema>) {
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     // form to upload image strings or files
-    console.log(values);
+    console.log(values.imgFile);
   }
   return (
     <>
@@ -54,9 +51,52 @@ export default function Modal({currentUserId}: {currentUserId: string}) {
               await updateProfilePic(img);
             }}
           >
-            Update
+            Edit
           </Button>
-          <Button onClick={async () => {}}>upload file</Button>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-2'>
+              <FormField
+                control={form.control}
+                name='imgURL'
+                render={({field}) => (
+                  <FormItem>
+                    <FormLabel>Image link:</FormLabel>
+                    <FormControl>
+                      <Input placeholder='paste your link here' {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FileController
+                name='imgFile'
+                control={form.control}
+                defaultValue={new File([], '')}
+                render={({field, base64, remove, select}: any) => (
+                  <FormItem>
+                    <FormLabel>Upload file:</FormLabel>
+                    <FormControl>
+                      {base64 ? (
+                        <>
+                          <Image src={base64} width={100} alt='preview-profile-pic' />
+                          <button onClick={remove}>remove</button>
+                        </>
+                      ) : (
+                        <>
+                          <input {...field} />
+                          <br />
+                          <button onClick={select}>select</button>
+                          &nbsp;&lt;--- alternative (if input is hidden)
+                        </>
+                      )}
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type='submit'>Update</Button>
+            </form>
+          </Form>
         </DialogContent>
       </Dialog>
 

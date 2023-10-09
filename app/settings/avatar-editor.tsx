@@ -81,8 +81,8 @@ export default function AvatarEdit() {
   // }
 
   return (
-    <div>
-      <div className={`h-[25rem] w-[25rem] overflow-hidden relative`} onMouseDown={handleMouseDown}>
+    <div className='h-full w-full flex items-center flex-col'>
+      <div className={`h-[18rem] w-[18rem] overflow-hidden relative`} onMouseDown={handleMouseDown}>
         <Image
           src={img}
           layout='fill'
@@ -91,7 +91,7 @@ export default function AvatarEdit() {
           style={{transform: `scale(${tempScale}) translate(${offset.x}px, ${offset.y}px)`}}
           alt='profile-pic-editor'
         />
-        <div className='absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] rounded-full border-white border-4 h-[25rem] w-[25rem]' />
+        <div className='absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] rounded-full border-white border-4 h-[18rem] w-[18rem]' />
       </div>
       <br />
       <div className='flex items-center justify-center'>

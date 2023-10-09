@@ -21,3 +21,12 @@ export default function dataURLtoFile(dataurl: string, filename: string) {
   }
   return new File([u8arr], filename, {type: mime});
 }
+export function getBase64(file: File) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = (error) => reject(error);
+  });
+}

@@ -2,7 +2,6 @@
 import Image from 'next/image';
 import {useEffect} from 'react';
 
-import {Avatar} from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -29,23 +28,23 @@ export default function Profile({currentUserData}: {currentUserData: any}) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant='ghost' className='relative h-11 w-11 rounded-full'>
-          <Avatar className='h-11 w-11'>
-            {serverImg && (
-              <Image
-                src={serverImg}
-                alt='currentUser-profile-picture'
-                width={44}
-                height={44}
-                style={{
-                  transform: `scale(${serverScale}) translate(${(serverStartOffset.x / serverScale) * 0.11}px, ${
-                    (serverStartOffset.y / serverScale) * 0.11
-                  }px)`,
-                }}
-                priority
-              />
-            )}
-          </Avatar>
+        <Button
+          variant='ghost'
+          className='h-11 w-11 overflow-hidden cursor-pointer opacity-100 hover:opacity-75 rounded-full relative'
+        >
+          {serverImg && (
+            <Image
+              src={serverImg}
+              alt='currentUser-profile-picture'
+              fill
+              objectFit='contain'
+              style={{
+                transform: `scale(${serverScale}) translate(${serverStartOffset.x * (45 / 288)}px, ${
+                  (serverStartOffset.y / serverScale) * (45 / 288)
+                }px)`,
+              }}
+            />
+          )}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className='w-56' align='end' forceMount>

@@ -1,20 +1,37 @@
 'use client';
-import {useCallback, useEffect, useRef, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import Image from 'next/image';
+
+import {Button} from '@/components/ui/button';
+import {uploadProfilePicKV} from '@/lib/server-actions/upload-profile-pic';
 import {useProfilePicStore} from '@/lib/hooks/useProfilePicStore';
+import {useAuthStore} from '@/lib/hooks/useAuthStore';
 
-export default function AvatarEdit() {
-  const {startOffset, scale, setScale, setStartOffset, img, setImg} = useProfilePicStore();
+export default function AvatarEdit({
+  aspectRatio,
+  currentUserData,
+  currentUserId,
+}: {
+  aspectRatio: number;
+  currentUserData: any;
+  currentUserId: string;
+}) {
+  const {startOffset, scale, setScale, setStartOffset, img} = useProfilePicStore();
+  const {updateProfilePic} = useAuthStore();
 
-  const [tempScale, setTempScale] = useState(scale);
-  const [tempStartOffset, setTempStartOffset] = useState(startOffset);
-  const [offset, setOffset] = useState({x: 0, y: 0});
+  const serverScale = scale ?? currentUserData.scale;
+  const serverStartOffset = startOffset ?? currentUserData;
+  const serverImg = img ?? currentUserData.photoURL;
+
+  const [tempScale, setTempScale] = useState(serverScale);
+  const [tempStartOffset, setTempStartOffset] = useState({x: 0, y: 0});
+  const [offset, setOffset] = useState(serverStartOffset);
   const [isDragging, setIsDragging] = useState(false);
 
-  const handleScale = (e: any) => {
+  const handleScale = useCallback((e: any) => {
     const newScale = parseFloat(e.target.value);
     setTempScale(newScale);
-  };
+  }, []);
 
   const handleMouseMove = useCallback(
     (e: any) => {
@@ -28,10 +45,8 @@ export default function AvatarEdit() {
     (e: any) => {
       if (!isDragging) return;
       setIsDragging(false);
-      setStartOffset(offset);
-      setScale(tempScale);
     },
-    [setStartOffset, isDragging, setScale, tempScale, offset]
+    [isDragging]
   );
   const handleMouseDown = useCallback((e: any) => {
     setIsDragging(true);
@@ -50,63 +65,47 @@ export default function AvatarEdit() {
     };
   }, [isDragging, handleMouseMove, handleMouseUp]);
 
-  function submitUrl(e: any) {
-    console.log(e.target.value);
-    setImg(e.target.value);
-  }
-  function newProfilePicFile(e: any) {
-    var files = e.target.files[0]; // FileList object
-    if (files === undefined) return;
-    var reader = new FileReader();
-
-    // Closure to capture the file information.
-    reader.onload = (function (file) {
-      return function (e: any) {
-        setImg(e.target.result);
-      };
-    })(files);
-
-    // Read in the image file as a data URL.
-    reader.readAsDataURL(files);
-  }
-  // async function createFile(url: string) {
-  //   let response = await fetch(url);
-  //   let data = await response.blob();
-  //   let metadata = {
-  //     type: 'image/jpeg',
-  //   };
-  //   let f = new File([data], 'test.jpg', metadata);
-  //   updateProfilePic(f)
-  //   // ... do something with the file or return it
-  // }
-
   return (
-    <div className='h-full w-full flex items-center flex-col'>
-      <div className={`h-[18rem] w-[18rem] overflow-hidden relative`} onMouseDown={handleMouseDown}>
-        <Image
-          src={img}
-          layout='fill'
-          objectFit='contain'
-          className={`w-full h-full`}
-          style={{transform: `scale(${tempScale}) translate(${offset.x}px, ${offset.y}px)`}}
-          alt='profile-pic-editor'
-        />
-        <div className='absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] rounded-full border-white border-4 h-[18rem] w-[18rem]' />
+    <>
+      <div className='h-full w-full flex items-center flex-col'>
+        <div className={`h-[288px] w-[288px] overflow-hidden relative`} onMouseDown={handleMouseDown}>
+          <Image
+            src={serverImg}
+            fill
+            objectFit='contain'
+            style={{transform: `scale(${tempScale}) translate(${offset.x}px, ${offset.y}px)`}}
+            alt='profile-pic-editor'
+          />
+          <div
+            className={`absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] rounded-full border-white border-4 h-[288px] w-[288px]`}
+          />
+        </div>
+        <br />
+        <div className='flex items-center justify-center'>
+          Zoom:
+          <input
+            name='scale'
+            type='range'
+            onChange={handleScale}
+            min={`${aspectRatio}`}
+            max='10'
+            step='0.01'
+            defaultValue='1'
+            style={{width: '250px', marginLeft: '0.15rem', marginTop: '0.2rem'}}
+          />
+        </div>
       </div>
-      <br />
-      <div className='flex items-center justify-center'>
-        Zoom:
-        <input
-          name='scale'
-          type='range'
-          onChange={handleScale}
-          min='1'
-          max='10'
-          step='0.01'
-          defaultValue='1'
-          style={{width: '250px', marginLeft: '0.15rem', marginTop: '0.2rem'}}
-        />
-      </div>
-    </div>
+      <Button
+        onClick={async () => {
+          if (currentUserId === '') return;
+          setScale(tempScale);
+          setStartOffset(offset);
+          await uploadProfilePicKV(currentUserId, startOffset, scale, img);
+          await updateProfilePic(img);
+        }}
+      >
+        Edit
+      </Button>
+    </>
   );
 }

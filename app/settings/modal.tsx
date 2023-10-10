@@ -1,58 +1,73 @@
 'use client';
 import Image from 'next/image';
-import {useCallback, useEffect, useRef, useState} from 'react';
+import {useState} from 'react';
 import {z} from 'zod';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {useForm} from 'react-hook-form';
+import {getStorage, ref, getDownloadURL, uploadBytes} from '@firebase/storage';
 
 import {Dialog, DialogContent} from '@/components/ui/dialog';
 import {Button} from '@/components/ui/button';
 import {uploadProfilePicKV} from '@/lib/server-actions/upload-profile-pic';
-import {Avatar} from '@/components/ui/avatar';
 import {Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage} from '@/components/ui/form';
 import {Input} from '@/components/ui/input';
 import AvatarEdit from './avatar-editor';
+import {FileController} from './file-controller';
 
 import {useAuthStore} from '@/lib/hooks/useAuthStore';
 import {useProfilePicStore} from '@/lib/hooks/useProfilePicStore';
-import {toDataURL} from '@/lib/convertToFile';
-import {FileController} from './file-controller';
+import dataURLtoFile from '@/lib/convertToFile';
 
 const formSchema = z.object({
   imgURL: z.coerce.string(),
-  imgFile: z.instanceof(File),
+  imgFile: z.any(),
 });
-export default function Modal({currentUserId}: {currentUserId: string}) {
-  const {startOffset, scale, setScale, setStartOffset, img, setImg} = useProfilePicStore();
+export default function Modal({
+  currentUserId,
+  aspectRatio,
+  currentUserData,
+}: {
+  currentUserId: string;
+  aspectRatio: number;
+  currentUserData: any;
+}) {
   const {updateProfilePic} = useAuthStore();
+  const {startOffset, scale, img, setImg} = useProfilePicStore();
+  const serverScale = scale ?? currentUserData.scale;
+  const serverStartOffset = startOffset ?? currentUserData;
+  const serverImg = img ?? currentUserData.photoURL;
+
   const [avatarClick, setAvatarClick] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       imgURL: '',
-      imgFile: new File([], ''),
+      imgFile: undefined,
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     // form to upload image strings or files
-    console.log(values.imgFile);
+    if ((values.imgFile.length === 0 || values.imgFile.size === 0) && values.imgURL === '') return;
+
+    const storage = getStorage();
+    const storageRef = ref(storage, `profile-pics/${currentUserId}`);
+    let file = values.imgFile ? values.imgFile[0] : dataURLtoFile(values.imgURL, 'profile-pic');
+
+    uploadBytes(storageRef, file).then(async (snapshot) => {
+      const imgURLFromFirebase: any = await getDownloadURL(snapshot.ref);
+      await updateProfilePic(imgURLFromFirebase);
+      await uploadProfilePicKV(currentUserId, startOffset, scale, imgURLFromFirebase);
+      setImg(imgURLFromFirebase);
+    });
   }
+
   return (
     <>
       <Dialog open={avatarClick} onOpenChange={setAvatarClick}>
         <DialogContent>
-          <AvatarEdit />
-          <Button
-            variant='outline'
-            onClick={async () => {
-              if (currentUserId === '') return;
-              await uploadProfilePicKV(currentUserId, startOffset, scale, img);
-              await updateProfilePic(img);
-            }}
-          >
-            Edit
-          </Button>
+          <AvatarEdit aspectRatio={aspectRatio} currentUserData={currentUserData} currentUserId={currentUserId} />
+
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-2'>
               <FormField
@@ -68,52 +83,29 @@ export default function Modal({currentUserId}: {currentUserId: string}) {
                   </FormItem>
                 )}
               />
-              <FileController
-                name='imgFile'
-                control={form.control}
-                defaultValue={new File([], '')}
-                render={({field, base64, remove, select}: any) => (
-                  <FormItem>
-                    <FormLabel>Upload file:</FormLabel>
-                    <FormControl>
-                      {base64 ? (
-                        <>
-                          <Image src={base64} width={100} alt='preview-profile-pic' />
-                          <button onClick={remove}>remove</button>
-                        </>
-                      ) : (
-                        <>
-                          <input {...field} />
-                          <br />
-                          <button onClick={select}>select</button>
-                          &nbsp;&lt;--- alternative (if input is hidden)
-                        </>
-                      )}
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <FileController name='imgFile' errors={form.formState.errors} register={form.register} />
               <Button type='submit'>Update</Button>
             </form>
           </Form>
         </DialogContent>
       </Dialog>
 
-      <Avatar className='w-24 h-24 cursor-pointer opacity-100 hover:opacity-75' onClick={() => setAvatarClick(true)}>
+      <div
+        className='w-[96px] h-[96px] overflow-hidden cursor-pointer opacity-100 hover:opacity-75 rounded-full relative'
+        onClick={() => setAvatarClick(true)}
+      >
         <Image
-          src={img}
+          src={serverImg}
           alt='user-profile-picture'
-          width={96}
-          height={96}
-          priority
+          fill
+          objectFit='contain'
           style={{
-            transform: `scale(${scale}) translate(${(startOffset.x / scale) * 0.11}px, ${
-              (startOffset.y / scale) * 0.11
+            transform: `scale(${serverScale}) translate(${serverStartOffset.x * (96 / 288)}px, ${
+              (serverStartOffset.y / serverScale) * (96 / 288)
             }px)`,
           }}
         />
-      </Avatar>
+      </div>
     </>
   );
 }

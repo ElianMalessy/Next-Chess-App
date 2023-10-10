@@ -45,6 +45,7 @@
     "next-firebase-auth-edge": "^0.8.8-1",
     "next-themes": "^0.2.1",
     "postcss": "8.4.31",
+    "probe-image-size": "^7.2.3",
     "react": "18.2.0",
     "react-avatar-editor": "^13.0.0",
     "react-dom": "18.2.0",

@@ -82,7 +82,7 @@ export default function SearchBar({users}: {users: any}) {
                 setUsersSearchList(usersFuse.current.search(search.target.value));
               }}
             />
-            <div className='flex flex-col rounded-md gap-1 w-full max-h-[10rem] absolute border bg-popover p-1 text-popover-foreground shadow-md mt-2'>
+            <div className='flex flex-col rounded-md gap-1 w-full absolute border bg-popover p-1 text-popover-foreground shadow-md mt-2'>
               {searchUsersMemo}
             </div>
           </motion.div>

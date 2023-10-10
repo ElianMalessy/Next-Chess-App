@@ -96,22 +96,22 @@ export default function ProfileCard({
                 </DialogContent>
               </Dialog>
 
-              <Avatar className='w-24 h-24'>
+              <div className='w-[96px] h-[96px] overflow-hidden cursor-pointer opacity-100 hover:opacity-75 rounded-full relative'>
                 <Image
                   src={pageUser.photoURL}
                   alt='user-profile-picture'
-                  width={96}
-                  height={96}
+                  fill
+                  objectFit='contain'
                   priority
                   style={{
                     transform: `scale(${useProfilePicStore.getState().scale}) translate(${
-                      (useProfilePicStore.getState().startOffset.x / useProfilePicStore.getState().scale) * 0.11
+                      (useProfilePicStore.getState().startOffset.x / useProfilePicStore.getState().scale) * (96 / 288)
                     }px, ${
-                      (useProfilePicStore.getState().startOffset.y / useProfilePicStore.getState().scale) * 0.11
+                      (useProfilePicStore.getState().startOffset.y / useProfilePicStore.getState().scale) * (96 / 288)
                     }px)`,
                   }}
                 />
-              </Avatar>
+              </div>
             </div>
             <div>
               <CardHeader>

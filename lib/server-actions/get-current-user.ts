@@ -36,3 +36,16 @@ export default async function getCurrentUser() {
   });
   return tokens?.decodedToken;
 }
+export async function getToken() {
+  const tokens = await getTokens(cookies(), {
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
+    serviceAccount: {
+      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!,
+      privateKey: process.env.NEXT_PUBLIC_FIREBASE_ADMIN_PRIVATE_KEY!.replace(/\\n/g, '\n'),
+      clientEmail: process.env.NEXT_PUBLIC_FIREBASE_ADMIN_CLIENT_EMAIL!,
+    },
+    cookieName: 'AuthToken',
+    cookieSignatureKeys: ['secret1', 'secret2'],
+  });
+  return tokens;
+}

@@ -18,6 +18,7 @@ import {
 import type {AuthCredential, User, UserCredential} from '@firebase/auth';
 import {auth, firestore} from '@/components/firebase';
 import {collection, doc, setDoc} from '@firebase/firestore';
+import {error} from 'console';
 
 export interface AuthState {
   currentUser?: User;

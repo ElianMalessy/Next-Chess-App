@@ -30,6 +30,7 @@ export default function AvatarEdit({
 
   const handleScale = useCallback((e: any) => {
     const newScale = parseFloat(e.target.value);
+    console.log(aspectRatio, newScale);
     setTempScale(newScale);
   }, []);
 
@@ -83,16 +84,18 @@ export default function AvatarEdit({
         <br />
         <div className='flex items-center justify-center'>
           Zoom:
-          <input
-            name='scale'
-            type='range'
-            onChange={handleScale}
-            min={`${aspectRatio}`}
-            max='10'
-            step='0.01'
-            defaultValue='1'
-            style={{width: '250px', marginLeft: '0.15rem', marginTop: '0.2rem'}}
-          />
+          {aspectRatio && (
+            <input
+              name='scale'
+              type='range'
+              onChange={handleScale}
+              min={`${aspectRatio}`}
+              max='10'
+              step='0.01'
+              defaultValue='1'
+              style={{width: '250px', marginLeft: '0.15rem', marginTop: '0.2rem'}}
+            />
+          )}
         </div>
       </div>
       <Button

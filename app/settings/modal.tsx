@@ -16,7 +16,7 @@ import {FileController} from './file-controller';
 
 import {useAuthStore} from '@/lib/hooks/useAuthStore';
 import {useProfilePicStore} from '@/lib/hooks/useProfilePicStore';
-import dataURLtoFile from '@/lib/convertToFile';
+import dataURLtoFile, {createFile} from '@/lib/convertToFile';
 
 const formSchema = z.object({
   imgURL: z.coerce.string(),
@@ -26,12 +26,13 @@ export default function Modal({
   currentUserId,
   aspectRatio,
   currentUserData,
+  token,
 }: {
   currentUserId: string;
   aspectRatio: number;
   currentUserData: any;
+  token: string;
 }) {
-  const {updateProfilePic} = useAuthStore();
   const {startOffset, scale, img, setImg} = useProfilePicStore();
   const serverScale = scale ?? currentUserData.scale;
   const serverStartOffset = startOffset ?? currentUserData;
@@ -52,11 +53,22 @@ export default function Modal({
 
     const storage = getStorage();
     const storageRef = ref(storage, `profile-pics/${currentUserId}`);
-    let file = values.imgFile ? values.imgFile[0] : dataURLtoFile(values.imgURL, 'profile-pic');
+
+    let file = values.imgFile[0];
+    if (values.imgURL && values.imgURL.startsWith('data:image/')) {
+      file = dataURLtoFile(values.imgURL, 'profile-pic');
+    } else if (values.imgURL && values.imgURL.startsWith('http')) {
+      file = await createFile(values.imgURL);
+    }
 
     uploadBytes(storageRef, file).then(async (snapshot) => {
       const imgURLFromFirebase: any = await getDownloadURL(snapshot.ref);
-      await updateProfilePic(imgURLFromFirebase);
+      await fetch(window.location.origin + `/api/update-profile-pic?imgURL=${imgURLFromFirebase}`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       await uploadProfilePicKV(currentUserId, startOffset, scale, imgURLFromFirebase);
       setImg(imgURLFromFirebase);
     });
@@ -77,7 +89,7 @@ export default function Modal({
                   <FormItem>
                     <FormLabel>Image link:</FormLabel>
                     <FormControl>
-                      <Input placeholder='paste your link here' {...field} />
+                      <Input placeholder='paste your link here' {...field} autoComplete='off' />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

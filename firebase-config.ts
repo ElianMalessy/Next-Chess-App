@@ -11,3 +11,17 @@ export const serverConfig: Config = {
     clientEmail: process.env.NEXT_PUBLIC_FIREBASE_ADMIN_CLIENT_EMAIL!,
   },
 };
+
+export const commonOptions = {
+  apiKey: serverConfig.apiKey,
+  cookieName: 'AuthToken',
+  cookieSignatureKeys: ['secret1', 'secret2'],
+  cookieSerializeOptions: {
+    path: '/',
+    httpOnly: true,
+    secure: false, // Set this to true on HTTPS environments
+    sameSite: 'strict' as const,
+    maxAge: 12 * 60 * 60 * 24, // twelve days
+  },
+  serviceAccount: serverConfig.serviceAccount,
+};

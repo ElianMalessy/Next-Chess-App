@@ -5,22 +5,10 @@ import {v4} from 'uuid';
 import {Tokens, getFirebaseAuth} from 'next-firebase-auth-edge/lib/auth';
 import {refreshAuthCookies} from 'next-firebase-auth-edge/lib/next/middleware';
 
-import {serverConfig} from '@/firebase-config';
+import {serverConfig, commonOptions} from '@/firebase-config';
 import {NextResponse} from 'next/server';
 
-const commonOptions = {
-  apiKey: serverConfig.apiKey,
-  cookieName: 'AuthToken',
-  cookieSignatureKeys: ['secret1', 'secret2'],
-  cookieSerializeOptions: {
-    path: '/',
-    httpOnly: true,
-    secure: false, // Set this to true on HTTPS environments
-    sameSite: 'strict' as const,
-    maxAge: 12 * 60 * 60 * 24, // twelve days
-  },
-  serviceAccount: serverConfig.serviceAccount,
-};
+
 const {getUser, updateUser} = getFirebaseAuth(serverConfig.serviceAccount, serverConfig.apiKey);
 export default async function createUser(token: Tokens) {
   const decodedToken = token.decodedToken;

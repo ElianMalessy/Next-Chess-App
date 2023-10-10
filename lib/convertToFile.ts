@@ -30,3 +30,11 @@ export function getBase64(file: File) {
     reader.onerror = (error) => reject(error);
   });
 }
+export async function createFile(url: string) {
+  let response = await fetch(window.location.origin + `/api/get-image-blob?imgURL=${url}`);
+  let data = await response.blob();
+  let metadata = {
+    type: 'image/jpeg',
+  };
+  return new File([data], 'profile-pic.jpeg', metadata);
+}

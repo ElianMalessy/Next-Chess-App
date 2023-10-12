@@ -30,7 +30,6 @@ export default function AvatarEdit({
 
   const handleScale = useCallback((e: any) => {
     const newScale = parseFloat(e.target.value);
-    console.log(aspectRatio, newScale);
     setTempScale(newScale);
   }, []);
 

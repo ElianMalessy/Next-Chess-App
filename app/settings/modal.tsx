@@ -14,9 +14,9 @@ import {Input} from '@/components/ui/input';
 import AvatarEdit from './avatar-editor';
 import {FileController} from './file-controller';
 
-import {useAuthStore} from '@/lib/hooks/useAuthStore';
 import {useProfilePicStore} from '@/lib/hooks/useProfilePicStore';
 import dataURLtoFile, {createFile} from '@/lib/convertToFile';
+import getImageAspectRatio from '@/lib/server-actions/get-image-aspect-ratio';
 
 const formSchema = z.object({
   imgURL: z.coerce.string(),
@@ -33,7 +33,7 @@ export default function Modal({
   currentUserData: any;
   token: string;
 }) {
-  const {startOffset, scale, img, setImg} = useProfilePicStore();
+  const {startOffset, scale, img, setImg, setScale} = useProfilePicStore();
   const serverScale = scale ?? currentUserData.scale;
   const serverStartOffset = startOffset ?? currentUserData;
   const serverImg = img ?? currentUserData.photoURL;
@@ -63,14 +63,17 @@ export default function Modal({
 
     uploadBytes(storageRef, file).then(async (snapshot) => {
       const imgURLFromFirebase: any = await getDownloadURL(snapshot.ref);
-      await fetch(window.location.origin + `/api/update-profile-pic?imgURL=${imgURLFromFirebase}`, {
+      await fetch(window.location.origin + `/api/update-profile-pic?imgURL=${encodeURIComponent(imgURLFromFirebase)}`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      await uploadProfilePicKV(currentUserId, startOffset, scale, imgURLFromFirebase);
+
+      const aspectRatio = await getImageAspectRatio(imgURLFromFirebase);
+      await uploadProfilePicKV(currentUserId, startOffset, aspectRatio, imgURLFromFirebase);
       setImg(imgURLFromFirebase);
+      setScale(aspectRatio);
     });
   }
 

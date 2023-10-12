@@ -4,16 +4,13 @@ import {validate} from 'uuid';
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import {getToken} from '@/lib/server-actions/get-current-user';
 import Modal from './modal';
-const probe = require('probe-image-size');
+import getImageAspectRatio from '@/lib/server-actions/get-image-aspect-ratio';
 
 export default async function UpdateAvatarEdit() {
   const token = await getToken();
   const currentUser = token?.decodedToken;
   const currentUserData = await kv.hgetall(currentUser?.uid ?? '');
-  let result = await probe(currentUser?.picture);
-  const width = result.width;
-  const height = result.height;
-  console.log(width, height, currentUser?.picture);
+  const aspectRatio = await getImageAspectRatio(currentUser?.picture ?? '');
 
   return (
     <div className='w-full flex items-center flex-col'>
@@ -23,7 +20,7 @@ export default async function UpdateAvatarEdit() {
             token={token?.token ?? ''}
             currentUserId={currentUser?.uid ?? ''}
             currentUserData={currentUserData}
-            aspectRatio={width && height ? width / height : 1}
+            aspectRatio={aspectRatio}
           />
         </div>
         <div>

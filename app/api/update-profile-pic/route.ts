@@ -12,7 +12,6 @@ export async function POST(request: NextRequest) {
   if (!token) throw new Error('Cannot update custom claims of unauthenticated user');
 
   const photoURL = request.nextUrl.searchParams.get('imgURL');
-
   await updateUser(token.decodedToken.uid, {photoURL: photoURL});
   const response = new NextResponse(
     JSON.stringify({

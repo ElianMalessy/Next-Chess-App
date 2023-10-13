@@ -5,7 +5,6 @@ import Image from 'next/image';
 import {Button} from '@/components/ui/button';
 import {uploadProfilePicKV} from '@/lib/server-actions/upload-profile-pic';
 import {useProfilePicStore} from '@/lib/hooks/useProfilePicStore';
-import {useAuthStore} from '@/lib/hooks/useAuthStore';
 
 export default function AvatarEdit({
   aspectRatio,
@@ -16,16 +15,17 @@ export default function AvatarEdit({
   currentUserData: any;
   currentUserId: string;
 }) {
-  const {startOffset, scale, setScale, setStartOffset, img} = useProfilePicStore();
-  const {updateProfilePic} = useAuthStore();
+  const {startOffset, scale, setScale, setStartOffset, img, setImg} = useProfilePicStore();
 
-  const serverScale = scale ?? currentUserData.scale;
-  const serverStartOffset = startOffset ?? currentUserData;
-  const serverImg = img ?? currentUserData.photoURL;
+  useEffect(() => {
+    setScale(currentUserData.scale);
+    setStartOffset(currentUserData.startOffset);
+    setImg(currentUserData.photoURL);
+  }, [currentUserData, setScale, setStartOffset, setImg]);
 
-  const [tempScale, setTempScale] = useState(serverScale);
+  const [tempScale, setTempScale] = useState(scale);
   const [tempStartOffset, setTempStartOffset] = useState({x: 0, y: 0});
-  const [offset, setOffset] = useState(serverStartOffset);
+  const [offset, setOffset] = useState(startOffset);
   const [isDragging, setIsDragging] = useState(false);
 
   const handleScale = useCallback((e: any) => {
@@ -70,10 +70,12 @@ export default function AvatarEdit({
       <div className='h-full w-full flex items-center flex-col'>
         <div className={`h-[288px] w-[288px] overflow-hidden relative`} onMouseDown={handleMouseDown}>
           <Image
-            src={serverImg}
+            src={img}
             fill
-            objectFit='contain'
-            style={{transform: `scale(${tempScale}) translate(${offset.x}px, ${offset.y}px)`}}
+            style={{
+              objectFit: 'cover',
+              transform: `scale(${tempScale}) translate(${offset.x}px, ${offset.y}px)`,
+            }}
             alt='profile-pic-editor'
           />
           <div
@@ -83,18 +85,16 @@ export default function AvatarEdit({
         <br />
         <div className='flex items-center justify-center'>
           Zoom:
-          {aspectRatio && (
-            <input
-              name='scale'
-              type='range'
-              onChange={handleScale}
-              min={`${aspectRatio}`}
-              max='10'
-              step='0.01'
-              defaultValue='1'
-              style={{width: '250px', marginLeft: '0.15rem', marginTop: '0.2rem'}}
-            />
-          )}
+          <input
+            name='scale'
+            type='range'
+            onChange={handleScale}
+            min={`${aspectRatio}`}
+            max='10'
+            step='0.01'
+            defaultValue='1'
+            style={{width: '250px', marginLeft: '0.15rem', marginTop: '0.2rem'}}
+          />
         </div>
       </div>
       <Button
@@ -102,8 +102,8 @@ export default function AvatarEdit({
           if (currentUserId === '') return;
           setScale(tempScale);
           setStartOffset(offset);
-          await uploadProfilePicKV(currentUserId, startOffset, scale, img);
-          await updateProfilePic(img);
+          console.log(currentUserId, offset, tempScale);
+          await uploadProfilePicKV(currentUserId, offset, tempScale, img);
         }}
       >
         Edit

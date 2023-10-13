@@ -1,5 +1,4 @@
 import {create} from 'zustand';
-import {devtools, persist} from 'zustand/middleware';
 const profilePicStore = (set: any) => ({
   img: 'https://firebasestorage.googleapis.com/v0/b/wechess-2ecf9.appspot.com/o/default-profile-pic.svg?alt=media&token=cbd585f6-a638-4e25-a502-436d2109ed7a',
   scale: 1,
@@ -26,8 +25,5 @@ const profilePicStore = (set: any) => ({
 });
 
 export const useProfilePicStore = create<any>()(
-  persist(profilePicStore, {
-    name: 'profile-pic-data',
-    skipHydration: true,
-  })
+  profilePicStore
 );

@@ -1,15 +1,13 @@
-export const toDataURL = (url: string) =>
-  fetch(url)
-    .then((response) => response.blob())
-    .then(
-      (blob) =>
-        new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result);
-          reader.onerror = reject;
-          reader.readAsDataURL(blob);
-        })
-    );
+export const toDataURL = async (url: string) => {
+  const response = await fetch(window.location.origin + `/api/get-image-blob?imgURL=${url}`);
+  const data = await response.blob();
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(data);
+  });
+};
 export default function dataURLtoFile(dataurl: string, filename: string) {
   let arr = dataurl.split(','),
     mime = arr[0].match(/:(.*?);/)![1],
@@ -21,7 +19,7 @@ export default function dataURLtoFile(dataurl: string, filename: string) {
   }
   return new File([u8arr], filename, {type: mime});
 }
-export function getBase64(file: File) {
+export function fileToDataurl(file: File) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 
@@ -30,10 +28,10 @@ export function getBase64(file: File) {
     reader.onerror = (error) => reject(error);
   });
 }
-export async function createFile(url: string) {
-  let response = await fetch(window.location.origin + `/api/get-image-blob?imgURL=${url}`);
-  let data = await response.blob();
-  let metadata = {
+export async function urlToFile(url: string) {
+  const response = await fetch(window.location.origin + `/api/get-image-blob?imgURL=${url}`);
+  const data = await response.blob();
+  const metadata = {
     type: 'image/jpeg',
   };
   return new File([data], 'profile-pic.jpeg', metadata);

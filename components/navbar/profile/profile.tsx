@@ -1,6 +1,6 @@
 'use client';
 import Image from 'next/image';
-import {useEffect} from 'react';
+import {useEffect, useState} from 'react';
 
 import {
   DropdownMenu,
@@ -16,15 +16,14 @@ import ProfileDropdown from './profile-dropdown';
 import {validate} from 'uuid';
 
 export default function Profile({currentUserData}: {currentUserData: any}) {
-  const {scale, startOffset, img} = useProfilePicStore();
-  const serverScale = scale ?? currentUserData.scale;
-  const serverStartOffset = startOffset ?? currentUserData;
-  const serverImg = img ?? currentUserData.photoURL;
+  const {scale, startOffset, img, setScale, setStartOffset, setImg} = useProfilePicStore();
+  useEffect(() => {
+    setScale(currentUserData.scale);
+    setStartOffset(currentUserData.startOffset);
+    setImg(currentUserData.photoURL);
+  }, [currentUserData, setScale, setStartOffset, setImg]);
   const {currentUser} = useAuthStore();
 
-  useEffect(() => {
-    useProfilePicStore.persist.rehydrate();
-  }, []);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -32,15 +31,15 @@ export default function Profile({currentUserData}: {currentUserData: any}) {
           variant='ghost'
           className='h-11 w-11 overflow-hidden cursor-pointer opacity-100 hover:opacity-75 rounded-full relative'
         >
-          {serverImg && (
+          {img && (
             <Image
-              src={serverImg}
+              src={img}
               alt='currentUser-profile-picture'
               fill
-              objectFit='contain'
               style={{
-                transform: `scale(${serverScale}) translate(${serverStartOffset.x * (45 / 288)}px, ${
-                  (serverStartOffset.y / serverScale) * (45 / 288)
+                objectFit: 'cover',
+                transform: `scale(${scale}) translate(${startOffset.x * (45 / 288)}px, ${
+                  (startOffset.y / scale) * (45 / 288)
                 }px)`,
               }}
             />

@@ -1,6 +1,6 @@
 'use client';
 import Image from 'next/image';
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import {z} from 'zod';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {useForm} from 'react-hook-form';
@@ -15,7 +15,7 @@ import AvatarEdit from './avatar-editor';
 import {FileController} from './file-controller';
 
 import {useProfilePicStore} from '@/lib/hooks/useProfilePicStore';
-import dataURLtoFile, {createFile} from '@/lib/convertToFile';
+import dataURLtoFile, {urlToFile, toDataURL} from '@/lib/convertToFile';
 import getImageAspectRatio from '@/lib/server-actions/get-image-aspect-ratio';
 
 const formSchema = z.object({
@@ -33,10 +33,13 @@ export default function Modal({
   currentUserData: any;
   token: string;
 }) {
-  const {startOffset, scale, img, setImg, setScale} = useProfilePicStore();
-  const serverScale = scale ?? currentUserData.scale;
-  const serverStartOffset = startOffset ?? currentUserData;
-  const serverImg = img ?? currentUserData.photoURL;
+  const {startOffset, scale, img, setImg, setScale, setStartOffset} = useProfilePicStore();
+
+  useEffect(() => {
+    setScale(currentUserData.scale);
+    setStartOffset(currentUserData.startOffset);
+    setImg(currentUserData.photoURL);
+  }, [currentUserData, setScale, setStartOffset, setImg]);
 
   const [avatarClick, setAvatarClick] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
@@ -46,6 +49,7 @@ export default function Modal({
       imgFile: undefined,
     },
   });
+  const {formState} = form;
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     // form to upload image strings or files
@@ -58,7 +62,7 @@ export default function Modal({
     if (values.imgURL && values.imgURL.startsWith('data:image/')) {
       file = dataURLtoFile(values.imgURL, 'profile-pic');
     } else if (values.imgURL && values.imgURL.startsWith('http')) {
-      file = await createFile(values.imgURL);
+      file = await urlToFile(values.imgURL);
     }
 
     uploadBytes(storageRef, file).then(async (snapshot) => {
@@ -74,6 +78,7 @@ export default function Modal({
       await uploadProfilePicKV(currentUserId, startOffset, aspectRatio, imgURLFromFirebase);
       setImg(imgURLFromFirebase);
       setScale(aspectRatio);
+      setStartOffset({x: 0, y: 0});
     });
   }
 
@@ -92,7 +97,22 @@ export default function Modal({
                   <FormItem>
                     <FormLabel>Image link:</FormLabel>
                     <FormControl>
-                      <Input placeholder='paste your link here' {...field} autoComplete='off' />
+                      <Input
+                        placeholder='Paste your link here'
+                        {...field}
+                        autoComplete='off'
+                        onChange={async (e) => {
+                          // field.onChange((event: any) => {
+                          //   console.log(e.target.value, event);
+                            const url = e.target.value;
+                            const dataURL = await toDataURL(url);
+                            const aspectRatio = await getImageAspectRatio(url);
+                            setImg(dataURL);
+                            setScale(aspectRatio);
+                            setStartOffset({x: 0, y: 0});
+                          // });
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -110,13 +130,13 @@ export default function Modal({
         onClick={() => setAvatarClick(true)}
       >
         <Image
-          src={serverImg}
+          src={img}
           alt='user-profile-picture'
           fill
-          objectFit='contain'
           style={{
-            transform: `scale(${serverScale}) translate(${serverStartOffset.x * (96 / 288)}px, ${
-              (serverStartOffset.y / serverScale) * (96 / 288)
+            objectFit: 'cover',
+            transform: `scale(${scale}) translate(${startOffset.x * (96 / 288)}px, ${
+              (startOffset.y / scale) * (96 / 288)
             }px)`,
           }}
         />

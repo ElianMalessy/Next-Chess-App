@@ -32,7 +32,6 @@ export default function ProfileCard({
   const {friendsList, friendRequestsList} = useFriendsStore();
   const [friendState, setFriendState] = useState(friend && !friend.isRequest ? friend : null);
   const [friendRequestState, setFriendRequestState] = useState(friend && friend.isRequest ? friend : null);
-  console.log(friend);
   const [openFriendDialog, setOpenFriendDialog] = useState(false);
   const [openFriendRequestDialog, setOpenFriendRequestDialog] = useState(false);
 
@@ -101,9 +100,9 @@ export default function ProfileCard({
                   src={pageUser.photoURL}
                   alt='user-profile-picture'
                   fill
-                  objectFit='contain'
                   priority
                   style={{
+                    objectFit: 'cover',
                     transform: `scale(${useProfilePicStore.getState().scale}) translate(${
                       (useProfilePicStore.getState().startOffset.x / useProfilePicStore.getState().scale) * (96 / 288)
                     }px, ${

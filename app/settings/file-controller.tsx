@@ -1,5 +1,5 @@
 import {useCallback} from 'react';
-import {getBase64} from '@/lib/convertToFile';
+import {fileToDataurl} from '@/lib/convertToFile';
 import {useProfilePicStore} from '@/lib/hooks/useProfilePicStore';
 
 export function FileController({name, errors, register}: any) {
@@ -8,7 +8,7 @@ export function FileController({name, errors, register}: any) {
 
   const onAvatarChange = useCallback(async (event: any) => {
     if (event.target.files?.[0]) {
-      const base64: any = await getBase64(event.target.files[0]);
+      const base64: any = await fileToDataurl(event.target.files[0]);
 
       setImg(base64);
       onChange(event);

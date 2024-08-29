@@ -18,7 +18,7 @@ export default async function createUser(token: Tokens) {
 
   // new users do this:
   const firebaseUser = await getUser(decodedToken.uid ?? '');
-  if (!firebaseUser.uid) return;
+  if (!firebaseUser || !firebaseUser.uid) return;
 
   const defaultProfilePic =
     'https://firebasestorage.googleapis.com/v0/b/wechess-2ecf9.appspot.com/o/default-profile-pic.svg?alt=media&token=cbd585f6-a638-4e25-a502-436d2109ed7a';

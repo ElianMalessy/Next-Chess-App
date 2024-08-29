@@ -1,16 +1,16 @@
 'use client';
 import ThemeProvider from './theme-provider';
-import {useEffect} from 'react';
+import { useEffect } from 'react';
 
-import type {User} from '@firebase/auth';
-import {onIdTokenChanged} from '@firebase/auth';
-import {auth} from '@/components/firebase';
-import {useAuthStore} from '@/lib/hooks/useAuthStore';
-import {useProfilePicStore} from '@/lib/hooks/useProfilePicStore';
+import type { User } from '@firebase/auth';
+import { onIdTokenChanged } from '@firebase/auth';
+import { auth } from '@/components/firebase';
+import { useAuthStore } from '@/lib/hooks/useAuthStore';
+import { useProfilePicStore } from '@/lib/hooks/useProfilePicStore';
 
-export default function Providers({children}: {children: React.ReactNode}) {
-  const {setCurrentUser} = useAuthStore();
-  const {setImg} = useProfilePicStore();
+export default function Providers({ children }: { children: React.ReactNode }) {
+  const { setCurrentUser } = useAuthStore();
+  const { setImg } = useProfilePicStore();
 
   useEffect(() => {
     async function handleIdTokenChanged(user: User | null) {

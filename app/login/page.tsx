@@ -1,19 +1,19 @@
 'use client';
 import Link from 'next/link';
-import {useRouter} from 'next/navigation';
-import {useState} from 'react';
-import {useForm} from 'react-hook-form';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import {zodResolver} from '@hookform/resolvers/zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 
-import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from '@/components/ui/form';
-import {Input} from '@/components/ui/input';
-import {Card, CardHeader, CardContent} from '@/components/ui/card';
-import {Button} from '@/components/ui/button';
-import {Separator} from '@/components/ui/separator';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 
 // import {useAuth} from '@/components/contexts/auth-provider';
-import {useAuthStore} from '@/lib/hooks/useAuthStore';
+import { useAuthStore } from '@/lib/hooks/useAuthStore';
 //import Background from './Background';
 
 const formSchema = z.object({
@@ -22,7 +22,7 @@ const formSchema = z.object({
 });
 
 export default function Login() {
-  const {login, anonSignup, googleSignIn} = useAuthStore();
+  const { login, anonSignup, googleSignIn } = useAuthStore();
   const router = useRouter();
   const [error, setError] = useState('');
 
@@ -67,7 +67,7 @@ export default function Login() {
                   <FormField
                     control={form.control}
                     name='email'
-                    render={({field}) => (
+                    render={({ field }) => (
                       <FormItem>
                         {/* <FormLabel /> */}
                         <FormControl>
@@ -81,7 +81,7 @@ export default function Login() {
                     <FormField
                       control={form.control}
                       name='password'
-                      render={({field}) => (
+                      render={({ field }) => (
                         <FormItem>
                           {/* <FormLabel /> */}
                           <FormControl>

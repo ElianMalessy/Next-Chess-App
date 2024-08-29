@@ -12,6 +12,7 @@ import {
   updateProfile,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
   getAdditionalUserInfo,
   linkWithCredential,
 } from '@firebase/auth';

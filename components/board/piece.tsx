@@ -72,7 +72,7 @@ export default function Piece({
         playerColor === 'w' || playerColor === 'default' ? piecePosition.y : 7 - piecePosition.y,
         piecePosition.x
       );
-      if (newPosition && ((playerColor === turn && turn === color) || (playerColor === 'default' && !realGame))) {
+      if (newPosition && (playerColor === 'default' || (playerColor === turn && turn === color))) {
         setPiecePosition({x: newPosition[1], y: newPosition[0]});
         setSquares([]);
         setZIndex(1);
@@ -176,6 +176,7 @@ export default function Piece({
           setTurn(turn === 'w' ? 'b' : 'w', dbRef);
         } else {
           setFENFromBoard(boardCopy, null);
+          // In board editor mode, always switch turns to allow both colors to move
           setTurn(turn === 'w' ? 'b' : 'w', null);
         }
 

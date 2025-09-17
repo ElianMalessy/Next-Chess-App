@@ -3,7 +3,7 @@ import {useCallback, useEffect, useState} from 'react';
 import Image from 'next/image';
 
 import {Button} from '@/components/ui/button';
-import {uploadProfilePicKV} from '@/lib/server-actions/upload-profile-pic';
+// Removed uploadProfilePicKV - no longer using KV
 import {useProfilePicStore} from '@/lib/hooks/useProfilePicStore';
 
 export default function AvatarEdit({
@@ -103,7 +103,7 @@ export default function AvatarEdit({
           setScale(tempScale);
           setStartOffset(offset);
           console.log(currentUserId, offset, tempScale);
-          await uploadProfilePicKV(currentUserId, offset, tempScale, img);
+          // Profile pic editing now handled by parent modal
         }}
       >
         Edit

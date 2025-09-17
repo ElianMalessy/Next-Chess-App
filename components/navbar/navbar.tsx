@@ -2,6 +2,7 @@ import Link from 'next/link';
 import ThemeToggle from './theme-toggle';
 import Profile from './profile/profile';
 import {BellIcon} from '@radix-ui/react-icons';
+import MessageIcon from '../messages/message-icon';
 // import Search from './search-users';
 import ProfileServer from './profile/profile-server';
 
@@ -14,6 +15,9 @@ export default function Navbar() {
         </Link>
         <div className='flex space-x-2 lg:space-x-3 items-center'>
           {/* <Search /> */}
+          <Link href="/messages">
+            <MessageIcon />
+          </Link>
           {/* <BellIcon className='h-[1.5rem] w-[1.5rem]' /> */}
           <ThemeToggle />
           <ProfileServer />

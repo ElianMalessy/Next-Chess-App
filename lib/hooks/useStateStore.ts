@@ -101,6 +101,12 @@ const store = (set: any) => ({
   check: false,
 
   setFENFromFirebase: (FEN: string) => {
+    // Handle undefined or null FEN
+    if (!FEN || typeof FEN !== 'string') {
+      console.warn('Invalid FEN provided:', FEN);
+      return;
+    }
+    
     const tempBoard: string[][] = [
       ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
       ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],

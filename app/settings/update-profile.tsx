@@ -132,7 +132,7 @@ export default function UpdateProfile() {
                     if (!currentUser || !currentUser?.displayName || !currentUser?.photoURL) return;
                     setLoading(true);
                     await deleteCurrentUser();
-                    await deleteUser(currentUser?.uid, currentUser?.displayName, currentUser?.photoURL);
+                    // User deletion now handled by Firebase auth only
                     setLoading(false);
                     router.push('/login');
                   }}

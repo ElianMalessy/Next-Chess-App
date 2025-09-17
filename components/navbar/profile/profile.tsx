@@ -33,7 +33,7 @@ export default function Profile({currentUserData}: {currentUserData: any}) {
           variant='ghost'
           className='h-11 w-11 overflow-hidden cursor-pointer opacity-100 hover:opacity-75 rounded-full relative'
         >
-          {img && (
+          {img ? (
             <Image
               src={img}
               alt='currentUser-profile-picture'
@@ -45,6 +45,10 @@ export default function Profile({currentUserData}: {currentUserData: any}) {
                 }px)`,
               }}
             />
+          ) : (
+            <div className='w-full h-full bg-gray-300 flex items-center justify-center text-gray-600 text-sm font-medium'>
+              {currentUser?.displayName?.[0]?.toUpperCase() || 'U'}
+            </div>
           )}
         </Button>
       </DropdownMenuTrigger>
@@ -52,11 +56,7 @@ export default function Profile({currentUserData}: {currentUserData: any}) {
         <DropdownMenuLabel className='font-normal'>
           <div className='flex flex-col space-y-1'>
             <p className='text-sm font-medium leading-none'>
-              {currentUser?.displayName
-                ? validate(currentUser?.displayName)
-                  ? 'anonymous'
-                  : currentUser?.displayName
-                : 'user'}
+              {currentUser?.displayName || 'user'}
             </p>
             <p className='text-xs leading-none text-muted-foreground'>{currentUser?.email}</p>
           </div>

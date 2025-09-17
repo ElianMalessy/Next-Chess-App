@@ -15,17 +15,22 @@ export default function GameInviteModal({gameId}: {gameId: string}) {
   const {sendMessage, createConversation} = useMessagesStore();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [friendEmail, setFriendEmail] = useState('');
+  const [friendUsername, setFriendUsername] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleInviteFriend = async () => {
-    if (!friendEmail || !currentUser?.uid || !currentUser?.displayName) return;
+    if (!friendUsername || !currentUser?.uid || !currentUser?.displayName) return;
+    
+    // Prevent self-invitation
+    if (friendUsername === currentUser.displayName) {
+      alert('You cannot send an invitation to yourself!');
+      return;
+    }
     
     setIsLoading(true);
     try {
-      // For now, we'll create a conversation using email as the identifier
-      // In a real app, you'd want to have a users collection with email -> uid mapping
-      const friendId = `email_${friendEmail}`;
+      // Use username as the identifier
+      const friendId = `username_${friendUsername}`;
       
       // Create or find conversation
       const conversationsRef = collection(firestore, 'conversations');
@@ -58,14 +63,14 @@ export default function GameInviteModal({gameId}: {gameId: string}) {
         currentUser.uid,
         currentUser.displayName,
         friendId,
-        friendEmail.split('@')[0], // Use email prefix as display name
+        friendUsername,
         'game_invite',
         gameId
       );
       
       alert('Game invitation sent! The recipient will see it when they log in.');
       setIsOpen(false);
-      setFriendEmail('');
+      setFriendUsername('');
       
     } catch (error) {
       console.error('Error sending invitation:', error);
@@ -88,26 +93,26 @@ export default function GameInviteModal({gameId}: {gameId: string}) {
         <DialogHeader>
           <DialogTitle>Invite a Friend to Play</DialogTitle>
           <DialogDescription>
-            Enter your friend&apos;s email to send them a game invitation, or play alone.
+            Enter your friend&apos;s username to send them a game invitation, or play alone.
           </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="friend-email">Friend&apos;s Email</Label>
+            <Label htmlFor="friend-username">Friend&apos;s Username</Label>
             <Input
-              id="friend-email"
-              type="email"
-              placeholder="friend@example.com"
-              value={friendEmail}
-              onChange={(e) => setFriendEmail(e.target.value)}
+              id="friend-username"
+              type="text"
+              placeholder="username"
+              value={friendUsername}
+              onChange={(e) => setFriendUsername(e.target.value)}
             />
           </div>
           
           <div className="flex gap-2">
             <Button 
               onClick={handleInviteFriend} 
-              disabled={!friendEmail || isLoading}
+              disabled={!friendUsername || isLoading}
               className="flex-1"
             >
               {isLoading ? 'Sending...' : 'Send Invitation'}

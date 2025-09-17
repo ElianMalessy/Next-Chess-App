@@ -8,8 +8,13 @@ export default async function User({
   params: {id: string};
 }) {
   const currentUser = await getCurrentUser();
-
-  const pageUser = {
+  
+  // For now, we'll use the current user's data since we don't have a users collection
+  // In a real app, you'd query Firestore for the user by username
+  const pageUser = currentUser ? {
+    photoURL: (currentUser as any).picture,
+    metadata: {creationTime: (currentUser as any).auth_time},
+  } : {
     photoURL: undefined,
     metadata: {creationTime: undefined},
   };

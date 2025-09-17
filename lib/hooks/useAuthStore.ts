@@ -76,29 +76,37 @@ const authStore = (set: any, get: any) => ({
     provider.addScope('email');
 
     const credential = await signInWithPopup(auth, provider);
+    // Always set displayName to use underscores
+    const safeDisplayName = (credential.user.displayName || '').replace(/\s+/g, '_');
+    if (credential.user.displayName !== safeDisplayName) {
+      await updateProfile(credential.user, { displayName: safeDisplayName });
+    }
     await get().setTokens(credential);
 
-    if (getAdditionalUserInfo(credential)?.isNewUser && credential.user.email) {
-      // convert to kv
-      // const usersRef = collection(firestore, 'users');
-      // await setDoc(doc(usersRef, credential.user.email), {
-      //   name: credential.user.displayName,
-      //   profilePic: credential.user.photoURL,
-      // });
+    // Update Firestore user doc if email exists
+    const usersRef = collection(firestore, 'users');
+    if (credential.user.email) {
+      await setDoc(doc(usersRef, credential.user.email), {
+        name: safeDisplayName,
+        profilePic: credential.user.photoURL,
+      }, { merge: true });
     }
     return credential;
   },
 
   signup: async (email: string, password: string) => {
     const credential = await createUserWithEmailAndPassword(auth, email, password);
+    // Set displayName to email username (before @), replacing spaces with underscores
+    const emailName = email.split('@')[0].replace(/\s+/g, '_');
+    await updateProfile(credential.user, { displayName: emailName });
     await get().setTokens(credential);
 
     const usersRef = collection(firestore, 'users');
     if (credential.user.email) {
       await setDoc(doc(usersRef, credential.user.email), {
-        name: credential.user.displayName,
+        name: emailName,
         profilePic: credential.user.photoURL,
-      });
+      }, { merge: true });
     }
 
     return credential;
@@ -122,7 +130,20 @@ const authStore = (set: any, get: any) => ({
   },
   anonSignup: async () => {
     const credential = await signInAnonymously(auth);
+    const anonName = `anon_${credential.user.uid.slice(0, 5)}`;
+    const defaultProfilePic = '/default-profile-pic.svg';
+    await updateProfile(credential.user, {
+      displayName: anonName,
+      photoURL: defaultProfilePic,
+    });
     await get().setTokens(credential);
+    setTimeout(() => {
+      get().setCurrentUser({
+        ...credential.user,
+        displayName: anonName,
+        photoURL: defaultProfilePic,
+      });
+    }, 0);
     return credential;
   },
 
@@ -131,14 +152,53 @@ const authStore = (set: any, get: any) => ({
     return updatePassword(get().currentUser, password);
   },
 
-  updateUsername: (username: string) => {
+  updateUsername: async (username: string) => {
     if (!get().currentUser) return Promise.resolve();
-    return updateProfile(get().currentUser, {displayName: username});
+    const safeDisplayName = username.replace(/\s+/g, '_');
+    try {
+      await updateProfile(get().currentUser, {displayName: safeDisplayName});
+      // Update Firestore user doc if email exists
+      if (get().currentUser.email) {
+        const usersRef = collection(firestore, 'users');
+        await setDoc(doc(usersRef, get().currentUser.email), {
+          name: safeDisplayName,
+        }, { merge: true });
+      }
+      // Refresh user state
+      set((state: AuthState) => ({
+        ...state,
+        currentUser: {
+          ...state.currentUser!,
+          displayName: safeDisplayName,
+        },
+      }));
+    } catch (err: any) {
+      // If error is auth/requires-recent-login, log out
+      if (err.code === 'auth/requires-recent-login') {
+        await get().logout();
+      }
+      throw err;
+    }
   },
 
-  updateProfilePic: (profilePic: string) => {
+  updateProfilePic: async (profilePic: string) => {
     if (!get().currentUser) return Promise.resolve();
-    return updateProfile(get().currentUser, {photoURL: profilePic});
+    await updateProfile(get().currentUser, {photoURL: profilePic});
+    // Update Firestore user doc if email exists
+    if (get().currentUser.email) {
+      const usersRef = collection(firestore, 'users');
+      await setDoc(doc(usersRef, get().currentUser.email), {
+        profilePic: profilePic,
+      }, { merge: true });
+    }
+    // Refresh user state
+    set((state: AuthState) => ({
+      ...state,
+      currentUser: {
+        ...state.currentUser!,
+        photoURL: profilePic,
+      },
+    }));
   },
   deleteCurrentUser: () => {
     if (!get().currentUser) return Promise.resolve();

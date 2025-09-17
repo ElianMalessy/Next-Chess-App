@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
-import {Button} from '@/components/ui/button';
-import {useEffect, useState} from 'react';
+import { Button } from '@/components/ui/button';
+import { useEffect, useState } from 'react';
 import GameInviteModal from '@/components/game/game-invite-modal';
 
 export default function LinkButtons() {
@@ -16,7 +16,7 @@ export default function LinkButtons() {
         <Link href='/board-editor'>Board Editor & Analysis</Link>
       </Button>
       <Button asChild className='w-full'>
-        <Link href='/game/test'>Previous Games</Link>
+        <Link href='/previous-games'>Previous Games</Link>
       </Button>
     </>
   );

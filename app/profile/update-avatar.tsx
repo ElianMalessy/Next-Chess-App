@@ -4,6 +4,7 @@ import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import {getToken} from '@/lib/server-actions/get-current-user';
 import Modal from './modal';
 import getImageAspectRatio from '@/lib/server-actions/get-image-aspect-ratio';
+import UsernameDisplay from './username-display';
 
 export default async function UpdateAvatarEdit() {
   const token = await getToken();
@@ -16,9 +17,9 @@ export default async function UpdateAvatarEdit() {
   const aspectRatio = await getImageAspectRatio(currentUser?.picture ?? '');
 
   return (
-    <div className='w-full flex items-center flex-col'>
-      <Card className='flex flex-row items-center w-[50%] py-2'>
-        <div className='ml-8'>
+    <div className='w-full flex items-center justify-center'>
+      <Card className='flex flex-row items-center w-full max-w-md py-2'>
+        <div className='ml-4'>
           <Modal
             token={token?.token ?? ''}
             currentUserId={currentUser?.uid ?? ''}
@@ -26,15 +27,9 @@ export default async function UpdateAvatarEdit() {
             aspectRatio={aspectRatio}
           />
         </div>
-        <div>
-          <CardHeader>
-            <CardTitle>
-              {currentUser?.name
-                ? validate(currentUser?.name)
-                  ? `anonymous (${currentUser?.name})`
-                  : currentUser?.name
-                : 'user'}
-            </CardTitle>
+        <div className='flex-1'>
+          <CardHeader className='pb-2'>
+            <UsernameDisplay />
           </CardHeader>
         </div>
       </Card>

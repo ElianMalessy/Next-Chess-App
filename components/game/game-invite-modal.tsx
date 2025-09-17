@@ -1,18 +1,18 @@
 'use client';
-import {useState} from 'react';
-import {useRouter} from 'next/navigation';
-import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger} from '@/components/ui/dialog';
-import {Button} from '@/components/ui/button';
-import {Input} from '@/components/ui/input';
-import {Label} from '@/components/ui/label';
-import {useAuthStore} from '@/lib/hooks/useAuthStore';
-import {useMessagesStore} from '@/lib/hooks/useMessagesStore';
-import {collection, query, where, getDocs, orderBy, limit} from '@firebase/firestore';
-import {firestore} from '@/components/firebase';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useAuthStore } from '@/lib/hooks/useAuthStore';
+import { useMessagesStore } from '@/lib/hooks/useMessagesStore';
+import { collection, query, where, getDocs, orderBy, limit } from '@firebase/firestore';
+import { firestore } from '@/components/firebase';
 
-export default function GameInviteModal({gameId}: {gameId: string}) {
-  const {currentUser} = useAuthStore();
-  const {sendMessage, createConversation} = useMessagesStore();
+export default function GameInviteModal({ gameId }: { gameId: string }) {
+  const { currentUser } = useAuthStore();
+  const { sendMessage, createConversation } = useMessagesStore();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [friendUsername, setFriendUsername] = useState('');
@@ -20,28 +20,28 @@ export default function GameInviteModal({gameId}: {gameId: string}) {
 
   const handleInviteFriend = async () => {
     if (!friendUsername || !currentUser?.uid || !currentUser?.displayName) return;
-    
+
     // Prevent self-invitation
     if (friendUsername === currentUser.displayName) {
       alert('You cannot send an invitation to yourself!');
       return;
     }
-    
+
     setIsLoading(true);
     try {
       // Use username as the identifier
-      const friendId = `username_${friendUsername}`;
-      
+      const friendId = `${friendUsername}`;
+
       // Create or find conversation
       const conversationsRef = collection(firestore, 'conversations');
       const conversationQuery = query(
         conversationsRef,
         where('participants', 'array-contains', currentUser.uid)
       );
-      
+
       const conversationSnapshot = await getDocs(conversationQuery);
       let conversationId = '';
-      
+
       // Check if conversation already exists
       for (const doc of conversationSnapshot.docs) {
         const participants = doc.data().participants;
@@ -50,16 +50,16 @@ export default function GameInviteModal({gameId}: {gameId: string}) {
           break;
         }
       }
-      
+
       // Create new conversation if none exists
       if (!conversationId) {
         conversationId = await createConversation(currentUser.uid, friendId);
       }
-      
+
       // Send game invitation message
       await sendMessage(
         conversationId,
-        `You've been invited to play chess! Click here to join the game.`,
+        `You've been invited to play chess!`,
         currentUser.uid,
         currentUser.displayName,
         friendId,
@@ -67,11 +67,11 @@ export default function GameInviteModal({gameId}: {gameId: string}) {
         'game_invite',
         gameId
       );
-      
+
       alert('Game invitation sent! The recipient will see it when they log in.');
       setIsOpen(false);
       setFriendUsername('');
-      
+
     } catch (error) {
       console.error('Error sending invitation:', error);
       alert('Failed to send invitation');
@@ -96,7 +96,7 @@ export default function GameInviteModal({gameId}: {gameId: string}) {
             Enter your friend&apos;s username to send them a game invitation, or play alone.
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="friend-username">Friend&apos;s Username</Label>
@@ -108,17 +108,17 @@ export default function GameInviteModal({gameId}: {gameId: string}) {
               onChange={(e) => setFriendUsername(e.target.value)}
             />
           </div>
-          
+
           <div className="flex gap-2">
-            <Button 
-              onClick={handleInviteFriend} 
+            <Button
+              onClick={handleInviteFriend}
               disabled={!friendUsername || isLoading}
               className="flex-1"
             >
               {isLoading ? 'Sending...' : 'Send Invitation'}
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={handlePlayAlone}
               className="flex-1"
             >

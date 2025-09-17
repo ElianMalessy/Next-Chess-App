@@ -18,7 +18,7 @@ export default function ProfileDropdown() {
   return (
     <>
       <DropdownMenuGroup>
-        <DropdownMenuItem onClick={() => router.push(`/user/${currentUser?.displayName?.replaceAll(' ', '_')}`)}>
+        <DropdownMenuItem onClick={() => router.push('/profile')}>
           Profile
           <DropdownMenuShortcut>
             <AvatarIcon />
@@ -28,12 +28,6 @@ export default function ProfileDropdown() {
           Messages
           <DropdownMenuShortcut>
             <EnvelopeClosedIcon />
-          </DropdownMenuShortcut>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => router.push('/settings')}>
-          Settings
-          <DropdownMenuShortcut>
-            <GearIcon />
           </DropdownMenuShortcut>
         </DropdownMenuItem>
       </DropdownMenuGroup>

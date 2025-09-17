@@ -7,7 +7,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuShortcut,
 } from '@/components/ui/dropdown-menu';
-import {AvatarIcon, GearIcon, FaceIcon, EnvelopeClosedIcon, ExitIcon} from '@radix-ui/react-icons';
+import {AvatarIcon, GearIcon, EnvelopeClosedIcon, ExitIcon} from '@radix-ui/react-icons';
 import {useAuthStore} from '@/lib/hooks/useAuthStore';
 import {useProfilePicStore} from '@/lib/hooks/useProfilePicStore';
 
@@ -22,12 +22,6 @@ export default function ProfileDropdown() {
           Profile
           <DropdownMenuShortcut>
             <AvatarIcon />
-          </DropdownMenuShortcut>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => router.push('/friends')}>
-          Friends
-          <DropdownMenuShortcut>
-            <FaceIcon />
           </DropdownMenuShortcut>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => router.push('/messages')}>

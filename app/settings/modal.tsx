@@ -8,7 +8,6 @@ import {getStorage, ref, getDownloadURL, uploadBytes} from '@firebase/storage';
 
 import {Dialog, DialogContent} from '@/components/ui/dialog';
 import {Button} from '@/components/ui/button';
-import {uploadProfilePicKV} from '@/lib/server-actions/upload-profile-pic';
 import {Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage} from '@/components/ui/form';
 import {Input} from '@/components/ui/input';
 import AvatarEdit from './avatar-editor';
@@ -75,7 +74,6 @@ export default function Modal({
       });
 
       const aspectRatio = await getImageAspectRatio(imgURLFromFirebase);
-      await uploadProfilePicKV(currentUserId, startOffset, aspectRatio, imgURLFromFirebase);
       setImg(imgURLFromFirebase);
       setScale(aspectRatio);
       setStartOffset({x: 0, y: 0});

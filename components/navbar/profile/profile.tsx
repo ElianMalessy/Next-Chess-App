@@ -18,9 +18,11 @@ import {validate} from 'uuid';
 export default function Profile({currentUserData}: {currentUserData: any}) {
   const {scale, startOffset, img, setScale, setStartOffset, setImg} = useProfilePicStore();
   useEffect(() => {
-    setScale(currentUserData.scale);
-    setStartOffset(currentUserData.startOffset);
-    setImg(currentUserData.photoURL);
+    if (currentUserData) {
+      setScale(currentUserData.scale ?? 1);
+      setStartOffset(currentUserData.startOffset ?? {x: 0, y: 0});
+      setImg(currentUserData.photoURL);
+    }
   }, [currentUserData, setScale, setStartOffset, setImg]);
   const {currentUser} = useAuthStore();
 

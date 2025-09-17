@@ -21,8 +21,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import {deleteUser} from '@/lib/server-actions/delete-user';
-import {updateUsernameKV} from '@/lib/server-actions/update-username';
+// Removed KV-backed user deletion and username updates
 
 const emailPasswordFormSchema = z
   .object({
@@ -71,7 +70,7 @@ export default function UpdateProfile() {
         setError(error.code);
         return;
       })
-      .then(() => updateUsernameKV(currentUser?.uid, values.username, currentUser?.displayName ?? ''))
+      .then(() => Promise.resolve())
       .finally(() => setLoading(false));
   }
 

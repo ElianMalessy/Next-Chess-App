@@ -1,7 +1,5 @@
 'use server';
 
-import {kv} from '@vercel/kv';
-import {v4} from 'uuid';
 import {Tokens, getFirebaseAuth} from 'next-firebase-auth-edge/lib/auth';
 import {refreshAuthCookies} from 'next-firebase-auth-edge/lib/next/middleware';
 
@@ -13,8 +11,6 @@ const {getUser, updateUser} = getFirebaseAuth(serverConfig.serviceAccount, serve
 export default async function createUser(token: Tokens) {
   const decodedToken = token.decodedToken;
   if (!decodedToken.uid) return;
-  const userExists = await kv.exists(decodedToken.uid ?? '');
-  if (userExists !== 0) return;
 
   // new users do this:
   const firebaseUser = await getUser(decodedToken.uid ?? '');
@@ -23,33 +19,15 @@ export default async function createUser(token: Tokens) {
   const defaultProfilePic =
     'https://firebasestorage.googleapis.com/v0/b/wechess-2ecf9.appspot.com/o/default-profile-pic.svg?alt=media&token=cbd585f6-a638-4e25-a502-436d2109ed7a';
 
-  if (firebaseUser.displayName) {
-    await kv.hset(decodedToken.uid ?? '', {
-      // email: firebaseUser.email, anon users dont have this
-      metadata: firebaseUser.metadata,
-      photoURL: firebaseUser.photoURL,
-      scale: 1,
-      startOffset: {x: 0, y: 0},
+  if (!firebaseUser.displayName || !firebaseUser.photoURL) {
+    await updateUser(decodedToken.uid, {
+      displayName: firebaseUser.displayName ?? decodedToken.uid,
+      photoURL: firebaseUser.photoURL ?? defaultProfilePic,
     });
-    await kv.set(firebaseUser.displayName.replaceAll(' ', '_'), decodedToken.uid);
-    await kv.lpush('users', {username: firebaseUser.displayName, uid: decodedToken.uid});
-  } else {
-    const idName = v4();
-    await kv.hset(decodedToken.uid ?? '', {
-      // email: firebaseUser.email, anon users dont have this
-      metadata: firebaseUser.metadata,
-      photoURL: defaultProfilePic,
-      scale: 1,
-      startOffset: {x: 0, y: 0},
-    });
-    await kv.set(idName, decodedToken.uid);
-    await kv.lpush('users', {username: idName, uid: decodedToken.uid});
-
-    await updateUser(decodedToken.uid, {displayName: idName, photoURL: defaultProfilePic});
     const response = new NextResponse(
       JSON.stringify({
-        name: idName,
-        picture: defaultProfilePic,
+        name: firebaseUser.displayName ?? decodedToken.uid,
+        picture: firebaseUser.photoURL ?? defaultProfilePic,
       }),
       {
         status: 200,

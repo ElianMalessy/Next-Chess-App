@@ -1,10 +1,15 @@
 import getCurrentUser from '@/lib/server-actions/get-current-user';
-import {kv} from '@vercel/kv';
 import Profile from './profile';
+
 export default async function ProfileServer() {
   const currentUser = await getCurrentUser();
-  let currentUserData;
-  if (currentUser) currentUserData = await kv.hgetall(currentUser?.uid);
+  const currentUserData = currentUser
+    ? {
+        photoURL: (currentUser as any).picture,
+        scale: 1,
+        startOffset: {x: 0, y: 0},
+      }
+    : undefined;
 
   return <Profile currentUserData={currentUserData} />;
 }

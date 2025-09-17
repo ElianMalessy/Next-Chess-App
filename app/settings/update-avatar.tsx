@@ -1,4 +1,3 @@
-import {kv} from '@vercel/kv';
 import {validate} from 'uuid';
 
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
@@ -9,7 +8,11 @@ import getImageAspectRatio from '@/lib/server-actions/get-image-aspect-ratio';
 export default async function UpdateAvatarEdit() {
   const token = await getToken();
   const currentUser = token?.decodedToken;
-  const currentUserData = await kv.hgetall(currentUser?.uid ?? '');
+  const currentUserData = {
+    photoURL: currentUser?.picture,
+    scale: 1,
+    startOffset: {x: 0, y: 0},
+  };
   const aspectRatio = await getImageAspectRatio(currentUser?.picture ?? '');
 
   return (

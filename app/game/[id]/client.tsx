@@ -3,11 +3,11 @@ import Board from '@/components/board/board';
 import useGameStore, {useEndStateStore} from '@/lib/hooks/useStateStore';
 import {realtimeDB} from '@/components/firebase';
 import {ref, get, set, update, onValue} from '@firebase/database';
-import {useEffect, useState} from 'react';
+import {useEffect, useState, useMemo} from 'react';
 import { useGameEndDetection } from '@/lib/hooks/useGameEndDetection';
 
 export default function Client({currentUserID, gameID}: {currentUserID: string; gameID: string}) {
-  const dbRef = ref(realtimeDB, `${gameID}`);
+  const dbRef = useMemo(() => ref(realtimeDB, `${gameID}`), [gameID]);
   const {setDbRef} = useEndStateStore();
   const {setPlayerColor, setFENFromFirebase, setTurn, setCastling, setEnPassent, FEN} = useGameStore();
   const {setCheckmate, setStalemate} = useEndStateStore();
@@ -70,7 +70,10 @@ export default function Client({currentUserID, gameID}: {currentUserID: string; 
       setCastling(data.castling, null);
       setEnPassent(data.enPassent, null);
     });
-    onValue(ref(realtimeDB, `${gameID}`), (snapshot: any) => {
+  }, [dbRef, currentUserID]);
+
+  useEffect(() => {
+    const unsubscribe = onValue(ref(realtimeDB, `${gameID}`), (snapshot: any) => {
       if (!snapshot.exists()) return;
       const data = snapshot.val();
       setFENFromFirebase(data.FEN);
@@ -80,7 +83,11 @@ export default function Client({currentUserID, gameID}: {currentUserID: string; 
       setCheckmate(data.checkmate, null);
       setStalemate(data.stalemate, null);
     });
-  }, []);
+    
+    return () => {
+      unsubscribe();
+    };
+  }, [gameID]);
 
   return <Board realGame={true} />;
 }

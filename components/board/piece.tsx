@@ -70,8 +70,23 @@ export default function Piece({
 
       const newPosition = possibleMove(
         playerColor === 'w' || playerColor === 'default' || playerColor === 'spectator' ? piecePosition.y : 7 - piecePosition.y,
-        piecePosition.x
+        playerColor === 'w' || playerColor === 'default' || playerColor === 'spectator' ? piecePosition.x : 7 - piecePosition.x
       );
+      
+      // Temporary debug for black player issues
+      if (playerColor === 'b' && newPosition) {
+        console.log('🏴 Black player move validation:', {
+          playerColor,
+          turn,
+          piece,
+          color,
+          canMove: playerColor === turn && turn === color && playerColor !== 'spectator',
+          playerColorMatchesTurn: playerColor === turn,
+          turnMatchesColor: turn === color,
+          isNotSpectator: playerColor !== 'spectator'
+        });
+      }
+      
       if (newPosition && (playerColor === 'default' || (playerColor === turn && turn === color && playerColor !== 'spectator'))) {
         setPiecePosition({x: newPosition[1], y: newPosition[0]});
         setSquares([]);

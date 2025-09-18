@@ -28,25 +28,24 @@ export default function GameChat({
 
   useEffect(() => {
     if (!dbRef) return;
-    const dbMessages: any = [];
+    
     const listener = onValue(
       dbRef,
       (snapshot) => {
+        const dbMessages: any = [];
         if (snapshot.exists()) {
           Object.values(snapshot.val()).forEach((msg) => {
             dbMessages.push(msg);
           });
-          setMessage(dbMessages);
         }
-      },
-      {
-        onlyOnce: true,
+        setMessage(dbMessages);
       }
     );
+    
     return () => {
-      listener;
+      listener();
     };
-  }, []);
+  }, [dbRef]);
 
   const getTime = useCallback(() => {
     const today = new Date();

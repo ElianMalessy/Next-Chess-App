@@ -29,8 +29,21 @@ export default function GameInviteModal({ gameId }: { gameId: string }) {
 
     setIsLoading(true);
     try {
-      // Use username as the identifier
-      const friendId = `${friendUsername}`;
+      // Find user by username in Firestore
+      const usersRef = collection(firestore, 'users');
+      const userQuery = query(usersRef, where('name', '==', friendUsername));
+      const userSnapshot = await getDocs(userQuery);
+
+      if (userSnapshot.empty) {
+        alert(`User "${friendUsername}" not found!`);
+        setIsLoading(false);
+        return;
+      }
+
+      // Get the first matching user (usernames should be unique)
+      const friendDoc = userSnapshot.docs[0];
+      const friendId = friendDoc.id; // This is the user's UID
+      const friendData = friendDoc.data();
 
       // Create or find conversation
       const conversationsRef = collection(firestore, 'conversations');
@@ -59,18 +72,21 @@ export default function GameInviteModal({ gameId }: { gameId: string }) {
       // Send game invitation message
       await sendMessage(
         conversationId,
-        `You've been invited to play chess!`,
+        `You've been invited to play chess! Game ID: ${gameId}`,
         currentUser.uid,
         currentUser.displayName,
         friendId,
-        friendUsername,
+        friendData.name || friendUsername,
         'game_invite',
         gameId
       );
 
-      alert('Game invitation sent! The recipient will see it when they log in.');
+      alert('Game invitation sent! Redirecting to game...');
       setIsOpen(false);
       setFriendUsername('');
+      
+      // Redirect to the game
+      router.push(`/game/${gameId}`);
 
     } catch (error) {
       console.error('Error sending invitation:', error);

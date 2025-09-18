@@ -1,7 +1,7 @@
 'use client';
 import {useEffect, useState} from 'react';
 import {useRouter} from 'next/navigation';
-import {collection, query, where, onSnapshot, orderBy, limit} from '@firebase/firestore';
+import {collection, query, where, onSnapshot, orderBy, limit, getDocs, doc as firestoreDoc, getDoc} from '@firebase/firestore';
 import {firestore} from '@/components/firebase';
 import {useAuthStore} from '@/lib/hooks/useAuthStore';
 import {useMessagesStore, Message, Conversation} from '@/lib/hooks/useMessagesStore';
@@ -12,10 +12,83 @@ import NavbarClient from '@/components/navbar/navbar-client';
 
 export default function MessagesPage() {
   const {currentUser} = useAuthStore();
-  const {conversations, setMessages, markAsRead} = useMessagesStore();
+  const {conversations, setMessages, markAsRead, setConversations} = useMessagesStore();
   const router = useRouter();
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [messages, setMessagesState] = useState<Message[]>([]);
+  const [participantNames, setParticipantNames] = useState<{[key: string]: string}>({});
+
+  // Load conversations on mount
+  useEffect(() => {
+    if (!currentUser?.uid) return;
+
+    // Listen for conversations where current user is a participant
+    const conversationsRef = collection(firestore, 'conversations');
+    const conversationsQuery = query(
+      conversationsRef,
+      where('participants', 'array-contains', currentUser.uid)
+    );
+
+    const unsubscribe = onSnapshot(conversationsQuery, async (snapshot) => {
+      const conversationsList = [];
+      const nameMap: {[key: string]: string} = {};
+      
+      for (const doc of snapshot.docs) {
+        const conversationData = doc.data();
+        
+        // Get names for all participants
+        for (const participantId of conversationData.participants) {
+          if (participantId !== currentUser.uid && !nameMap[participantId]) {
+            try {
+              const userDocRef = firestoreDoc(firestore, 'users', participantId);
+              const userDoc = await getDoc(userDocRef);
+              if (userDoc.exists()) {
+                const userData = userDoc.data() as any;
+                nameMap[participantId] = userData.name || participantId;
+              } else {
+                nameMap[participantId] = participantId;
+              }
+            } catch (error) {
+              console.error('Error fetching user name:', error);
+              nameMap[participantId] = participantId;
+            }
+          }
+        }
+        
+        // Get unread count for this conversation
+        const messagesRef = collection(firestore, 'conversations', doc.id, 'messages');
+        const unreadQuery = query(
+          messagesRef,
+          where('receiverId', '==', currentUser.uid),
+          where('read', '==', false)
+        );
+        
+        const unreadSnapshot = await getDocs(unreadQuery);
+        const unreadCount = unreadSnapshot.size;
+        
+        // Get last message
+        const lastMessageQuery = query(
+          messagesRef,
+          orderBy('createdAt', 'desc'),
+          limit(1)
+        );
+        const lastMessageSnapshot = await getDocs(lastMessageQuery);
+        const lastMessage = lastMessageSnapshot.empty ? null : lastMessageSnapshot.docs[0].data();
+        
+        conversationsList.push({
+          id: doc.id,
+          participants: conversationData.participants,
+          unreadCount,
+          lastMessage,
+        });
+      }
+      
+      setParticipantNames(nameMap);
+      setConversations(conversationsList);
+    });
+
+    return () => unsubscribe();
+  }, [currentUser?.uid, setConversations]);
 
   useEffect(() => {
     if (!selectedConversation || !currentUser?.uid) return;
@@ -44,7 +117,8 @@ export default function MessagesPage() {
   };
 
   const getOtherParticipant = (conversation: Conversation) => {
-    return conversation.participants.find(p => p !== currentUser?.uid) || '';
+    const otherParticipantId = conversation.participants.find(p => p !== currentUser?.uid) || '';
+    return participantNames[otherParticipantId] || otherParticipantId;
   };
 
   return (

@@ -73,53 +73,62 @@ export default function Piece({
         playerColor === 'w' || playerColor === 'default' || playerColor === 'spectator' ? piecePosition.x : 7 - piecePosition.x
       );
       if (newPosition && (playerColor === 'default' || (playerColor === turn && turn === color && playerColor !== 'spectator'))) {
-        setPiecePosition({x: newPosition[1], y: newPosition[0]});
+        // For black players, the newPosition is in visual coordinates, need to convert back to board coordinates
+        const boardRow = playerColor === 'w' || playerColor === 'default' || playerColor === 'spectator' ? newPosition[0] : 7 - newPosition[0];
+        const boardCol = playerColor === 'w' || playerColor === 'default' || playerColor === 'spectator' ? newPosition[1] : 7 - newPosition[1];
+        
+        setPiecePosition({x: boardCol, y: boardRow});
         setSquares([]);
         setZIndex(1);
         if (
-          board[newPosition[0]][newPosition[1]] !== '1' &&
-          color !== getColor(board[newPosition[0]][newPosition[1]])
+          board[boardRow][boardCol] !== '1' &&
+          color !== getColor(board[boardRow][boardCol])
         ) {
-          capturedPieces.push(board[newPosition[0]][newPosition[1]]);
+          capturedPieces.push(board[boardRow][boardCol]);
           setCapturedPieces(capturedPieces, dbRef);
         }
 
         const boardCopy = board;
-        boardCopy[newPosition[0]][newPosition[1]] =
+        boardCopy[boardRow][boardCol] =
           board[initialPiecePosition.current.y][initialPiecePosition.current.x];
         boardCopy[initialPiecePosition.current.y][initialPiecePosition.current.x] = '1';
 
         // promotion
-        if (piece === 'p' && color === 'b' && newPosition[0] === 7) board[newPosition[0]][newPosition[1]] = 'q';
-        else if (piece === 'p' && color === 'w' && newPosition[0] === 0) board[newPosition[0]][newPosition[1]] = 'Q';
+        if (piece === 'p' && color === 'b' && boardRow === 7) board[boardRow][boardCol] = 'q';
+        else if (piece === 'p' && color === 'w' && boardRow === 0) board[boardRow][boardCol] = 'Q';
 
         let tempEnPassent = '-';
         if (newPosition.length === 3) {
-          capturedPieces.push(board[newPosition[2]][newPosition[1]]);
+          // En passant - convert capture square coordinates back to board coordinates
+          const captureRow = playerColor === 'w' || playerColor === 'default' || playerColor === 'spectator' ? newPosition[2] : 7 - newPosition[2];
+          capturedPieces.push(board[captureRow][boardCol]);
           setCapturedPieces(capturedPieces, dbRef);
-          boardCopy[newPosition[2]][newPosition[1]] = '1'; // enPassent
+          boardCopy[captureRow][boardCol] = '1'; // enPassent
         } else if (newPosition.length === 4 && piece.toLowerCase() === 'p') {
-          tempEnPassent = String.fromCharCode(newPosition[3] + 'a'.charCodeAt(0)) + (8 - newPosition[2]).toString();
-          setEnPassent(
-            String.fromCharCode(newPosition[3] + 'a'.charCodeAt(0)) + (8 - newPosition[2]).toString(),
-            dbRef
-          );
+          // Pawn double move - need to convert coordinates for en passant square notation
+          const enPassantCol = playerColor === 'w' || playerColor === 'default' || playerColor === 'spectator' ? newPosition[3] : 7 - newPosition[3];
+          const enPassantRow = playerColor === 'w' || playerColor === 'default' || playerColor === 'spectator' ? newPosition[2] : 7 - newPosition[2];
+          tempEnPassent = String.fromCharCode(enPassantCol + 'a'.charCodeAt(0)) + (8 - enPassantRow).toString();
+          setEnPassent(tempEnPassent, dbRef);
         } else if (piece.toLowerCase() === 'p' && enPassent !== '-') {
           setEnPassent('-', dbRef);
         } else if (newPosition.length === 4) {
-          // castling move
-          boardCopy[newPosition[0]][newPosition[2]] = board[newPosition[0]][newPosition[3]];
-          boardCopy[newPosition[0]][newPosition[3]] = '1';
+          // castling move - convert coordinates back to board coordinates
+          const castlingRow = playerColor === 'w' || playerColor === 'default' || playerColor === 'spectator' ? newPosition[0] : 7 - newPosition[0];
+          const rookNewCol = playerColor === 'w' || playerColor === 'default' || playerColor === 'spectator' ? newPosition[2] : 7 - newPosition[2];
+          const rookOldCol = playerColor === 'w' || playerColor === 'default' || playerColor === 'spectator' ? newPosition[3] : 7 - newPosition[3];
+          boardCopy[castlingRow][rookNewCol] = board[castlingRow][rookOldCol];
+          boardCopy[castlingRow][rookOldCol] = '1';
         }
 
-        if (isStalemate(board, getColor(boardCopy[newPosition[0]][newPosition[1]]), tempEnPassent)) {
+        if (isStalemate(board, getColor(boardCopy[boardRow][boardCol]), tempEnPassent)) {
           setPlayerColor('');
           setStalemate(true, dbRef);
         }
-        const checkStatus = isCheckmate(board, getColor(boardCopy[newPosition[0]][newPosition[1]]), tempEnPassent);
+        const checkStatus = isCheckmate(board, getColor(boardCopy[boardRow][boardCol]), tempEnPassent);
         if (checkStatus) {
           setCheck(
-            findPositionOf(board, getColor(boardCopy[newPosition[0]][newPosition[1]]) === 'w' ? 'k' : 'K'),
+            findPositionOf(board, getColor(boardCopy[boardRow][boardCol]) === 'w' ? 'k' : 'K'),
             dbRef
           );
           if (checkStatus !== 'check') {
@@ -142,28 +151,28 @@ export default function Piece({
         }
 
         // setCastling
-        if (boardCopy[newPosition[0]][newPosition[1]] === 'K') {
+        if (boardCopy[boardRow][boardCol] === 'K') {
           setCastling(castling.replace('KQ', ''), dbRef);
-        } else if (boardCopy[newPosition[0]][newPosition[1]] === 'k') {
+        } else if (boardCopy[boardRow][boardCol] === 'k') {
           setCastling(castling.replace('kq', ''), dbRef);
         } else if (
-          boardCopy[newPosition[0]][newPosition[1]] === 'R' &&
+          boardCopy[boardRow][boardCol] === 'R' &&
           initialPiecePosition.current.y === initialPiecePosition.current.x
         ) {
           setCastling(castling.replace('K', ''), dbRef);
         } else if (
-          boardCopy[newPosition[0]][newPosition[1]] === 'R' &&
+          boardCopy[boardRow][boardCol] === 'R' &&
           initialPiecePosition.current.y === 7 &&
           initialPiecePosition.current.x === 0
         ) {
           setCastling(castling.replace('Q', ''), dbRef);
         } else if (
-          boardCopy[newPosition[0]][newPosition[1]] === 'r' &&
+          boardCopy[boardRow][boardCol] === 'r' &&
           initialPiecePosition.current.y === initialPiecePosition.current.x
         ) {
           setCastling(castling.replace('q', ''), dbRef);
         } else if (
-          boardCopy[newPosition[0]][newPosition[1]] === 'R' &&
+          boardCopy[boardRow][boardCol] === 'R' &&
           initialPiecePosition.current.y === 0 &&
           initialPiecePosition.current.x === 7
         ) {
@@ -180,7 +189,7 @@ export default function Piece({
           setTurn(turn === 'w' ? 'b' : 'w', null);
         }
 
-        initialPiecePosition.current = {x: newPosition[1], y: newPosition[0]};
+        initialPiecePosition.current = {x: boardCol, y: boardRow};
         initialMousePosition.current = {x: 0, y: 0};
         initialOffsetPiecePosition.current = {x: 0, y: 0};
         setZIndex(0);

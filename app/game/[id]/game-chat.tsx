@@ -1,7 +1,7 @@
 'use client';
 import {onValue, ref, push, set, child} from '@firebase/database';
 
-import {useState, useEffect, useRef, useCallback} from 'react';
+import {useState, useEffect, useRef, useCallback, useMemo} from 'react';
 import {Card, CardHeader, CardContent, CardTitle, CardDescription, CardFooter} from '@/components/ui/card';
 import useGameStore, {useEndStateStore} from '@/lib/hooks/useStateStore';
 import {realtimeDB} from '@/components/firebase';
@@ -22,13 +22,12 @@ export default function GameChat({
 }) {
   const {checkmate} = useEndStateStore();
   const {playerColor, turn} = useGameStore();
-  const dbRef = ref(realtimeDB, gameID + '/chat');
   const [message, setMessage] = useState<string[][]>([]);
   const [typingMessage, setTypingMessage] = useState('');
 
+  const dbRef = useMemo(() => ref(realtimeDB, gameID + '/chat'), [gameID]);
+
   useEffect(() => {
-    if (!dbRef) return;
-    
     const listener = onValue(
       dbRef,
       (snapshot) => {

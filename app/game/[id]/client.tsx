@@ -42,19 +42,16 @@ export default function Client({currentUserID, gameID}: {currentUserID: string; 
       // Determine player color based on existing game state
       if (data.player_1 === currentUserID) {
         // Current user is player 1 (white)
-        console.log('🔵 Player assigned as White (Player 1)');
         setPlayerColor('w');
         setPlayer1(currentUserID);
         if (data.player_2) setPlayer2(data.player_2);
       } else if (data.player_2 === currentUserID) {
         // Current user is player 2 (black)
-        console.log('⚫ Player assigned as Black (Player 2)');
         setPlayerColor('b');
         setPlayer2(currentUserID);
         setPlayer1(data.player_1);
       } else if (!data.player_2) {
         // Current user is joining as player 2 (black)
-        console.log('⚫ Player joining as Black (Player 2)');
         update(dbRef, {
           player_2: currentUserID,
         });
@@ -63,7 +60,6 @@ export default function Client({currentUserID, gameID}: {currentUserID: string; 
         setPlayer1(data.player_1);
       } else {
         // Game is full, current user becomes spectator
-        console.log('👁️ Player assigned as Spectator');
         setPlayerColor('spectator');
         setPlayer1(data.player_1);
         setPlayer2(data.player_2);

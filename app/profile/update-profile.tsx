@@ -145,10 +145,16 @@ export default function UpdateProfile() {
                 onClick={async () => {
                   if (!currentUser || !currentUser?.displayName || !currentUser?.photoURL) return;
                   setLoading(true);
-                  await deleteCurrentUser();
-                  // User deletion now handled by Firebase auth only
-                  setLoading(false);
-                  router.push('/login');
+                  try {
+                    await deleteCurrentUser();
+                    // Use replace to prevent going back to profile page
+                    router.replace('/login');
+                  } catch (error) {
+                    console.error('Error deleting user:', error);
+                    // Still redirect even if there's an error
+                    router.replace('/login');
+                  }
+                  // Don't set loading to false as component will unmount
                 }}
               >
                 Continue

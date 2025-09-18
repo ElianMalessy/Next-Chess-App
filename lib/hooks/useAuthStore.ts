@@ -223,7 +223,7 @@ const authStore = (set: any, get: any) => ({
       const gamesQuery = query(gamesRef, where('participants', 'array-contains', currentUser.uid));
       const gamesSnapshot = await getDocs(gamesQuery);
       
-      const gameDeletePromises = gamesSnapshot.docs.map(doc => deleteDoc(doc.ref));
+      const gameDeletePromises = gamesSnapshot.docs.map(gameDoc => deleteDoc(gameDoc.ref));
       await Promise.all(gameDeletePromises);
       
       // Note: Conversations are not deleted as they involve other users

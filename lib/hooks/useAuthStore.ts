@@ -84,14 +84,14 @@ const authStore = (set: any, get: any) => ({
     }
     await get().setTokens(credential);
 
-    // Update Firestore user doc if email exists
+    // Update Firestore user doc using UID
     const usersRef = collection(firestore, 'users');
-    if (credential.user.email) {
-      await setDoc(doc(usersRef, credential.user.email), {
-        name: safeDisplayName,
-        profilePic: credential.user.photoURL,
-      }, { merge: true });
-    }
+    await setDoc(doc(usersRef, credential.user.uid), {
+      name: safeDisplayName,
+      email: credential.user.email,
+      profilePic: credential.user.photoURL,
+    }, { merge: true });
+    
     return credential;
   },
 
@@ -102,13 +102,13 @@ const authStore = (set: any, get: any) => ({
     await updateProfile(credential.user, { displayName: emailName });
     await get().setTokens(credential);
 
+    // Create Firestore user doc using UID
     const usersRef = collection(firestore, 'users');
-    if (credential.user.email) {
-      await setDoc(doc(usersRef, credential.user.email), {
-        name: emailName,
-        profilePic: credential.user.photoURL,
-      }, { merge: true });
-    }
+    await setDoc(doc(usersRef, credential.user.uid), {
+      name: emailName,
+      email: credential.user.email,
+      profilePic: credential.user.photoURL,
+    }, { merge: true });
 
     return credential;
   },
@@ -138,6 +138,16 @@ const authStore = (set: any, get: any) => ({
       photoURL: defaultProfilePic,
     });
     await get().setTokens(credential);
+
+    // Create Firestore user doc for anonymous user using UID
+    const usersRef = collection(firestore, 'users');
+    await setDoc(doc(usersRef, credential.user.uid), {
+      name: anonName,
+      email: null, // Anonymous users don't have emails
+      profilePic: defaultProfilePic,
+      isAnonymous: true,
+    }, { merge: true });
+
     setTimeout(() => {
       get().setCurrentUser({
         ...credential.user,
@@ -158,13 +168,12 @@ const authStore = (set: any, get: any) => ({
     const safeDisplayName = username.replace(/\s+/g, '_');
     try {
       await updateProfile(get().currentUser, {displayName: safeDisplayName});
-      // Update Firestore user doc if email exists
-      if (get().currentUser.email) {
-        const usersRef = collection(firestore, 'users');
-        await setDoc(doc(usersRef, get().currentUser.email), {
-          name: safeDisplayName,
-        }, { merge: true });
-      }
+      // Update Firestore user doc using UID
+      const usersRef = collection(firestore, 'users');
+      await setDoc(doc(usersRef, get().currentUser.uid), {
+        name: safeDisplayName,
+      }, { merge: true });
+      
       // Refresh user state
       set((state: AuthState) => ({
         ...state,
@@ -185,13 +194,12 @@ const authStore = (set: any, get: any) => ({
   updateProfilePic: async (profilePic: string) => {
     if (!get().currentUser) return Promise.resolve();
     await updateProfile(get().currentUser, {photoURL: profilePic});
-    // Update Firestore user doc if email exists
-    if (get().currentUser.email) {
-      const usersRef = collection(firestore, 'users');
-      await setDoc(doc(usersRef, get().currentUser.email), {
-        profilePic: profilePic,
-      }, { merge: true });
-    }
+    // Update Firestore user doc using UID
+    const usersRef = collection(firestore, 'users');
+    await setDoc(doc(usersRef, get().currentUser.uid), {
+      profilePic: profilePic,
+    }, { merge: true });
+    
     // Refresh user state
     set((state: AuthState) => ({
       ...state,
@@ -206,11 +214,9 @@ const authStore = (set: any, get: any) => ({
     if (!currentUser) return Promise.resolve();
     
     try {
-      // Delete user's Firestore document if email exists
-      if (currentUser.email) {
-        const usersRef = collection(firestore, 'users');
-        await deleteDoc(doc(usersRef, currentUser.email));
-      }
+      // Delete user's Firestore document using UID
+      const usersRef = collection(firestore, 'users');
+      await deleteDoc(doc(usersRef, currentUser.uid));
       
       // Delete user's completed games
       const gamesRef = collection(firestore, 'completedGames');

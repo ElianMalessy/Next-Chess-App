@@ -1,5 +1,7 @@
+import { getBaseUrl } from './get-base-url';
+
 export const toDataURL = async (url: string) => {
-  const response = await fetch(window.location.origin + `/api/get-image-blob?imgURL=${url}`);
+  const response = await fetch(getBaseUrl() + `/api/get-image-blob?imgURL=${url}`);
   const data = await response.blob();
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -29,7 +31,7 @@ export function fileToDataurl(file: File) {
   });
 }
 export async function urlToFile(url: string) {
-  const response = await fetch(window.location.origin + `/api/get-image-blob?imgURL=${url}`);
+  const response = await fetch(getBaseUrl() + `/api/get-image-blob?imgURL=${url}`);
   const data = await response.blob();
   const metadata = {
     type: 'image/jpeg',

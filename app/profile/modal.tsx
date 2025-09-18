@@ -16,6 +16,7 @@ import {FileController} from './file-controller';
 import {useProfilePicStore} from '@/lib/hooks/useProfilePicStore';
 import dataURLtoFile, {urlToFile, toDataURL} from '@/lib/convertToFile';
 import getImageAspectRatio from '@/lib/server-actions/get-image-aspect-ratio';
+import {getBaseUrl} from '@/lib/get-base-url';
 
 const formSchema = z.object({
   imgURL: z.coerce.string(),
@@ -66,7 +67,7 @@ export default function Modal({
 
     uploadBytes(storageRef, file).then(async (snapshot) => {
       const imgURLFromFirebase: any = await getDownloadURL(snapshot.ref);
-      await fetch(window.location.origin + `/api/update-profile-pic?imgURL=${encodeURIComponent(imgURLFromFirebase)}`, {
+      await fetch(getBaseUrl() + `/api/update-profile-pic?imgURL=${encodeURIComponent(imgURLFromFirebase)}`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,

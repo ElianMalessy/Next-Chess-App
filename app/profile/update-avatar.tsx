@@ -44,9 +44,9 @@ export default function UpdateAvatarEdit() {
   }
 
   return (
-    <div className='w-full flex items-center justify-center'>
-      <Card className='flex flex-row items-center w-full max-w-md py-2'>
-        <div className='ml-4'>
+    <div className='w-full max-w-md mx-auto flex items-center justify-center'>
+      <Card className='flex flex-row items-center w-full py-2 overflow-hidden'>
+        <div className='ml-4 flex-shrink-0'>
           <Modal
             token={token}
             currentUserId={currentUser.uid}
@@ -54,7 +54,7 @@ export default function UpdateAvatarEdit() {
             aspectRatio={aspectRatio}
           />
         </div>
-        <div className='flex-1'>
+        <div className='flex-1 min-w-0 pr-4'>
           <CardHeader className='pb-2'>
             <UsernameDisplay />
           </CardHeader>

@@ -5,40 +5,40 @@ import UpdateAvatarEdit from './update-avatar';
 
 export default function ProfilePage() {
   return (
-    <>
+    <div className='min-h-screen overflow-x-hidden'>
       <Navbar />
-      <main className='p-2'>
-        <div className='container mx-auto max-w-4xl pt-8'>
+      <main className='px-4 py-2 w-full'>
+        <div className='container mx-auto max-w-2xl pt-8'>
           <div className='text-center mb-8'>
             <h1 className='text-3xl font-bold mb-2'>Profile</h1>
             <p className='text-muted-foreground'>Manage your account settings</p>
           </div>
           
-          <div className='grid gap-6 md:grid-cols-1 lg:grid-cols-1'>
+          <div className='space-y-6 w-full'>
             {/* Avatar Section */}
-            <Card>
+            <Card className='w-full'>
               <CardHeader>
                 <CardTitle>Profile Picture</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className='flex justify-center'>
+              <CardContent className='overflow-hidden'>
+                <div className='flex justify-center w-full'>
                   <UpdateAvatarEdit />
                 </div>
               </CardContent>
             </Card>
 
             {/* Account Settings Section */}
-            <Card>
+            <Card className='w-full'>
               <CardHeader>
                 <CardTitle>Account Settings</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className='overflow-hidden'>
                 <UpdateProfile />
               </CardContent>
             </Card>
           </div>
         </div>
       </main>
-    </>
+    </div>
   );
 }

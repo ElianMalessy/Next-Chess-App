@@ -18,7 +18,7 @@ import {
 } from '@firebase/auth';
 import type {AuthCredential, User, UserCredential} from '@firebase/auth';
 import {auth, firestore} from '@/components/firebase';
-import {collection, doc, setDoc} from '@firebase/firestore';
+import {collection, doc, setDoc, deleteDoc, query, where, getDocs} from '@firebase/firestore';
 import {error} from 'console';
 import {getBaseUrl} from '@/lib/get-base-url';
 
@@ -201,9 +201,43 @@ const authStore = (set: any, get: any) => ({
       },
     }));
   },
-  deleteCurrentUser: () => {
-    if (!get().currentUser) return Promise.resolve();
-    return deleteUser(get().currentUser);
+  deleteCurrentUser: async () => {
+    const currentUser = get().currentUser;
+    if (!currentUser) return Promise.resolve();
+    
+    try {
+      // Delete user's Firestore document if email exists
+      if (currentUser.email) {
+        const usersRef = collection(firestore, 'users');
+        await deleteDoc(doc(usersRef, currentUser.email));
+      }
+      
+      // Delete user's completed games
+      const gamesRef = collection(firestore, 'completedGames');
+      const gamesQuery = query(gamesRef, where('participants', 'array-contains', currentUser.uid));
+      const gamesSnapshot = await getDocs(gamesQuery);
+      
+      const gameDeletePromises = gamesSnapshot.docs.map(doc => deleteDoc(doc.ref));
+      await Promise.all(gameDeletePromises);
+      
+      // Note: Conversations are not deleted as they involve other users
+      // Consider anonymizing messages instead of deleting them
+      
+      // Delete Firebase Auth user
+      await deleteUser(currentUser);
+      
+      // Clear user state
+      set((state: AuthState) => ({
+        ...state,
+        currentUser: undefined,
+      }));
+    } catch (err: any) {
+      // If error is auth/requires-recent-login, log out
+      if (err.code === 'auth/requires-recent-login') {
+        await get().logout();
+      }
+      throw err;
+    }
   },
 });
 export const useAuthStore = create<AuthState>()(authStore);

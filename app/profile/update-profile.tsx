@@ -76,7 +76,7 @@ export default function UpdateProfile() {
   }
 
   return (
-    <div className='space-y-6'>
+    <div className='space-y-6 w-full overflow-hidden'>
       {/* Username Update Section */}
       <div className='space-y-4'>
         <h3 className='text-lg font-medium'>Update Username</h3>
@@ -95,6 +95,7 @@ export default function UpdateProfile() {
                       autoComplete='off' 
                       id='username' 
                       placeholder='Enter new username (no spaces allowed)' 
+                      className='w-full max-w-full'
                     />
                   </FormControl>
                   <FormMessage />
@@ -102,7 +103,7 @@ export default function UpdateProfile() {
               )}
             />
             {error && (
-              <div className='border-destructive border rounded-md text-center bg-destructive/10 text-sm text-destructive p-3'>
+              <div className='border-destructive border rounded-md text-center bg-destructive/10 text-sm text-destructive p-3 max-w-full break-words'>
                 {error}
               </div>
             )}

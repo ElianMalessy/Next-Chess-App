@@ -81,4 +81,15 @@
     @apply bg-background text-foreground;
     /* overflow-y: hidden; */
   }
+  
+  /* Prevent horizontal overflow globally */
+  html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+  
+  /* Ensure all containers respect width limits */
+  * {
+    box-sizing: border-box;
+  }
 }

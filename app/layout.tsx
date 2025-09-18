@@ -14,7 +14,7 @@ export default async function RootLayout({children}: {children: React.ReactNode}
   return (
     <html lang='en' suppressHydrationWarning>
       <head />
-      <body className='h-screen w-screen'>
+      <body className='h-screen w-full overflow-x-hidden'>
         <Providers>
           {children}
           <Toaster />

@@ -15,6 +15,11 @@ export function getBaseUrl() {
     return process.env.NEXT_PUBLIC_APP_URL;
   }
   
+  // In production, throw an error instead of falling back to localhost
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('No production URL configured. Please set VERCEL_URL or NEXT_PUBLIC_APP_URL');
+  }
+  
   // Check for deployment URL (some platforms use this)
   if (process.env.DEPLOY_URL) {
     return process.env.DEPLOY_URL;
@@ -25,6 +30,6 @@ export function getBaseUrl() {
     return process.env.URL;
   }
   
-  // Development fallback
+  // Development fallback - explicitly include port
   return 'http://localhost:3000';
 }

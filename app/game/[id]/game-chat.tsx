@@ -85,7 +85,9 @@ export default function GameChat({
       <CardHeader>
         <CardTitle>Chat</CardTitle>
         <CardDescription>Turn: {turn}</CardDescription>
-        <CardDescription>Player color: {playerColor}</CardDescription>
+        <CardDescription>
+          Your role: {playerColor === 'w' ? 'White Player' : playerColor === 'b' ? 'Black Player' : playerColor === 'spectator' ? 'Spectator' : 'Unknown'}
+        </CardDescription>
 
         {/* <CardDescription>{`${currentUserName} - ${opponentUsername.replaceAll('_', ' ')}`}</CardDescription> */}
       </CardHeader>

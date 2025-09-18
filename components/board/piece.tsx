@@ -69,10 +69,10 @@ export default function Piece({
       setIsDragging(false);
 
       const newPosition = possibleMove(
-        playerColor === 'w' || playerColor === 'default' ? piecePosition.y : 7 - piecePosition.y,
+        playerColor === 'w' || playerColor === 'default' || playerColor === 'spectator' ? piecePosition.y : 7 - piecePosition.y,
         piecePosition.x
       );
-      if (newPosition && (playerColor === 'default' || (playerColor === turn && turn === color))) {
+      if (newPosition && (playerColor === 'default' || (playerColor === turn && turn === color && playerColor !== 'spectator'))) {
         setPiecePosition({x: newPosition[1], y: newPosition[0]});
         setSquares([]);
         setZIndex(1);
@@ -248,6 +248,7 @@ export default function Piece({
         !divRef.current ||
         !Number.isInteger(piecePosition.x) ||
         !Number.isInteger(piecePosition.y) ||
+        playerColor === 'spectator' ||
         (playerColor !== 'default' &&
           getColor(
             playerColor === 'w'
@@ -263,11 +264,11 @@ export default function Piece({
       const rect = divRef.current.getBoundingClientRect();
       setSquares(
         showPossibleMoves(
-          playerColor === 'w' || playerColor === 'default'
+          playerColor === 'w' || playerColor === 'default' || playerColor === 'spectator'
             ? board[piecePosition.y][piecePosition.x]
             : board[7 - piecePosition.y][7 - piecePosition.x],
-          playerColor === 'w' || playerColor === 'default' ? piecePosition.y : 7 - piecePosition.y,
-          playerColor === 'w' || playerColor === 'default' ? piecePosition.x : 7 - piecePosition.x,
+          playerColor === 'w' || playerColor === 'default' || playerColor === 'spectator' ? piecePosition.y : 7 - piecePosition.y,
+          playerColor === 'w' || playerColor === 'default' || playerColor === 'spectator' ? piecePosition.x : 7 - piecePosition.x,
           board,
           enPassent,
           castling
@@ -338,8 +339,8 @@ export default function Piece({
                 key={key}
                 className={classes['capture-hint']}
                 style={{
-                  top: playerColor === 'w' || playerColor === 'default' ? square[0] * scale : (7 - square[0]) * scale,
-                  left: playerColor === 'w' || playerColor === 'default' ? square[1] * scale : (7 - square[1]) * scale,
+                  top: playerColor === 'w' || playerColor === 'default' || playerColor === 'spectator' ? square[0] * scale : (7 - square[0]) * scale,
+                  left: playerColor === 'w' || playerColor === 'default' || playerColor === 'spectator' ? square[1] * scale : (7 - square[1]) * scale,
                 }}
               />
             );
@@ -349,8 +350,8 @@ export default function Piece({
               key={key}
               className={classes['hint']}
               style={{
-                top: playerColor === 'w' || playerColor === 'default' ? square[0] * scale : (7 - square[0]) * scale,
-                left: playerColor === 'w' || playerColor === 'default' ? square[1] * scale : (7 - square[1]) * scale,
+                top: playerColor === 'w' || playerColor === 'default' || playerColor === 'spectator' ? square[0] * scale : (7 - square[0]) * scale,
+                left: playerColor === 'w' || playerColor === 'default' || playerColor === 'spectator' ? square[1] * scale : (7 - square[1]) * scale,
               }}
             />
           );

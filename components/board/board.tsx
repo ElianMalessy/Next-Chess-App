@@ -41,7 +41,7 @@ export default function Board({realGame}: {realGame: boolean}) {
         index++;
       }
       return tempBoardFiller;
-    } else if (playerColor === 'w' || (playerColor === 'default' && !realGame)) {
+    } else if (playerColor === 'w' || playerColor === 'spectator' || (playerColor === 'default' && !realGame)) {
       for (let i = 0, row = 8, column = 1, index = 0; i < FEN.length; i++, column++) {
         const spaceNumber = parseInt(FEN[i]);
         if (FEN[i] === '/') {

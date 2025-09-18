@@ -19,9 +19,10 @@ export default function Client({currentUserID, gameID}: {currentUserID: string; 
 
   useEffect(() => {
     setDbRef(dbRef);
-    setPlayerColor('w');
+    
     get(dbRef).then((snapshot) => {
       if (!snapshot.exists()) {
+        // First player to join becomes player_1 (white)
         set(dbRef, {
           checkmate: false,
           stalemate: false,
@@ -31,24 +32,38 @@ export default function Client({currentUserID, gameID}: {currentUserID: string; 
           enPassent: '-',
           player_1: currentUserID,
         });
+        setPlayerColor('w'); // First player is white
+        setPlayer1(currentUserID);
         return;
       }
+      
       const data = snapshot.val();
-      if (!data.player_2 && data.player_1 !== currentUserID) {
+      
+      // Determine player color based on existing game state
+      if (data.player_1 === currentUserID) {
+        // Current user is player 1 (white)
+        setPlayerColor('w');
+        setPlayer1(currentUserID);
+        if (data.player_2) setPlayer2(data.player_2);
+      } else if (data.player_2 === currentUserID) {
+        // Current user is player 2 (black)
+        setPlayerColor('b');
+        setPlayer2(currentUserID);
+        setPlayer1(data.player_1);
+      } else if (!data.player_2) {
+        // Current user is joining as player 2 (black)
         update(dbRef, {
           player_2: currentUserID,
         });
-        console.log(currentUserID);
         setPlayerColor('b');
         setPlayer2(currentUserID);
-      } else if (currentUserID === data.player_2) {
-        setPlayerColor('b');
-        setPlayer2(currentUserID);
+        setPlayer1(data.player_1);
+      } else {
+        // Game is full, current user becomes spectator
+        setPlayerColor('spectator');
+        setPlayer1(data.player_1);
+        setPlayer2(data.player_2);
       }
-      
-      // Set player IDs for game tracking
-      setPlayer1(data.player_1 || '');
-      if (data.player_2) setPlayer2(data.player_2);
 
       setFENFromFirebase(data.FEN);
       setTurn(data.turn, null);

@@ -10,9 +10,19 @@ export function getBaseUrl() {
     return `https://${process.env.VERCEL_URL}`;
   }
   
-  // Custom production URL (set this in your deployment environment)
+  // Check for custom production URL
   if (process.env.NEXT_PUBLIC_APP_URL) {
     return process.env.NEXT_PUBLIC_APP_URL;
+  }
+  
+  // Check for deployment URL (some platforms use this)
+  if (process.env.DEPLOY_URL) {
+    return process.env.DEPLOY_URL;
+  }
+  
+  // Check for site URL (Netlify uses this)
+  if (process.env.URL) {
+    return process.env.URL;
   }
   
   // Development fallback

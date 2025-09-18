@@ -1,6 +1,11 @@
 import { getBaseUrl } from './get-base-url';
 
 export const toDataURL = async (url: string) => {
+  // Only run on client side
+  if (typeof window === 'undefined') {
+    throw new Error('toDataURL can only be called on the client side');
+  }
+  
   const response = await fetch(getBaseUrl() + `/api/get-image-blob?imgURL=${url}`);
   const data = await response.blob();
   return new Promise((resolve, reject) => {
@@ -31,6 +36,11 @@ export function fileToDataurl(file: File) {
   });
 }
 export async function urlToFile(url: string) {
+  // Only run on client side
+  if (typeof window === 'undefined') {
+    throw new Error('urlToFile can only be called on the client side');
+  }
+  
   const response = await fetch(getBaseUrl() + `/api/get-image-blob?imgURL=${url}`);
   const data = await response.blob();
   const metadata = {

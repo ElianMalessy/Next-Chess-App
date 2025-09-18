@@ -20,6 +20,7 @@ import type {AuthCredential, User, UserCredential} from '@firebase/auth';
 import {auth, firestore} from '@/components/firebase';
 import {collection, doc, setDoc} from '@firebase/firestore';
 import {error} from 'console';
+import {getBaseUrl} from '@/lib/get-base-url';
 
 export interface AuthState {
   currentUser?: User;
@@ -58,7 +59,7 @@ const authStore = (set: any, get: any) => ({
   setTokens: async (credential: UserCredential) => {
     const tokenResult = await credential?.user.getIdTokenResult();
     // Sets authentication cookies
-    await fetch('/api/login', {
+    await fetch(getBaseUrl() + '/api/login', {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${tokenResult.token}`,
@@ -121,7 +122,7 @@ const authStore = (set: any, get: any) => ({
 
   logout: async () => {
     await signOut(auth);
-    await fetch('/api/logout', {
+    await fetch(getBaseUrl() + '/api/logout', {
       method: 'GET',
     });
   },

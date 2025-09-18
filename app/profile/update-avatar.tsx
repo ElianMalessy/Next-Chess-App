@@ -2,15 +2,17 @@
 
 import {validate} from 'uuid';
 import {useEffect, useState} from 'react';
+import {onAuthStateChanged} from '@firebase/auth';
+import type {User} from '@firebase/auth';
 
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
-import {useAuthStore} from '@/lib/hooks/useAuthStore';
+import {auth} from '@/components/firebase';
 import Modal from './modal';
 import getImageAspectRatio from '@/lib/server-actions/get-image-aspect-ratio';
 import UsernameDisplay from './username-display';
 
 export default function UpdateAvatarEdit() {
-  const {currentUser} = useAuthStore();
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [aspectRatio, setAspectRatio] = useState(1);
   const [token, setToken] = useState('');
   
@@ -21,13 +23,21 @@ export default function UpdateAvatarEdit() {
   };
 
   useEffect(() => {
-    if (currentUser) {
-      currentUser.getIdToken().then(setToken);
-      if (currentUser.photoURL) {
-        getImageAspectRatio(currentUser.photoURL).then(setAspectRatio);
+    const unsubscribe = onAuthStateChanged(auth, (user: User | null) => {
+      setCurrentUser(user);
+      if (user) {
+        user.getIdToken().then(setToken);
+        if (user.photoURL) {
+          getImageAspectRatio(user.photoURL).then(setAspectRatio);
+        }
+      } else {
+        setToken('');
+        setAspectRatio(1);
       }
-    }
-  }, [currentUser]);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   if (!currentUser || !token) {
     return <div>Loading...</div>;

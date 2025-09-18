@@ -72,7 +72,7 @@ export default function GameInviteModal({ gameId }: { gameId: string }) {
       // Send game invitation message
       await sendMessage(
         conversationId,
-        `You've been invited to play chess! Game ID: ${gameId}`,
+        `You've been invited to play chess!`,
         currentUser.uid,
         currentUser.displayName,
         friendId,

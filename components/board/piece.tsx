@@ -68,16 +68,29 @@ export default function Piece({
     if (isDragging) {
       setIsDragging(false);
 
-      const newPosition = possibleMove(
-        playerColor === 'w' || playerColor === 'default' || playerColor === 'spectator' ? piecePosition.y : 7 - piecePosition.y,
-        playerColor === 'w' || playerColor === 'default' || playerColor === 'spectator' ? piecePosition.x : 7 - piecePosition.x
-      );
+      // Convert current piece position to board coordinates for move validation
+      const currentBoardRow = playerColor === 'w' || playerColor === 'default' || playerColor === 'spectator' ? piecePosition.y : 7 - piecePosition.y;
+      const currentBoardCol = playerColor === 'w' || playerColor === 'default' || playerColor === 'spectator' ? piecePosition.x : 7 - piecePosition.x;
+      
+      console.log('Debug move:', {
+        playerColor,
+        piecePosition,
+        currentBoardRow,
+        currentBoardCol,
+        initialPiecePosition: initialPiecePosition.current
+      });
+      
+      const newPosition = possibleMove(currentBoardRow, currentBoardCol);
       if (newPosition && (playerColor === 'default' || (playerColor === turn && turn === color && playerColor !== 'spectator'))) {
-        // For black players, the newPosition is in visual coordinates, need to convert back to board coordinates
-        const boardRow = playerColor === 'w' || playerColor === 'default' || playerColor === 'spectator' ? newPosition[0] : 7 - newPosition[0];
-        const boardCol = playerColor === 'w' || playerColor === 'default' || playerColor === 'spectator' ? newPosition[1] : 7 - newPosition[1];
+        // newPosition is in board coordinates (standard coordinate system), use directly
+        const boardRow = newPosition[0];
+        const boardCol = newPosition[1];
         
-        setPiecePosition({x: boardCol, y: boardRow});
+        // Convert board coordinates back to visual coordinates for piece position
+        const visualRow = playerColor === 'w' || playerColor === 'default' || playerColor === 'spectator' ? boardRow : 7 - boardRow;
+        const visualCol = playerColor === 'w' || playerColor === 'default' || playerColor === 'spectator' ? boardCol : 7 - boardCol;
+        
+        setPiecePosition({x: visualCol, y: visualRow});
         setSquares([]);
         setZIndex(1);
         if (
@@ -90,8 +103,8 @@ export default function Piece({
 
         const boardCopy = board;
         boardCopy[boardRow][boardCol] =
-          board[initialPiecePosition.current.y][initialPiecePosition.current.x];
-        boardCopy[initialPiecePosition.current.y][initialPiecePosition.current.x] = '1';
+          board[playerColor === 'w' || playerColor === 'default' || playerColor === 'spectator' ? initialPiecePosition.current.y : 7 - initialPiecePosition.current.y][playerColor === 'w' || playerColor === 'default' || playerColor === 'spectator' ? initialPiecePosition.current.x : 7 - initialPiecePosition.current.x];
+        boardCopy[playerColor === 'w' || playerColor === 'default' || playerColor === 'spectator' ? initialPiecePosition.current.y : 7 - initialPiecePosition.current.y][playerColor === 'w' || playerColor === 'default' || playerColor === 'spectator' ? initialPiecePosition.current.x : 7 - initialPiecePosition.current.x] = '1';
 
         // promotion
         if (piece === 'p' && color === 'b' && boardRow === 7) board[boardRow][boardCol] = 'q';
@@ -189,7 +202,7 @@ export default function Piece({
           setTurn(turn === 'w' ? 'b' : 'w', null);
         }
 
-        initialPiecePosition.current = {x: boardCol, y: boardRow};
+        initialPiecePosition.current = {x: visualCol, y: visualRow};
         initialMousePosition.current = {x: 0, y: 0};
         initialOffsetPiecePosition.current = {x: 0, y: 0};
         setZIndex(0);
